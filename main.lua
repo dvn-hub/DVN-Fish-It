@@ -423,6 +423,7 @@ function CreateDropdown(parent, text, options, defaultOption, callback)
     local viewHeight = math.min(contentHeight, maxVisibleItems * (itemHeight + 2))
     Container.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
     local isOpen = false
+    local currentSelection = defaultOption
     for _, opt in ipairs(options) do
         local B = Instance.new("TextButton")
         B.Size = UDim2.new(1, -4, 0, itemHeight)
@@ -436,9 +437,17 @@ function CreateDropdown(parent, text, options, defaultOption, callback)
         C.CornerRadius = UDim.new(0, 3)
         C.Parent = B
         B.MouseButton1Click:Connect(function()
-            Lab.Text = text .. ": " .. opt
-            Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            pcall(callback, opt)
+            if currentSelection == opt then
+                currentSelection = nil
+                Lab.Text = text
+                Lab.TextColor3 = TEXT_COLOR
+                pcall(callback, nil)
+            else
+                currentSelection = opt
+                Lab.Text = text .. ": " .. opt
+                Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
+                pcall(callback, opt)
+            end
             isOpen = false
             TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30)}):Play()
             TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, 0)}):Play()
@@ -540,7 +549,7 @@ end
 
 local selectedRodLabel = nil
 
-CreateDropdown(TabFrames["Shop"], "Select Rod", RodOptions, RodOptions[1], function(val)
+CreateDropdown(TabFrames["Shop"], "Select Rod", RodOptions, nil, function(val)
     selectedRodLabel = val
 end)
 
@@ -579,7 +588,7 @@ end
 
 local selectedBaitLabel = nil
 
-CreateDropdown(TabFrames["Shop"], "Select Bait", BaitOptions, BaitOptions[1], function(val)
+CreateDropdown(TabFrames["Shop"], "Select Bait", BaitOptions, nil, function(val)
     selectedBaitLabel = val
 end)
 
