@@ -41,7 +41,7 @@ MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG_COLOR
 MainFrame.BackgroundTransparency = 0.25
 MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true 
+MainFrame.ClipsDescendants = false 
 MainFrame.Parent = ScreenGui
 
 local MainStroke = Instance.new("UIStroke")
@@ -58,7 +58,7 @@ MainCorner.Parent = MainFrame
 local DragBar = Instance.new("Frame")
 DragBar.Name = "DragBar"
 DragBar.Size = UDim2.new(0, 140, 0, 4)
-DragBar.Position = UDim2.new(0.5, 0, 1, -8)
+DragBar.Position = UDim2.new(0.5, 0, 1, 12)
 DragBar.AnchorPoint = Vector2.new(0.5, 1)
 DragBar.BackgroundColor3 = LINE_COLOR
 DragBar.BackgroundTransparency = 0.5
@@ -68,6 +68,14 @@ DragBar.Parent = MainFrame
 local DragBarCorner = Instance.new("UICorner")
 DragBarCorner.CornerRadius = UDim.new(1, 0)
 DragBarCorner.Parent = DragBar
+
+-- DragBar Animation
+DragBar.MouseEnter:Connect(function()
+    TweenService:Create(DragBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 160, 0, 6), BackgroundTransparency = 0.2}):Play()
+end)
+DragBar.MouseLeave:Connect(function()
+    TweenService:Create(DragBar, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 140, 0, 4), BackgroundTransparency = 0.5}):Play()
+end)
 
 -- 3. HEADER
 local Header = Instance.new("Frame")
@@ -258,6 +266,13 @@ function CreateButton(parent, text, callback)
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
     Corner.Parent = Btn
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = LINE_COLOR
+    Stroke.Transparency = 0.8
+    Stroke.Thickness = 1
+    Stroke.Parent = Btn
+    
     Btn.MouseButton1Click:Connect(function()
         pcall(callback)
     end)
@@ -272,6 +287,12 @@ function CreateToggle(parent, text, callback)
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
     Corner.Parent = Frame
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = LINE_COLOR
+    Stroke.Transparency = 0.8
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
     
     local Label = Instance.new("TextLabel")
     Label.Text = text
