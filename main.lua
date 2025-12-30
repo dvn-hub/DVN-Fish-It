@@ -1,7 +1,8 @@
 --[[ 
-    DVN HUB - FINAL POLISHED VERSION
+    DVN HUB - FINAL 50% LINE VERSION
     Updates:
-    - HELPER LINE: Now Oval/Pill shaped & Hides when minimized.
+    - HELPER LINE: Width reduced to 50% (More compact).
+    - SHAPE: Oval/Pill shaped & Hides when minimized.
     - TELEPORT: Full Coordinates Included.
     - UI: Responsive, Bold, Contrast Fixed.
 ]]
@@ -463,20 +464,20 @@ end)
 
 -- 8. CORE LOGIC
 
--- [HELPER LINE - OVAL & AUTO HIDE]
+-- [HELPER LINE - OVAL/PILL & AUTO HIDE & 50% WIDTH]
 local HelperLine = Instance.new("TextButton")
 HelperLine.Name = "HelperLine"
 HelperLine.Text = ""
 HelperLine.BackgroundColor3 = ACCENT_COLOR
 HelperLine.BorderSizePixel = 0
-HelperLine.BackgroundTransparency = 0.3 -- Solid enough
+HelperLine.BackgroundTransparency = 0.3 -- Normal (Visible)
 HelperLine.AnchorPoint = Vector2.new(0.5, 0)
 HelperLine.Parent = ScreenGui
 HelperLine.ZIndex = MainFrame.ZIndex - 1
 
--- OVAL SHAPE
+-- OVAL SHAPE (PILL)
 local HCorner = Instance.new("UICorner")
-HCorner.CornerRadius = UDim.new(1, 0) -- Pill Shape
+HCorner.CornerRadius = UDim.new(1, 0) 
 HCorner.Parent = HelperLine
 
 local function UpdateHelperLine()
@@ -486,7 +487,8 @@ local function UpdateHelperLine()
     local centerX = mainPos.X + (mainSize.X / 2)
     local bottomY = mainPos.Y + mainSize.Y
     HelperLine.Position = UDim2.new(0, centerX, 0, bottomY + 4)
-    HelperLine.Size = UDim2.new(0, mainSize.X * 0.6, 0, 5) 
+    -- LEBAR 50%
+    HelperLine.Size = UDim2.new(0, mainSize.X * 0.5, 0, 5) 
 end
 MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateHelperLine)
 MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateHelperLine)
