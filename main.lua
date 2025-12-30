@@ -75,12 +75,9 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DVN_HUB_FIXED"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 10000
-if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("DVN_HUB_FIXED") then
-    LocalPlayer.PlayerGui.DVN_HUB_FIXED:Destroy()
 if GUI_PARENT:FindFirstChild("DVN_HUB_FIXED") then
     GUI_PARENT.DVN_HUB_FIXED:Destroy()
 end
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
 
