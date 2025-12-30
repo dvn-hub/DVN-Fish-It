@@ -20,7 +20,7 @@ local Camera = workspace.CurrentCamera
 local req = http_request or request
 
 -- GUI PARENT SAFE
-local GUI_PARENT = gethui and gethui() or LocalPlayer:WaitForChild("PlayerGui")
+local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
 
 -- ====================================================================
 -- 1. LOGGER SETTINGS & LOGIC
