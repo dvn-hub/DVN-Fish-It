@@ -371,7 +371,7 @@ function CreateToggle(parent, text, callback)
     end)
 end
 
-function CreateDropdown(parent, text, options, callback)
+function CreateDropdown(parent, text, options, defaultOption, callback)
     local Frame = Instance.new("Frame")
     Frame.LayoutOrder = GetOrder(parent)
     Frame.Size = UDim2.new(1, 0, 0, 30)
@@ -382,11 +382,11 @@ function CreateDropdown(parent, text, options, callback)
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
     local Lab = Instance.new("TextLabel")
-    Lab.Text = text
+    Lab.Text = defaultOption and (text .. ": " .. defaultOption) or text
     Lab.Size = UDim2.new(0.6, 0, 0, 30)
     Lab.Position = UDim2.new(0, 10, 0, 0)
     Lab.BackgroundTransparency = 1
-    Lab.TextColor3 = TEXT_COLOR
+    Lab.TextColor3 = defaultOption and Color3.fromRGB(255, 255, 255) or TEXT_COLOR
     Lab.Font = Enum.Font.GothamBold
     Lab.TextSize = 14
     Lab.TextXAlignment = Enum.TextXAlignment.Left
@@ -457,6 +457,11 @@ function CreateDropdown(parent, text, options, callback)
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
         end
     end)
+    
+    -- Set Default Value Logic
+    if defaultOption then
+        pcall(callback, defaultOption)
+    end
 end
 
 -- 7. KONTEN
@@ -535,7 +540,7 @@ end
 
 local selectedRodLabel = nil
 
-CreateDropdown(TabFrames["Shop"], "Select Rod", RodOptions, function(val)
+CreateDropdown(TabFrames["Shop"], "Select Rod", RodOptions, RodOptions[1], function(val)
     selectedRodLabel = val
 end)
 
@@ -574,7 +579,7 @@ end
 
 local selectedBaitLabel = nil
 
-CreateDropdown(TabFrames["Shop"], "Select Bait", BaitOptions, function(val)
+CreateDropdown(TabFrames["Shop"], "Select Bait", BaitOptions, BaitOptions[1], function(val)
     selectedBaitLabel = val
 end)
 
@@ -612,7 +617,7 @@ for name, _ in pairs(Locations) do table.insert(PlaceNames, name) end
 table.sort(PlaceNames)
 
 local selectedPlace = nil
-CreateDropdown(TabFrames["Teleport"], "Select Location", PlaceNames, function(val) selectedPlace = val end)
+CreateDropdown(TabFrames["Teleport"], "Select Location", PlaceNames, nil, function(val) selectedPlace = val end)
 CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
     if selectedPlace and Locations[selectedPlace] and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Locations[selectedPlace])
