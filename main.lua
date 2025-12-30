@@ -221,7 +221,7 @@ for index, tabName in ipairs(Tabs) do
     Btn.BackgroundTransparency = 1
     Btn.Text = tabName
     Btn.TextColor3 = TEXT_INACTIVE
-    Btn.Font = Enum.Font.Gotham
+    Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 13
     Btn.Parent = Sidebar
     
@@ -256,7 +256,7 @@ end
 
 function CreateButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, 0, 0, 38)
+    Btn.Size = UDim2.new(1, 0, 0, 30)
     Btn.BackgroundColor3 = ELEMENT_BG
     Btn.Text = text
     Btn.TextColor3 = TEXT_ACTIVE
@@ -281,7 +281,7 @@ end
 
 function CreateToggle(parent, text, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, 0, 0, 38)
+    Frame.Size = UDim2.new(1, 0, 0, 30)
     Frame.BackgroundColor3 = ELEMENT_BG
     Frame.BackgroundTransparency = 1
     Frame.Parent = parent
@@ -350,14 +350,14 @@ function CreateDropdown(parent, text, options, callback)
     local viewHeight = math.min(contentHeight, maxDisplay * optionHeight)
     
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, 0, 0, 38)
+    Container.Size = UDim2.new(1, 0, 0, 30)
     Container.BackgroundColor3 = ELEMENT_BG
     Container.BackgroundTransparency = 1
     Container.ClipsDescendants = true
     Container.Parent = parent
     
     local MainBtn = Instance.new("TextButton")
-    MainBtn.Size = UDim2.new(1, 0, 0, 38)
+    MainBtn.Size = UDim2.new(1, 0, 0, 30)
     MainBtn.BackgroundColor3 = ELEMENT_BG
     MainBtn.Text = text .. "  ▼"
     MainBtn.TextColor3 = TEXT_ACTIVE
@@ -378,7 +378,7 @@ function CreateDropdown(parent, text, options, callback)
     
     local Scroll = Instance.new("ScrollingFrame")
     Scroll.Size = UDim2.new(1, 0, 0, viewHeight)
-    Scroll.Position = UDim2.new(0, 0, 0, 42)
+    Scroll.Position = UDim2.new(0, 0, 0, 34)
     Scroll.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Scroll.ScrollBarThickness = 2
     Scroll.BorderSizePixel = 0
@@ -395,14 +395,14 @@ function CreateDropdown(parent, text, options, callback)
         OptBtn.BackgroundTransparency = 0
         OptBtn.Text = opt
         OptBtn.TextColor3 = TEXT_INACTIVE
-        OptBtn.Font = Enum.Font.Gotham
+        OptBtn.Font = Enum.Font.GothamBold
         OptBtn.TextSize = 12
         OptBtn.Parent = Scroll
         
         OptBtn.MouseButton1Click:Connect(function()
             MainBtn.Text = opt .. "  ▼"
             isOpened = false
-            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 30)}):Play()
             callback(opt)
         end)
     end
@@ -410,9 +410,9 @@ function CreateDropdown(parent, text, options, callback)
     MainBtn.MouseButton1Click:Connect(function()
         isOpened = not isOpened
         if isOpened then
-            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 42 + viewHeight)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 34 + viewHeight)}):Play()
         else
-            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 30)}):Play()
         end
     end)
 end
@@ -468,7 +468,23 @@ local islandList = {
 }
 
 -- Masukkan koordinat XYZ di sini nanti. Format: ["Nama Island"] = Vector3.new(X, Y, Z)
-local Locations = {} 
+local Locations = {
+    ["Christmas Island"]   = Vector3.new(0, 0, 0),
+    ["Christmas Cave"]     = Vector3.new(0, 0, 0),
+    ["Fisherman Island"]   = Vector3.new(0, 0, 0),
+    ["Kohana"]             = Vector3.new(0, 0, 0),
+    ["Kohana Volcano"]     = Vector3.new(0, 0, 0),
+    ["Coral Reefs"]        = Vector3.new(0, 0, 0),
+    ["Esotoric Depths"]    = Vector3.new(0, 0, 0),
+    ["Tropical Grove"]     = Vector3.new(0, 0, 0),
+    ["Crater Island"]      = Vector3.new(0, 0, 0),
+    ["Treasure Room"]      = Vector3.new(0, 0, 0),
+    ["Sisyphus Statue"]    = Vector3.new(0, 0, 0),
+    ["Ancient Jungle"]     = Vector3.new(0, 0, 0),
+    ["Sacred Temple"]      = Vector3.new(0, 0, 0),
+    ["Underground Cellar"] = Vector3.new(0, 0, 0),
+    ["Ancient Ruin"]       = Vector3.new(0, 0, 0)
+}
 
 local selectedIsland = nil
 
@@ -507,11 +523,13 @@ MinBtn.MouseButton1Click:Connect(function()
     if isMinimized then
         -- Restore
         TweenService:Create(MainFrame, TweenInfo.new(0.4), {Size = storedSize}):Play()
+        Body.Visible = true
         MinBtn.Text = "-"
         ResizeHandle.Visible = true
     else
         -- Minimize
         storedSize = MainFrame.Size -- Simpan ukuran terakhir sebelum ditutup
+        Body.Visible = false
         TweenService:Create(MainFrame, TweenInfo.new(0.4), {Size = UDim2.new(0, storedSize.X.Offset, 0, 35)}):Play()
         MinBtn.Text = "+"
         ResizeHandle.Visible = false
