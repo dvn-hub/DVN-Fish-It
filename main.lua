@@ -59,6 +59,7 @@ local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 35)
 Header.BackgroundTransparency = 1
+Header.Active = true
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
@@ -67,7 +68,7 @@ Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = TEXT_ACTIVE
-Title.Font = Enum.Font.GothamBold
+Title.Font = Enum.Font.Gotham
 Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
@@ -140,14 +141,14 @@ local Tabs = {
 }
 
 local TabIcons = {
-    ["Info"] = "◈",
-    ["Fishing"] = "⚓",
-    ["Shop"] = "❖",
-    ["Trade"] = "⇄",
-    ["Teleport"] = "⌖",
-    ["Quest"] = "⚔",
-    ["Config"] = "⚙",
-    ["Misc"] = "∞"
+    ["Info"] = "?",
+    ["Fishing"] = "~",
+    ["Shop"] = "$",
+    ["Trade"] = "=",
+    ["Teleport"] = "+",
+    ["Quest"] = "!",
+    ["Config"] = "*",
+    ["Misc"] = "#"
 }
 
 local TabFrames = {}
@@ -488,10 +489,13 @@ end)
 -- B. Dragging (Header Only)
 local dragging, dragInput, dragStart, startPos
 Header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
+        if input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
     end
 end)
 Header.InputChanged:Connect(function(input)
@@ -506,7 +510,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
 print("DVN HUB LOADED")
