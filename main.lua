@@ -61,7 +61,7 @@ DragBar.Size = UDim2.new(0, 140, 0, 4)
 DragBar.Position = UDim2.new(0.5, 0, 1, 12)
 DragBar.AnchorPoint = Vector2.new(0.5, 1)
 DragBar.BackgroundColor3 = LINE_COLOR
-DragBar.BackgroundTransparency = 0.5
+DragBar.BackgroundTransparency = 0.3
 DragBar.BorderSizePixel = 0
 DragBar.Active = true
 DragBar.Parent = MainFrame
@@ -229,6 +229,12 @@ for index, tabName in ipairs(Tabs) do
     BtnCorner.CornerRadius = UDim.new(0, 6)
     BtnCorner.Parent = Btn
     
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = LINE_COLOR
+    BtnStroke.Transparency = 0.6
+    BtnStroke.Thickness = 1
+    BtnStroke.Parent = Btn
+    
     Btn.MouseButton1Click:Connect(function()
         SwitchTab(tabName)
     end)
@@ -269,7 +275,7 @@ function CreateButton(parent, text, callback)
     
     local Stroke = Instance.new("UIStroke")
     Stroke.Color = LINE_COLOR
-    Stroke.Transparency = 0.8
+    Stroke.Transparency = 0.6
     Stroke.Thickness = 1
     Stroke.Parent = Btn
     
@@ -290,7 +296,7 @@ function CreateToggle(parent, text, callback)
     
     local Stroke = Instance.new("UIStroke")
     Stroke.Color = LINE_COLOR
-    Stroke.Transparency = 0.8
+    Stroke.Transparency = 0.6
     Stroke.Thickness = 1
     Stroke.Parent = Frame
     
