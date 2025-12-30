@@ -61,10 +61,12 @@ local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 35)
 Header.BackgroundTransparency = 1
+Header.Active = true
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Text = "DVN HUB | v 0.1"
+Title.RichText = true
+Title.Text = "DVN HUB | <font face='Gotham'>v 0.1</font>"
 Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
