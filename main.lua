@@ -517,8 +517,12 @@ local RodsDB = {
 local RodOptions = {}
 local RodLookup = {}
 
+local function FormatPrice(n)
+    return tostring(n):reverse():gsub("%d%d%d", "%0."):reverse():gsub("^%.", "")
+end
+
 for _, rod in ipairs(RodsDB) do
-    local label = rod.Name .. " ($" .. rod.Price .. ")"
+    local label = rod.Name .. " ($" .. FormatPrice(rod.Price) .. ")"
     table.insert(RodOptions, label)
     RodLookup[label] = rod.Id
 end
