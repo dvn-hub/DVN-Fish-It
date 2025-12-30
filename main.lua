@@ -551,32 +551,41 @@ end)
 -- === BAIT SHOP (UPDATED: DROPDOWN) ===
 CreateSection(TabFrames["Shop"], "Bait Shop")
 
--- Daftar Bait
-local BaitList = {
-    ["Floral Bait"] = 20, -- ID 20 (Hidden)
-    ["Midnight Bait"] = 3, -- ID 3
-    ["Topwater Bait"] = 10, -- ID 10
-    ["Luck Bait"] = 2 -- ID 2
+local BaitsDB = {
+    {Name = "Topwater Bait", Price = 100, Id = 10},
+    {Name = "Luck Bait", Price = 1000, Id = 2},
+    {Name = "Midnight Bait", Price = 3000, Id = 3},
+    {Name = "Nature Bait", Price = 83500, Id = 17},
+    {Name = "Chroma Bait", Price = 290000, Id = 6},
+    {Name = "Dark Matter Bait", Price = 630000, Id = 8},
+    {Name = "Corrupt Bait", Price = 1148484, Id = 15},
+    {Name = "Aether Bait", Price = 3700000, Id = 16},
+    {Name = "Floral Bait", Price = 4000000, Id = 20}
 }
 
-local BaitNames = {}
-for name, _ in pairs(BaitList) do table.insert(BaitNames, name) end
-table.sort(BaitNames)
+local BaitOptions = {}
+local BaitLookup = {}
 
-local selectedBait = "Topwater Bait"
+for _, bait in ipairs(BaitsDB) do
+    local label = bait.Name .. " ($" .. FormatPrice(bait.Price) .. ")"
+    table.insert(BaitOptions, label)
+    BaitLookup[label] = bait.Id
+end
 
-CreateDropdown(TabFrames["Shop"], "Select Bait", BaitNames, function(val)
-    selectedBait = val
+local selectedBaitLabel = nil
+
+CreateDropdown(TabFrames["Shop"], "Select Bait", BaitOptions, function(val)
+    selectedBaitLabel = val
 end)
 
 CreateButton(TabFrames["Shop"], "Buy Selected Bait", function()
-    if selectedBait and BaitList[selectedBait] then
-        InvokeShop("PurchaseBait", BaitList[selectedBait])
+    local id = BaitLookup[selectedBaitLabel]
+    if id then
+        InvokeShop("PurchaseBait", id)
     else
         warn("⚠️ Pilih bait dulu!")
     end
 end)
--- (Auto Buy Button dihapus)
 
 -- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Island")
