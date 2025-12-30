@@ -57,7 +57,7 @@ MainCorner.Parent = MainFrame
 -- DRAG BAR (HOME INDICATOR)
 local DragBar = Instance.new("Frame")
 DragBar.Name = "DragBar"
-DragBar.Size = UDim2.new(0, 100, 0, 4)
+DragBar.Size = UDim2.new(0, 140, 0, 4)
 DragBar.Position = UDim2.new(0.5, 0, 1, -8)
 DragBar.AnchorPoint = Vector2.new(0.5, 1)
 DragBar.BackgroundColor3 = LINE_COLOR
@@ -177,7 +177,7 @@ local function SwitchTab(activeName)
     for name, btn in pairs(TabButtons) do
         if name == activeName then
             btn.TextColor3 = TEXT_ACTIVE
-            btn.BackgroundTransparency = 0.92
+            btn.BackgroundTransparency = 1
         else
             btn.TextColor3 = TEXT_INACTIVE
             btn.BackgroundTransparency = 1
