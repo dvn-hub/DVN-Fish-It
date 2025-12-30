@@ -67,6 +67,8 @@ local function InvokeShop(remoteName, itemId)
 end
 -- ====================================================================
 
+-- GUI PARENT SAFE
+local GUI_PARENT = gethui and gethui() or LocalPlayer:WaitForChild("PlayerGui")
 
 -- 1. SETUP GUI (ORIGINAL USER UI)
 local ScreenGui = Instance.new("ScreenGui")
@@ -75,8 +77,11 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 10000
 if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("DVN_HUB_FIXED") then
     LocalPlayer.PlayerGui.DVN_HUB_FIXED:Destroy()
+if GUI_PARENT:FindFirstChild("DVN_HUB_FIXED") then
+    GUI_PARENT.DVN_HUB_FIXED:Destroy()
 end
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
 
 -- KONFIGURASI TAMPILAN
@@ -140,7 +145,7 @@ Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = TEXT_COLOR
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 14
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
@@ -265,7 +270,7 @@ for i, name in ipairs(Tabs) do
     Btn.BackgroundTransparency = 1
     Btn.Text = name
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 12
+    Btn.TextSize = 14
     Btn.TextColor3 = TEXT_DIM
     Btn.Parent = Sidebar
     
@@ -289,7 +294,7 @@ function CreateSection(parent, text)
     Lab.TextColor3 = ACCENT_COLOR
     Lab.TextTransparency = 0.4
     Lab.Font = Enum.Font.GothamBold
-    Lab.TextSize = 10
+    Lab.TextSize = 12
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = parent
 end
@@ -302,7 +307,7 @@ function CreateButton(parent, text, callback)
     Btn.Text = text
     Btn.TextColor3 = TEXT_COLOR
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 12
+    Btn.TextSize = 14
     Btn.Parent = parent
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
@@ -326,7 +331,7 @@ function CreateToggle(parent, text, callback)
     Lab.BackgroundTransparency = 1
     Lab.TextColor3 = TEXT_COLOR
     Lab.Font = Enum.Font.GothamBold
-    Lab.TextSize = 12
+    Lab.TextSize = 14
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = Frame
     local ToggleBtn = Instance.new("TextButton")
@@ -377,7 +382,7 @@ function CreateDropdown(parent, text, options, callback)
     Lab.BackgroundTransparency = 1
     Lab.TextColor3 = TEXT_COLOR
     Lab.Font = Enum.Font.GothamBold
-    Lab.TextSize = 12
+    Lab.TextSize = 14
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = Frame
     local Arrow = Instance.new("TextLabel")
@@ -386,7 +391,7 @@ function CreateDropdown(parent, text, options, callback)
     Arrow.Position = UDim2.new(1, -30, 0, 0)
     Arrow.BackgroundTransparency = 1
     Arrow.TextColor3 = TEXT_DIM
-    Arrow.TextSize = 10
+    Arrow.TextSize = 12
     Arrow.Parent = Frame
     local Trigger = Instance.new("TextButton")
     Trigger.Size = UDim2.new(1, 0, 0, 30)
@@ -418,8 +423,8 @@ function CreateDropdown(parent, text, options, callback)
         B.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         B.Text = opt
         B.TextColor3 = TEXT_COLOR
-        B.Font = Enum.Font.Gotham
-        B.TextSize = 11
+        B.Font = Enum.Font.GothamBold
+        B.TextSize = 13
         B.Parent = Container
         local C = Instance.new("UICorner")
         C.CornerRadius = UDim.new(0, 3)
@@ -459,7 +464,7 @@ InfoTxt.Size = UDim2.new(1, 0, 0, 120)
 InfoTxt.BackgroundTransparency = 1
 InfoTxt.TextColor3 = TEXT_DIM
 InfoTxt.Font = Enum.Font.GothamBold
-InfoTxt.TextSize = 11
+InfoTxt.TextSize = 13
 InfoTxt.TextXAlignment = Enum.TextXAlignment.Left
 InfoTxt.TextWrapped = true
 InfoTxt.Parent = TabFrames["Info"]
@@ -471,8 +476,8 @@ JoinUsTxt.Text = "Join Us!"
 JoinUsTxt.Size = UDim2.new(1, 0, 0, 15)
 JoinUsTxt.BackgroundTransparency = 1
 JoinUsTxt.TextColor3 = TEXT_DIM
-JoinUsTxt.Font = Enum.Font.Gotham
-JoinUsTxt.TextSize = 10
+JoinUsTxt.Font = Enum.Font.GothamBold
+JoinUsTxt.TextSize = 12
 JoinUsTxt.TextXAlignment = Enum.TextXAlignment.Left
 JoinUsTxt.Parent = TabFrames["Info"]
 

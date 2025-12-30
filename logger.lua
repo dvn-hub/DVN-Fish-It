@@ -193,7 +193,7 @@ Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = TEXT_COLOR
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 14
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
@@ -318,7 +318,7 @@ for i, name in ipairs(Tabs) do
     Btn.BackgroundTransparency = 1
     Btn.Text = name
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 12
+    Btn.TextSize = 14
     Btn.TextColor3 = TEXT_DIM
     Btn.Parent = Sidebar
     
@@ -342,7 +342,7 @@ function CreateSection(parent, text)
     Lab.TextColor3 = ACCENT_COLOR
     Lab.TextTransparency = 0.4
     Lab.Font = Enum.Font.GothamBold
-    Lab.TextSize = 10
+    Lab.TextSize = 12
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = parent
 end
@@ -355,7 +355,7 @@ function CreateButton(parent, text, callback)
     Btn.Text = text
     Btn.TextColor3 = TEXT_COLOR
     Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 12
+    Btn.TextSize = 14
     Btn.Parent = parent
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
@@ -380,7 +380,7 @@ function CreateToggle(parent, text, defaultVal, callback)
     Lab.BackgroundTransparency = 1
     Lab.TextColor3 = TEXT_COLOR
     Lab.Font = Enum.Font.GothamBold
-    Lab.TextSize = 12
+    Lab.TextSize = 14
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = Frame
     
@@ -435,8 +435,8 @@ function CreateInput(parent, placeholder, defaultText, callback)
     Box.PlaceholderText = placeholder
     Box.TextColor3 = TEXT_COLOR
     Box.PlaceholderColor3 = TEXT_DIM
-    Box.Font = Enum.Font.Gotham
-    Box.TextSize = 12
+    Box.Font = Enum.Font.GothamBold
+    Box.TextSize = 14
     Box.TextXAlignment = Enum.TextXAlignment.Left
     Box.ClearTextOnFocus = false
     Box.Parent = Frame
@@ -459,7 +459,7 @@ InfoTxt.Size = UDim2.new(1, 0, 0, 100)
 InfoTxt.BackgroundTransparency = 1
 InfoTxt.TextColor3 = TEXT_DIM
 InfoTxt.Font = Enum.Font.GothamBold
-InfoTxt.TextSize = 11
+InfoTxt.TextSize = 13
 InfoTxt.TextXAlignment = Enum.TextXAlignment.Left
 InfoTxt.TextWrapped = true
 InfoTxt.Parent = TabFrames["Info"]
