@@ -442,7 +442,7 @@ CreateButton(TabFrames["Teleport"], "Teleport Now", function()
 end)
 
 -- [OTHER TABS]
-CreateSection(TabFrames["Settings"], "UI Settings")
+CreateSection(TabFrames["Config"], "UI Settings")
 CreateButton(TabFrames["Misc"], "Rejoin Server", function() end)
 
 
