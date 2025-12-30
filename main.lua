@@ -221,20 +221,13 @@ for index, tabName in ipairs(Tabs) do
     Btn.BackgroundTransparency = 1
     Btn.Text = tabName
     Btn.TextColor3 = TEXT_INACTIVE
-    Btn.Font = Enum.Font.GothamBold
+    Btn.Font = Enum.Font.Gotham
     Btn.TextSize = 13
     Btn.Parent = Sidebar
     
     local BtnCorner = Instance.new("UICorner")
     BtnCorner.CornerRadius = UDim.new(0, 6)
     BtnCorner.Parent = Btn
-    
-    local BtnStroke = Instance.new("UIStroke")
-    BtnStroke.Color = LINE_COLOR
-    BtnStroke.Transparency = 0.6
-    BtnStroke.Thickness = 1
-    BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    BtnStroke.Parent = Btn
     
     Btn.MouseButton1Click:Connect(function()
         SwitchTab(tabName)
@@ -349,6 +342,81 @@ function CreateToggle(parent, text, callback)
     end)
 end
 
+function CreateDropdown(parent, text, options, callback)
+    local isOpened = false
+    local optionHeight = 30
+    local maxDisplay = 6
+    local contentHeight = #options * optionHeight
+    local viewHeight = math.min(contentHeight, maxDisplay * optionHeight)
+    
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, 0, 0, 38)
+    Container.BackgroundColor3 = ELEMENT_BG
+    Container.BackgroundTransparency = 1
+    Container.ClipsDescendants = true
+    Container.Parent = parent
+    
+    local MainBtn = Instance.new("TextButton")
+    MainBtn.Size = UDim2.new(1, 0, 0, 38)
+    MainBtn.BackgroundColor3 = ELEMENT_BG
+    MainBtn.Text = text .. "  ▼"
+    MainBtn.TextColor3 = TEXT_ACTIVE
+    MainBtn.Font = Enum.Font.GothamBold
+    MainBtn.TextSize = 13
+    MainBtn.Parent = Container
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = MainBtn
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = LINE_COLOR
+    Stroke.Transparency = 0.6
+    Stroke.Thickness = 1
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Stroke.Parent = MainBtn
+    
+    local Scroll = Instance.new("ScrollingFrame")
+    Scroll.Size = UDim2.new(1, 0, 0, viewHeight)
+    Scroll.Position = UDim2.new(0, 0, 0, 42)
+    Scroll.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Scroll.ScrollBarThickness = 2
+    Scroll.BorderSizePixel = 0
+    Scroll.Parent = Container
+    
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Parent = Scroll
+    
+    for _, opt in ipairs(options) do
+        local OptBtn = Instance.new("TextButton")
+        OptBtn.Size = UDim2.new(1, 0, 0, optionHeight)
+        OptBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        OptBtn.BackgroundTransparency = 0
+        OptBtn.Text = opt
+        OptBtn.TextColor3 = TEXT_INACTIVE
+        OptBtn.Font = Enum.Font.Gotham
+        OptBtn.TextSize = 12
+        OptBtn.Parent = Scroll
+        
+        OptBtn.MouseButton1Click:Connect(function()
+            MainBtn.Text = opt .. "  ▼"
+            isOpened = false
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+            callback(opt)
+        end)
+    end
+    
+    MainBtn.MouseButton1Click:Connect(function()
+        isOpened = not isOpened
+        if isOpened then
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 42 + viewHeight)}):Play()
+        else
+            TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+        end
+    end)
+end
+
 function CreateParagraph(parent, text)
     local Label = Instance.new("TextLabel")
     Label.Text = text
@@ -392,6 +460,32 @@ CreateSection(TabFrames["Trade"], "System")
 
 -- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Maps")
+local islandList = {
+    "Christmas Island", "Christmas Cave", "Fisherman Island", "Kohana", 
+    "Kohana Volcano", "Coral Reefs", "Esotoric Depths", "Tropical Grove", 
+    "Crater Island", "Treasure Room", "Sisyphus Statue", "Ancient Jungle", 
+    "Sacred Temple", "Underground Cellar", "Ancient Ruin"
+}
+
+-- Masukkan koordinat XYZ di sini nanti. Format: ["Nama Island"] = Vector3.new(X, Y, Z)
+local Locations = {} 
+
+local selectedIsland = nil
+
+CreateDropdown(TabFrames["Teleport"], "Select Island", islandList, function(val)
+    selectedIsland = val
+end)
+
+CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
+    if selectedIsland and Locations[selectedIsland] then
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(Locations[selectedIsland])
+        end
+    else
+        print("Koordinat belum tersedia untuk: " .. tostring(selectedIsland))
+    end
+end)
 
 -- [QUEST]
 CreateSection(TabFrames["Quest"], "Auto Quest")
