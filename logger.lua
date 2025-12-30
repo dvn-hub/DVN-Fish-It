@@ -121,12 +121,12 @@ Players.PlayerRemoving:Connect(function(player) sendJoinLeave(player, false) end
 -- ====================================================================
 
 -- CLEANUP OLD GUI
-if GUI_PARENT:FindFirstChild("DVN_HUB_FIXED") then
-    GUI_PARENT.DVN_HUB_FIXED:Destroy()
+if GUI_PARENT:FindFirstChild("DVN_HUB_LOGGER") then
+    GUI_PARENT.DVN_HUB_LOGGER:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "DVN_HUB_FIXED"
+ScreenGui.Name = "DVN_HUB_LOGGER"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.DisplayOrder = 10000
 ScreenGui.Parent = GUI_PARENT
