@@ -39,14 +39,14 @@ MainFrame.Size = DEFAULT_SIZE
 MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG_COLOR
-MainFrame.BackgroundTransparency = 0.05
+MainFrame.BackgroundTransparency = 0.25
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true 
 MainFrame.Parent = ScreenGui
 
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = LINE_COLOR
-MainStroke.Transparency = 0.85
+MainStroke.Transparency = 0.6
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
@@ -87,7 +87,7 @@ local HeaderLine = Instance.new("Frame")
 HeaderLine.Size = UDim2.new(1, 0, 0, 1)
 HeaderLine.Position = UDim2.new(0, 0, 1, -1)
 HeaderLine.BackgroundColor3 = LINE_COLOR
-HeaderLine.BackgroundTransparency = 0.85
+HeaderLine.BackgroundTransparency = 0.6
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
@@ -120,7 +120,7 @@ local VerticalLine = Instance.new("Frame")
 VerticalLine.Size = UDim2.new(0, 1, 1, 0)
 VerticalLine.Position = UDim2.new(0.28, 0, 0, 0)
 VerticalLine.BackgroundColor3 = LINE_COLOR
-VerticalLine.BackgroundTransparency = 0.85
+VerticalLine.BackgroundTransparency = 0.6
 VerticalLine.BorderSizePixel = 0
 VerticalLine.Parent = Body
 
@@ -303,10 +303,35 @@ function CreateToggle(parent, text, callback)
     end)
 end
 
+function CreateParagraph(parent, text)
+    local Label = Instance.new("TextLabel")
+    Label.Text = text
+    Label.Size = UDim2.new(1, 0, 0, 0)
+    Label.AutomaticSize = Enum.AutomaticSize.Y
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = TEXT_ACTIVE
+    Label.TextTransparency = 0.2
+    Label.Font = Enum.Font.Gotham
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.TextWrapped = true
+    Label.Parent = parent
+    local Pad = Instance.new("UIPadding")
+    Pad.PaddingLeft = UDim.new(0, 10)
+    Pad.PaddingRight = UDim.new(0, 10)
+    Pad.PaddingTop = UDim.new(0, 5)
+    Pad.PaddingBottom = UDim.new(0, 5)
+    Pad.Parent = Label
+end
+
 -- 8. ISI FITUR SCRIPT
 -- [INFO]
 CreateSection(TabFrames["Info"], "Information")
-CreateButton(TabFrames["Info"], "Copy Discord", function() end)
+CreateParagraph(TabFrames["Info"], "Thank you for using DVN Hub!\nThis tool is created to enhance your experience and make your gameplay easier.\n\nUse this tool at your own risk. DVN Team is not responsible for any misuse or consequences.\n\nBrought to you with care by DVN.\nEnjoy and have fun!")
+CreateSection(TabFrames["Info"], "Official Discord DVN! Join Us!")
+CreateButton(TabFrames["Info"], "Copy Discord Link", function()
+    setclipboard("https://discord.gg/LINK_DISCORD_DISINI") -- Ganti link nanti
+end)
 
 -- [FISHING]
 CreateSection(TabFrames["Fishing"], "Feature")
