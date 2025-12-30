@@ -1,10 +1,9 @@
 --[[ 
-    DVN HUB - FINAL VISIBILITY UPDATE
-    Updates:
-    - DROPDOWN: Fixed text visibility (Now White/Bright).
-    - TELEPORT: Renamed "Waypoints" to "Island".
-    - HELPER LINE: Bold (5px) & Solid.
-    - RESPONSIVE: Defaults to 65% screen size.
+    DVN HUB - FINAL COMPLETE VERSION
+    Features:
+    - TELEPORT: All coordinates updated & working.
+    - UI: Responsive (65% Screen), Bold Helper Line, Scrollable Dropdown.
+    - VISIBILITY: Fixed text contrast & readability.
 ]]
 
 local Players = game:GetService("Players")
@@ -37,8 +36,8 @@ local MINIMIZED_SIZE = UDim2.new(0, StartWidth, 0, 32)
 local MAIN_BG = Color3.fromRGB(15, 15, 15)
 local ELEMENT_BG = Color3.fromRGB(30, 30, 30)
 local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
-local TEXT_COLOR = Color3.fromRGB(240, 240, 240) -- Putih Terang
-local TEXT_DIM = Color3.fromRGB(120, 120, 120)   -- Abu-abu
+local TEXT_COLOR = Color3.fromRGB(240, 240, 240)
+local TEXT_DIM = Color3.fromRGB(120, 120, 120)
 
 -- 2. MAIN FRAME
 local MainFrame = Instance.new("Frame")
@@ -358,7 +357,7 @@ function CreateDropdown(parent, text, options, callback)
         B.Size = UDim2.new(1, -4, 0, itemHeight)
         B.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         B.Text = opt
-        B.TextColor3 = TEXT_COLOR -- FIX: Ganti Warna jadi Putih agar Kelihatan
+        B.TextColor3 = TEXT_COLOR
         B.Font = Enum.Font.Gotham
         B.TextSize = 11
         B.Parent = Container
@@ -430,17 +429,26 @@ CreateSection(TabFrames["Shop"], "Shop")
 CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
 
 -- [TELEPORT]
-CreateSection(TabFrames["Teleport"], "Island") -- Update Judul: Island
+CreateSection(TabFrames["Teleport"], "Island")
+-- KOORDINAT LENGKAP SUDAH DIUPDATE
 local Locations = {
-    ["Ancient Jungle"] = Vector3.new(0, 0, 0), ["Ancient Ruin"] = Vector3.new(0, 0, 0),
-    ["Christmas Cave"] = Vector3.new(0, 0, 0), ["Christmas Island"] = Vector3.new(0, 0, 0),
-    ["Coral Reefs"] = Vector3.new(0, 0, 0), ["Crater Island"] = Vector3.new(0, 0, 0),
-    ["Esotoric Depths"] = Vector3.new(0, 0, 0), ["Fisherman Island"] = Vector3.new(0, 0, 0),
-    ["Kohana"] = Vector3.new(0, 0, 0), ["Kohana Volcano"] = Vector3.new(0, 0, 0),
-    ["Sacred Temple"] = Vector3.new(0, 0, 0), ["Sisyphus Statue"] = Vector3.new(0, 0, 0),
-    ["Treasure Room"] = Vector3.new(0, 0, 0), ["Tropical Grove"] = Vector3.new(0, 0, 0),
-    ["Underground Cellar"] = Vector3.new(0, 0, 0)
+    ["Ancient Jungle"]     = Vector3.new(1472.61, 4.79, -331.18),
+    ["Ancient Ruin"]       = Vector3.new(6046.77, -588.60, 4611.83),
+    ["Christmas Cave"]     = Vector3.new(713.52, -487.11, 8870.00),
+    ["Christmas Island"]   = Vector3.new(1178.85, 24.10, 1585.74),
+    ["Coral Reefs"]        = Vector3.new(-3113.50, 2.48, 2138.63),
+    ["Crater Island"]      = Vector3.new(978.00, 46.90, 5087.00),
+    ["Esotoric Depths"]    = Vector3.new(3248.44, -1293.43, 1435.97),
+    ["Fisherman Island"]   = Vector3.new(-65.84, 3.26, 2856.85),
+    ["Kohana"]             = Vector3.new(-442.29, 17.25, 493.56),
+    ["Kohana Volcano"]     = Vector3.new(-554.06, 17.08, 113.67),
+    ["Sacred Temple"]      = Vector3.new(1519.95, 4.89, -671.92),
+    ["Sisyphus Statue"]    = Vector3.new(-3743.65, -135.07, -1007.13),
+    ["Treasure Room"]      = Vector3.new(-3649.53, -269.23, -1655.62),
+    ["Tropical Grove"]     = Vector3.new(-2173.73, 53.49, 3630.97),
+    ["Underground Cellar"] = Vector3.new(2139.71, -91.40, -764.99)
 }
+
 local PlaceNames = {}
 for name, _ in pairs(Locations) do table.insert(PlaceNames, name) end
 table.sort(PlaceNames)
