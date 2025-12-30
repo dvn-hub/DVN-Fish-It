@@ -498,25 +498,41 @@ CreateToggle(TabFrames["Fishing"], "Auto Fish", function(v) end)
 -- === SHOP SECTION (ROD) ===
 CreateSection(TabFrames["Shop"], "Rod Shop")
 
-local RodList = {
-    ["Ares Rod"] = 126,
-    ["Demascus Rod"] = 77,
-    ["Chrome Rod"] = 7
+local RodsDB = {
+    {Name = "Luck Rod", Price = 225, Id = 79},
+    {Name = "Carbon Rod", Price = 750, Id = 76},
+    {Name = "Grass Rod", Price = 1500, Id = 85},
+    {Name = "Demascus Rod", Price = 3000, Id = 77},
+    {Name = "Ice Rod", Price = 5000, Id = 78},
+    {Name = "Lucky Rod", Price = 15000, Id = 4},
+    {Name = "Midnight Rod", Price = 50000, Id = 80},
+    {Name = "Steampunk Rod", Price = 215000, Id = 6},
+    {Name = "Chrome Rod", Price = 437000, Id = 7},
+    {Name = "Astral Rod", Price = 1000000, Id = 5},
+    {Name = "Ares Rod", Price = 3000000, Id = 126},
+    {Name = "Angler Rod", Price = 8000000, Id = 168},
+    {Name = "Bamboo Rod", Price = 12000000, Id = 258}
 }
 
-local RodNames = {}
-for name, _ in pairs(RodList) do table.insert(RodNames, name) end
-table.sort(RodNames)
+local RodOptions = {}
+local RodLookup = {}
 
-local selectedRod = "Ares Rod" 
+for _, rod in ipairs(RodsDB) do
+    local label = rod.Name .. " ($" .. rod.Price .. ")"
+    table.insert(RodOptions, label)
+    RodLookup[label] = rod.Id
+end
 
-CreateDropdown(TabFrames["Shop"], "Select Rod", RodNames, function(val)
-    selectedRod = val
+local selectedRodLabel = nil
+
+CreateDropdown(TabFrames["Shop"], "Select Rod", RodOptions, function(val)
+    selectedRodLabel = val
 end)
 
 CreateButton(TabFrames["Shop"], "Buy Selected Rod", function()
-    if selectedRod and RodList[selectedRod] then
-        InvokeShop("PurchaseFishingRod", RodList[selectedRod])
+    local id = RodLookup[selectedRodLabel]
+    if id then
+        InvokeShop("PurchaseFishingRod", id)
     else
         warn("⚠️ Pilih rod dulu!")
     end
