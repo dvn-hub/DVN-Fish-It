@@ -518,7 +518,13 @@ local RodOptions = {}
 local RodLookup = {}
 
 local function FormatPrice(n)
-    return tostring(n):reverse():gsub("%d%d%d", "%0."):reverse():gsub("^%.", "")
+    local formatted = tostring(n)
+    while true do
+        local k
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1.%2')
+        if k == 0 then break end
+    end
+    return formatted
 end
 
 for _, rod in ipairs(RodsDB) do
