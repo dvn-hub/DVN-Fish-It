@@ -1,9 +1,9 @@
 --[[ 
-    DVN HUB - FINAL COMPLETE VERSION
-    Features:
-    - TELEPORT: All coordinates updated & working.
-    - UI: Responsive (65% Screen), Bold Helper Line, Scrollable Dropdown.
-    - VISIBILITY: Fixed text contrast & readability.
+    DVN HUB - FINAL POLISHED VERSION
+    Updates:
+    - HELPER LINE: Now Oval/Pill shaped & Hides when minimized.
+    - TELEPORT: Full Coordinates Included.
+    - UI: Responsive, Bold, Contrast Fixed.
 ]]
 
 local Players = game:GetService("Players")
@@ -430,7 +430,7 @@ CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
 
 -- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Island")
--- KOORDINAT LENGKAP SUDAH DIUPDATE
+-- KOORDINAT LENGKAP
 local Locations = {
     ["Ancient Jungle"]     = Vector3.new(1472.61, 4.79, -331.18),
     ["Ancient Ruin"]       = Vector3.new(6046.77, -588.60, 4611.83),
@@ -463,16 +463,21 @@ end)
 
 -- 8. CORE LOGIC
 
--- [HELPER LINE - BOLDER (5px) & OPAQUE (0.3)]
+-- [HELPER LINE - OVAL & AUTO HIDE]
 local HelperLine = Instance.new("TextButton")
 HelperLine.Name = "HelperLine"
 HelperLine.Text = ""
 HelperLine.BackgroundColor3 = ACCENT_COLOR
 HelperLine.BorderSizePixel = 0
-HelperLine.BackgroundTransparency = 0.3 -- Normal (Visible)
+HelperLine.BackgroundTransparency = 0.3 -- Solid enough
 HelperLine.AnchorPoint = Vector2.new(0.5, 0)
 HelperLine.Parent = ScreenGui
 HelperLine.ZIndex = MainFrame.ZIndex - 1
+
+-- OVAL SHAPE
+local HCorner = Instance.new("UICorner")
+HCorner.CornerRadius = UDim.new(1, 0) -- Pill Shape
+HCorner.Parent = HelperLine
 
 local function UpdateHelperLine()
     if not MainFrame or not MainFrame.Parent then return end
@@ -515,17 +520,21 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- [MINIMIZE & RESIZE]
+-- [MINIMIZE & RESIZE (With Auto Hide Helper Line)]
 local isMin, lastSize = false, DEFAULT_SIZE
 MinBtn.MouseButton1Click:Connect(function()
     if isMin then
+        -- Expand
         TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = lastSize}):Play()
         Body.Visible = true
+        HelperLine.Visible = true -- SHOW HELPER LINE
         MinBtn.Text = "-"
     else
+        -- Minimize
         lastSize = MainFrame.Size
         TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = MINIMIZED_SIZE}):Play()
         Body.Visible = false
+        HelperLine.Visible = false -- HIDE HELPER LINE
         MinBtn.Text = "+"
     end
     isMin = not isMin
