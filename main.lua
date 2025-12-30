@@ -72,6 +72,7 @@ end
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DVN_HUB_FIXED"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 10000
 if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("DVN_HUB_FIXED") then
     LocalPlayer.PlayerGui.DVN_HUB_FIXED:Destroy()
 end
@@ -112,7 +113,7 @@ MainCorner.Parent = MainFrame
 
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = ACCENT_COLOR
-MainStroke.Transparency = 0.8
+MainStroke.Transparency = 0.5
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 

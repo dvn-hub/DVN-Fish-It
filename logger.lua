@@ -166,7 +166,7 @@ MainCorner.Parent = MainFrame
 
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = ACCENT_COLOR
-MainStroke.Transparency = 0.8
+MainStroke.Transparency = 0.5
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
