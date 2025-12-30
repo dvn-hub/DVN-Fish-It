@@ -170,6 +170,15 @@ MainStroke.Transparency = 0.8
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
+-- [AESTHETIC] Main Gradient
+local MainGradient = Instance.new("UIGradient")
+MainGradient.Rotation = 45
+MainGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1.0, Color3.fromRGB(150, 150, 150))
+}
+MainGradient.Parent = MainFrame
+
 -- HEADER
 local Header = Instance.new("Frame")
 Header.Name = "Header"
@@ -206,6 +215,15 @@ HeaderLine.BackgroundColor3 = ACCENT_COLOR
 HeaderLine.BackgroundTransparency = 0.8
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
+
+-- [AESTHETIC] Line Gradient
+local LineGradient = Instance.new("UIGradient")
+LineGradient.Transparency = NumberSequence.new{
+    NumberSequenceKeypoint.new(0.0, 1),
+    NumberSequenceKeypoint.new(0.5, 0.2),
+    NumberSequenceKeypoint.new(1.0, 1)
+}
+LineGradient.Parent = HeaderLine
 
 -- BODY & CONTENT
 local Body = Instance.new("Frame")
@@ -578,4 +596,9 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 SwitchTab("Info")
+
+-- [AESTHETIC] Startup Animation
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = DEFAULT_SIZE}):Play()
+
 print("DVN LOGGER UI LOADED")
