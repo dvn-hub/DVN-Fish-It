@@ -24,7 +24,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- KONFIGURASI TAMPILAN
-local DEFAULT_SIZE = UDim2.new(0, 550, 0, 350) -- Ukuran awal dalam Pixel biar enak diresize
+local DEFAULT_SIZE = UDim2.new(0, 450, 0, 260) -- Ukuran aman untuk mobile
 local MIN_SIZE = Vector2.new(400, 250) -- Ukuran terkecil
 local MAIN_BG_COLOR = Color3.fromRGB(18, 18, 18)
 local LINE_COLOR = Color3.fromRGB(255, 255, 255)
@@ -132,19 +132,6 @@ Content.Position = UDim2.new(0.28, 0, 0, 0)
 Content.BackgroundTransparency = 1
 Content.ClipsDescendants = true
 Content.Parent = Body
-
--- 5. RESIZE HANDLE (POJOK KANAN BAWAH)
-local ResizeHandle = Instance.new("TextButton")
-ResizeHandle.Name = "ResizeHandle"
-ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
-ResizeHandle.Position = UDim2.new(1, 0, 1, 0)
-ResizeHandle.AnchorPoint = Vector2.new(1, 1)
-ResizeHandle.BackgroundTransparency = 1
-ResizeHandle.Text = "◢" -- Simbol pojok
-ResizeHandle.TextColor3 = TEXT_INACTIVE
-ResizeHandle.TextSize = 14
-ResizeHandle.Font = Enum.Font.Gotham
-ResizeHandle.Parent = MainFrame
 
 -- 6. SISTEM MENU (Sorted 1-8)
 local Tabs = {
@@ -303,6 +290,90 @@ function CreateToggle(parent, text, callback)
     end)
 end
 
+function CreateDropdown(parent, text, options, callback)
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1, 0, 0, 38)
+    Frame.BackgroundColor3 = ELEMENT_BG
+    Frame.ClipsDescendants = true
+    Frame.Parent = parent
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Frame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Text = text
+    Label.Size = UDim2.new(0.7, 0, 0, 38)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.TextColor3 = TEXT_ACTIVE
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 13
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = Frame
+    
+    local Arrow = Instance.new("TextLabel")
+    Arrow.Text = "▼"
+    Arrow.Size = UDim2.new(0, 30, 0, 38)
+    Arrow.Position = UDim2.new(1, -30, 0, 0)
+    Arrow.BackgroundTransparency = 1
+    Arrow.TextColor3 = TEXT_INACTIVE
+    Arrow.TextSize = 12
+    Arrow.Parent = Frame
+    
+    local Trigger = Instance.new("TextButton")
+    Trigger.Size = UDim2.new(1, 0, 0, 38)
+    Trigger.BackgroundTransparency = 1
+    Trigger.Text = ""
+    Trigger.Parent = Frame
+    
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, -10, 0, 0)
+    Container.Position = UDim2.new(0, 5, 0, 38)
+    Container.BackgroundTransparency = 1
+    Container.Parent = Frame
+    
+    local UIList = Instance.new("UIListLayout")
+    UIList.Padding = UDim.new(0, 2)
+    UIList.SortOrder = Enum.SortOrder.LayoutOrder
+    UIList.Parent = Container
+    
+    local isOpen = false
+    for _, option in ipairs(options) do
+        local OptBtn = Instance.new("TextButton")
+        OptBtn.Size = UDim2.new(1, 0, 0, 25)
+        OptBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        OptBtn.Text = option
+        OptBtn.TextColor3 = TEXT_INACTIVE
+        OptBtn.Font = Enum.Font.Gotham
+        OptBtn.TextSize = 12
+        OptBtn.Parent = Container
+        local OptCorner = Instance.new("UICorner")
+        OptCorner.CornerRadius = UDim.new(0, 4)
+        OptCorner.Parent = OptBtn
+        
+        OptBtn.MouseButton1Click:Connect(function()
+            Label.Text = text .. ": " .. option
+            Label.TextColor3 = Color3.fromRGB(0, 255, 150)
+            pcall(callback, option)
+            isOpen = false
+            TweenService:Create(Frame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+            TweenService:Create(Arrow, TweenInfo.new(0.3), {Rotation = 0}):Play()
+        end)
+    end
+    
+    Trigger.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        if isOpen then
+            local totalHeight = (#options * 27) + 5
+            TweenService:Create(Frame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38 + totalHeight)}):Play()
+            TweenService:Create(Arrow, TweenInfo.new(0.3), {Rotation = 180}):Play()
+        else
+            TweenService:Create(Frame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
+            TweenService:Create(Arrow, TweenInfo.new(0.3), {Rotation = 0}):Play()
+        end
+    end)
+end
+
 -- 8. ISI FITUR SCRIPT
 -- [INFO]
 CreateSection(TabFrames["Info"], "Information")
@@ -320,7 +391,43 @@ CreateToggle(TabFrames["Shop"], "Auto Buy", function(v) end)
 CreateSection(TabFrames["Trade"], "System")
 
 -- [TELEPORT]
-CreateSection(TabFrames["Teleport"], "Maps")
+local IslandCoords = {
+    ["Christmas Island"] = Vector3.new(0,0,0),
+    ["Christmas Cave"] = Vector3.new(0,0,0),
+    ["Fisherman Island"] = Vector3.new(0,0,0),
+    ["Ocean"] = Vector3.new(0,0,0),
+    ["Kohana"] = Vector3.new(0,0,0),
+    ["Kohana Volcano"] = Vector3.new(0,0,0),
+    ["Coral Reefs"] = Vector3.new(0,0,0),
+    ["Esotoric Depths"] = Vector3.new(0,0,0),
+    ["Tropical Grove"] = Vector3.new(0,0,0),
+    ["Crater Island"] = Vector3.new(0,0,0),
+    ["Treasure Room"] = Vector3.new(0,0,0),
+    ["Sisyphus Statue"] = Vector3.new(0,0,0),
+    ["Ancient Jungle"] = Vector3.new(0,0,0),
+    ["Sacred Temple"] = Vector3.new(0,0,0),
+    ["Underground Cellar"] = Vector3.new(0,0,0),
+    ["Ancient Ruin"] = Vector3.new(0,0,0)
+}
+local selectedLocation = nil
+
+CreateDropdown(TabFrames["Teleport"], "Teleport Island", {
+    "Christmas Island", "Christmas Cave", "Fisherman Island", "Ocean", 
+    "Kohana", "Kohana Volcano", "Coral Reefs", "Esotoric Depths", 
+    "Tropical Grove", "Crater Island", "Treasure Room", "Sisyphus Statue", 
+    "Ancient Jungle", "Sacred Temple", "Underground Cellar", "Ancient Ruin"
+}, function(val)
+    selectedLocation = val
+end)
+
+CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
+    if selectedLocation and IslandCoords[selectedLocation] then
+        local targetPos = IslandCoords[selectedLocation]
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+        end
+    end
+end)
 
 -- [QUEST]
 CreateSection(TabFrames["Quest"], "Auto Quest")
@@ -343,13 +450,11 @@ MinBtn.MouseButton1Click:Connect(function()
         -- Restore
         TweenService:Create(MainFrame, TweenInfo.new(0.4), {Size = storedSize}):Play()
         MinBtn.Text = "-"
-        ResizeHandle.Visible = true
     else
         -- Minimize
         storedSize = MainFrame.Size -- Simpan ukuran terakhir sebelum ditutup
         TweenService:Create(MainFrame, TweenInfo.new(0.4), {Size = UDim2.new(0, storedSize.X.Offset, 0, 35)}):Play()
         MinBtn.Text = "+"
-        ResizeHandle.Visible = false
     end
     isMinimized = not isMinimized
 end)
@@ -376,40 +481,6 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-end)
-
--- C. Resizing Logic
-local resizing = false
-local resizeStart = Vector2.new()
-local startSize = Vector2.new()
-
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        resizeStart = input.Position
-        startSize = MainFrame.AbsoluteSize
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - resizeStart
-        local newX = math.max(MIN_SIZE.X, startSize.X + delta.X)
-        local newY = math.max(MIN_SIZE.Y, startSize.Y + delta.Y)
-        
-        -- Matikan animasi tween saat resize agar responsif
-        MainFrame.Size = UDim2.new(0, newX, 0, newY)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
-        -- Update stored size buat minimize logic
-        if not isMinimized then
-            storedSize = MainFrame.Size
-        end
-    end
 end)
 
 print("DVN HUB LOADED")
