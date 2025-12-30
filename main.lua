@@ -24,7 +24,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 -- KONFIGURASI TAMPILAN
-local DEFAULT_SIZE = UDim2.new(0, 450, 0, 260) -- Ukuran aman untuk mobile
+local DEFAULT_SIZE = UDim2.new(0, 520, 0, 320) -- Ukuran lebih lebar & tinggi
 local MIN_SIZE = Vector2.new(400, 250) -- Ukuran terkecil
 local MAIN_BG_COLOR = Color3.fromRGB(18, 18, 18)
 local LINE_COLOR = Color3.fromRGB(255, 255, 255)
@@ -39,7 +39,7 @@ MainFrame.Size = DEFAULT_SIZE
 MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG_COLOR
-MainFrame.BackgroundTransparency = 0.05
+MainFrame.BackgroundTransparency = 0.15
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true 
 MainFrame.Parent = ScreenGui
@@ -62,7 +62,7 @@ Header.BackgroundTransparency = 1
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
-Title.Text = "DVN HUB" -- JUDUL BARU
+Title.Text = "DVN HUB | v 0.1"
 Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
@@ -139,6 +139,17 @@ local Tabs = {
     "Teleport", "Quest", "Config", "Misc"
 }
 
+local TabIcons = {
+    ["Info"] = "◈",
+    ["Fishing"] = "⚓",
+    ["Shop"] = "❖",
+    ["Trade"] = "⇄",
+    ["Teleport"] = "⌖",
+    ["Quest"] = "⚔",
+    ["Config"] = "⚙",
+    ["Misc"] = "∞"
+}
+
 local TabFrames = {}
 local TabButtons = {}
 
@@ -183,10 +194,11 @@ for index, tabName in ipairs(Tabs) do
     Btn.Size = UDim2.new(1, -20, 0, 32)
     Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Btn.BackgroundTransparency = 1
-    Btn.Text = tabName
+    Btn.Text = "   " .. (TabIcons[tabName] or "") .. "  " .. tabName
     Btn.TextColor3 = TEXT_INACTIVE
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 13
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
     Btn.Parent = Sidebar
     
     local BtnCorner = Instance.new("UICorner")
@@ -278,9 +290,9 @@ function CreateToggle(parent, text, callback)
     Toggler.MouseButton1Click:Connect(function()
         enabled = not enabled
         if enabled then
-            TweenService:Create(Toggler, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
+            TweenService:Create(Toggler, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
             TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(1, -18, 0.5, -8)}):Play()
-            TweenService:Create(Circle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            TweenService:Create(Circle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
         else
             TweenService:Create(Toggler, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
             TweenService:Create(Circle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -8)}):Play()
@@ -353,7 +365,7 @@ function CreateDropdown(parent, text, options, callback)
         
         OptBtn.MouseButton1Click:Connect(function()
             Label.Text = text .. ": " .. option
-            Label.TextColor3 = Color3.fromRGB(0, 255, 150)
+            Label.TextColor3 = TEXT_ACTIVE
             pcall(callback, option)
             isOpen = false
             TweenService:Create(Frame, TweenInfo.new(0.3), {Size = UDim2.new(1, 0, 0, 38)}):Play()
@@ -376,8 +388,22 @@ end
 
 -- 8. ISI FITUR SCRIPT
 -- [INFO]
-CreateSection(TabFrames["Info"], "Information")
-CreateButton(TabFrames["Info"], "Copy Discord", function() end)
+local InfoText = "Thank you for using DVN Script.\nDVN is designed to help you AFK easier, please ensure you configure it correctly.\n\nPlease use this script responsibly. We are not responsible for any bans or account restrictions. It is recommended to use an alt account for testing first."
+
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Size = UDim2.new(1, 0, 0, 120)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Text = InfoText
+InfoLabel.TextColor3 = TEXT_INACTIVE
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.TextSize = 12
+InfoLabel.TextWrapped = true
+InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+InfoLabel.TextYAlignment = Enum.TextXAlignment.Top
+InfoLabel.Parent = TabFrames["Info"]
+
+CreateSection(TabFrames["Info"], "DVN Official Discord! Join Us!")
+CreateButton(TabFrames["Info"], "Copy Discord Link", function() end)
 
 -- [FISHING]
 CreateSection(TabFrames["Fishing"], "Feature")
