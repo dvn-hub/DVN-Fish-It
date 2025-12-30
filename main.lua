@@ -387,14 +387,25 @@ end
 -- [INFO]
 CreateSection(TabFrames["Info"], "About")
 local InfoTxt = Instance.new("TextLabel")
-InfoTxt.Text = "DVN HUB v1.0\nMinimalist Edition\n\nUse responsibly."
-InfoTxt.Size = UDim2.new(1, 0, 0, 60)
+InfoTxt.Text = "Thank you for using DVN Hub!\nThis tool is created to enhance your experience and make your gameplay easier.\n\nUse this tool at your own risk. DVN Team is not responsible for any misuse or consequences.\n\nBrought to you with care by DVN.\nEnjoy and have fun!"
+InfoTxt.Size = UDim2.new(1, 0, 0, 140)
 InfoTxt.BackgroundTransparency = 1
 InfoTxt.TextColor3 = TEXT_DIM
 InfoTxt.Font = Enum.Font.GothamBold
 InfoTxt.TextSize = 11
 InfoTxt.TextXAlignment = Enum.TextXAlignment.Left
 InfoTxt.Parent = TabFrames["Info"]
+
+CreateSection(TabFrames["Info"], "Official Discord DVN!")
+local DiscordTxt = Instance.new("TextLabel")
+DiscordTxt.Text = "Join Us!"
+DiscordTxt.Size = UDim2.new(1, 0, 0, 20)
+DiscordTxt.BackgroundTransparency = 1
+DiscordTxt.TextColor3 = TEXT_DIM
+DiscordTxt.Font = Enum.Font.Gotham
+DiscordTxt.TextSize = 10
+DiscordTxt.TextXAlignment = Enum.TextXAlignment.Left
+DiscordTxt.Parent = TabFrames["Info"]
 
 -- [FISHING]
 CreateSection(TabFrames["Fishing"], "Main")
