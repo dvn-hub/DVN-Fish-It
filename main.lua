@@ -38,14 +38,14 @@ MainFrame.Size = DEFAULT_SIZE
 MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG_COLOR
-MainFrame.BackgroundTransparency = 0.1
+MainFrame.BackgroundTransparency = 0.25
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true 
 MainFrame.Parent = ScreenGui
 
 local MainStroke = Instance.new("UIStroke")
 MainStroke.Color = LINE_COLOR
-MainStroke.Transparency = 0.85
+MainStroke.Transparency = 0.6
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
@@ -58,6 +58,7 @@ local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 35)
 Header.BackgroundTransparency = 1
+Header.Active = true
 Header.Parent = MainFrame
 
 local Title = Instance.new("TextLabel")
@@ -88,7 +89,7 @@ local HeaderLine = Instance.new("Frame")
 HeaderLine.Size = UDim2.new(1, 0, 0, 1)
 HeaderLine.Position = UDim2.new(0, 0, 1, -1)
 HeaderLine.BackgroundColor3 = LINE_COLOR
-HeaderLine.BackgroundTransparency = 0.85
+HeaderLine.BackgroundTransparency = 0.7
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
@@ -122,7 +123,7 @@ local VerticalLine = Instance.new("Frame")
 VerticalLine.Size = UDim2.new(0, 1, 1, 0)
 VerticalLine.Position = UDim2.new(0.28, 0, 0, 0)
 VerticalLine.BackgroundColor3 = LINE_COLOR
-VerticalLine.BackgroundTransparency = 0.85
+VerticalLine.BackgroundTransparency = 0.7
 VerticalLine.BorderSizePixel = 0
 VerticalLine.Parent = Body
 
