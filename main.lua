@@ -1,20 +1,68 @@
 --[[ 
-    DVN HUB - FINAL 50% LINE VERSION
+    DVN HUB - FINAL 50% LINE (ARES ROD ADDED)
     Updates:
-    - HELPER LINE: Width reduced to 50% (More compact).
-    - SHAPE: Oval/Pill shaped & Hides when minimized.
-    - TELEPORT: Full Coordinates Included.
-    - UI: Responsive, Bold, Contrast Fixed.
+    - NEW ITEM: Ares Rod (ID 126) added to Shop.
+    - LOGIC: Remote Scanner + Number Method (Verified).
 ]]
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- 1. SETUP GUI
+-- ====================================================================
+-- [SYSTEM] SMART REMOTE FINDER (MESIN SCANNER)
+-- ====================================================================
+local CachedRemotes = {}
+
+local function GetRemote(remoteName)
+    if CachedRemotes[remoteName] then return CachedRemotes[remoteName] end
+    
+    local packages = ReplicatedStorage:FindFirstChild("Packages")
+    if packages then
+        for _, v in pairs(packages:GetDescendants()) do
+            if v:IsA("RemoteFunction") then
+                if v.Name == remoteName or v.Name == "RF/" .. remoteName then
+                    print("✅ DVN SYSTEM: Remote ketemu ->", v.Name)
+                    CachedRemotes[remoteName] = v
+                    return v
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function InvokeShop(remoteName, itemId)
+    local remote = GetRemote(remoteName)
+    
+    if remote and itemId then
+        print("🛒 MENGIRIM ID:", itemId, "...")
+        
+        task.spawn(function()
+            local success, res = pcall(function()
+                return remote:InvokeServer(itemId)
+            end)
+            
+            if success and res == true then
+                print("✅ SUKSES! Barang terbeli.")
+            elseif success then
+                warn("⚠️ GAGAL BELI (Server menolak):", tostring(res))
+                warn("   (Cek: Uang cukup? Level cukup?)")
+            else
+                warn("❌ ERROR SCRIPT:", res)
+            end
+        end)
+    else
+        warn("❌ FATAL: Remote belum siap atau tidak ditemukan.")
+    end
+end
+-- ====================================================================
+
+
+-- 1. SETUP GUI (ORIGINAL USER UI)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DVN_HUB_FIXED"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -426,7 +474,36 @@ end)
 -- [FISHING & SHOP]
 CreateSection(TabFrames["Fishing"], "Main")
 CreateToggle(TabFrames["Fishing"], "Auto Fish", function(v) end)
-CreateSection(TabFrames["Shop"], "Shop")
+
+-- === SHOP SECTION (ARES ROD ADDED) ===
+CreateSection(TabFrames["Shop"], "Rod Shop")
+
+local RodList = {
+    ["Ares Rod"] = 126,    -- NEW ITEM
+    ["Demascus Rod"] = 77, -- PREV ITEM
+    ["Chrome Rod"] = 7     -- PREV ITEM
+}
+
+local RodNames = {}
+for name, _ in pairs(RodList) do table.insert(RodNames, name) end
+table.sort(RodNames)
+
+local selectedRod = "Ares Rod" -- AUTO SELECT ARES
+
+CreateDropdown(TabFrames["Shop"], "Select Rod", RodNames, function(val)
+    selectedRod = val
+end)
+
+CreateButton(TabFrames["Shop"], "Buy Selected Rod", function()
+    if selectedRod and RodList[selectedRod] then
+        InvokeShop("PurchaseFishingRod", RodList[selectedRod])
+    else
+        warn("⚠️ Pilih rod dulu!")
+    end
+end)
+-- ============================================
+
+CreateSection(TabFrames["Shop"], "Bait Shop")
 CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
 
 -- [TELEPORT]
