@@ -1,9 +1,9 @@
 --[[ 
-    DVN HUB - FINAL COMPLETE VERSION
-    Features:
-    - DRAGGABLE HELPER LINE: Garis bawah sekarang bisa dipakai geser panel.
-    - TELEPORT: Full List Sorted A-Z
-    - UI: Minimalist, Bold, Anti-Bleeding
+    DVN HUB - FINAL REVISION
+    Updates:
+    - RESPONSIVE: Panel size defaults to 65% of screen size.
+    - DROPDOWN: Added Scrollable area (Limit display to 5 items).
+    - HELPER LINE: Simpler animation, 60% width, draggable.
 ]]
 
 local Players = game:GetService("Players")
@@ -11,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
 -- 1. SETUP GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -23,9 +24,14 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 -- KONFIGURASI TAMPILAN
-local DEFAULT_SIZE = UDim2.new(0, 500, 0, 300)
+-- Hitung ukuran 65% dari layar saat ini
+local Viewport = Camera.ViewportSize
+local StartWidth = math.clamp(Viewport.X * 0.65, 400, 800) -- Minimal 400px
+local StartHeight = math.clamp(Viewport.Y * 0.65, 280, 600) -- Minimal 280px
+
+local DEFAULT_SIZE = UDim2.new(0, StartWidth, 0, StartHeight)
 local MIN_SIZE = Vector2.new(380, 240)
-local MINIMIZED_SIZE = UDim2.new(0, 500, 0, 32)
+local MINIMIZED_SIZE = UDim2.new(0, StartWidth, 0, 32)
 
 -- Palette Warna
 local MAIN_BG = Color3.fromRGB(15, 15, 15)
@@ -38,7 +44,7 @@ local TEXT_DIM = Color3.fromRGB(120, 120, 120)
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = DEFAULT_SIZE
-MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
+MainFrame.Position = UDim2.new(0.5, 0, 0.45, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG
 MainFrame.BackgroundTransparency = 0.05
@@ -324,10 +330,15 @@ function CreateDropdown(parent, text, options, callback)
     Trigger.Text = ""
     Trigger.Parent = Frame
     
-    local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, -4, 0, 0)
+    -- CONTAINER SCROLLING (UPDATED)
+    local Container = Instance.new("ScrollingFrame")
+    Container.Name = "DropScroll"
+    Container.Size = UDim2.new(1, -4, 0, 0) -- Tinggi akan dianimasikan
     Container.Position = UDim2.new(0, 2, 0, 32)
     Container.BackgroundTransparency = 1
+    Container.BorderSizePixel = 0
+    Container.ScrollBarThickness = 2
+    Container.ScrollBarImageColor3 = ACCENT_COLOR
     Container.Parent = Frame
     
     local UIList = Instance.new("UIListLayout")
@@ -335,10 +346,18 @@ function CreateDropdown(parent, text, options, callback)
     UIList.SortOrder = Enum.SortOrder.LayoutOrder
     UIList.Parent = Container
     
+    -- Hitung Tinggi Konten
+    local itemHeight = 24
+    local maxVisibleItems = 5
+    local contentHeight = #options * (itemHeight + 2)
+    local viewHeight = math.min(contentHeight, maxVisibleItems * (itemHeight + 2))
+    
+    Container.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+
     local isOpen = false
     for _, opt in ipairs(options) do
         local B = Instance.new("TextButton")
-        B.Size = UDim2.new(1, 0, 0, 24)
+        B.Size = UDim2.new(1, -4, 0, itemHeight)
         B.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         B.Text = opt
         B.TextColor3 = TEXT_DIM
@@ -355,18 +374,20 @@ function CreateDropdown(parent, text, options, callback)
             pcall(callback, opt)
             isOpen = false
             TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, 0)}):Play()
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
         end)
     end
     
     Trigger.MouseButton1Click:Connect(function()
         isOpen = not isOpen
-        local h = (#options * 26) + 4
         if isOpen then
-            TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30 + h)}):Play()
+            TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30 + viewHeight + 4)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, viewHeight)}):Play()
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 180}):Play()
         else
             TweenService:Create(Frame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30)}):Play()
+            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, 0)}):Play()
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
         end
     end)
@@ -434,10 +455,10 @@ CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
     end
 end)
 
--- 8. CORE LOGIC (HELPER LINE, DRAG, MINIMIZE)
+-- 8. CORE LOGIC
 
--- [HELPER LINE]
-local HelperLine = Instance.new("TextButton") -- Diganti TextButton agar bisa detect input lebih baik
+-- [HELPER LINE - UPDATED: 60% Width, Simple Anim, Draggable]
+local HelperLine = Instance.new("TextButton")
 HelperLine.Name = "HelperLine"
 HelperLine.Text = ""
 HelperLine.BackgroundColor3 = ACCENT_COLOR
@@ -454,34 +475,30 @@ local function UpdateHelperLine()
     local centerX = mainPos.X + (mainSize.X / 2)
     local bottomY = mainPos.Y + mainSize.Y
     HelperLine.Position = UDim2.new(0, centerX, 0, bottomY + 4)
-    HelperLine.Size = UDim2.new(0, mainSize.X * 0.25, 0, 2)
+    -- LEBAR 60% (Simple Update)
+    HelperLine.Size = UDim2.new(0, mainSize.X * 0.6, 0, 3) 
 end
 MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateHelperLine)
 MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateHelperLine)
 UpdateHelperLine()
 
+-- Animasi Simple (Fade Only)
 HelperLine.MouseEnter:Connect(function()
-    TweenService:Create(HelperLine, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0, MainFrame.AbsoluteSize.X * 0.4, 0, 4), BackgroundTransparency = 0}):Play()
+    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
 end)
 HelperLine.MouseLeave:Connect(function()
-    TweenService:Create(HelperLine, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0, MainFrame.AbsoluteSize.X * 0.25, 0, 2), BackgroundTransparency = 0.6}):Play()
+    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0.6}):Play()
 end)
 
--- [DRAGGING LOGIC - UPDATED]
+-- [DRAGGING LOGIC]
 local dragging, dragStart, startPos
-
--- Fungsi mulai drag
 local function StartDrag(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
+        dragging = true; dragStart = input.Position; startPos = MainFrame.Position
     end
 end
-
--- Sambungkan ke Header DAN HelperLine
 Header.InputBegan:Connect(StartDrag)
-HelperLine.InputBegan:Connect(StartDrag)
+HelperLine.InputBegan:Connect(StartDrag) -- Bisa drag dari garis
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
