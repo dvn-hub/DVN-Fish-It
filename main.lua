@@ -7,12 +7,15 @@
     - UI: 100% Original Logic Restored (Drag & Minimize Fixed).
 ]]
 
+print("🚀 STARTING DVN HUB...")
+if not game:IsLoaded() then game.Loaded:Wait() end
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local Camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
 
 -- ====================================================================
 -- [SYSTEM] SMART REMOTE FINDER
@@ -68,7 +71,12 @@ end
 -- ====================================================================
 
 -- GUI PARENT SAFE
-local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
+local GUI_PARENT
+if typeof(gethui) == "function" then
+    GUI_PARENT = gethui()
+else
+    GUI_PARENT = LocalPlayer:WaitForChild("PlayerGui")
+end
 
 -- 1. SETUP GUI (ORIGINAL USER UI)
 if GUI_PARENT:FindFirstChild("DVN_HUB_FIXED") then
