@@ -233,6 +233,7 @@ for index, tabName in ipairs(Tabs) do
     BtnStroke.Color = LINE_COLOR
     BtnStroke.Transparency = 0.6
     BtnStroke.Thickness = 1
+    BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     BtnStroke.Parent = Btn
     
     Btn.MouseButton1Click:Connect(function()
@@ -277,6 +278,7 @@ function CreateButton(parent, text, callback)
     Stroke.Color = LINE_COLOR
     Stroke.Transparency = 0.6
     Stroke.Thickness = 1
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Stroke.Parent = Btn
     
     Btn.MouseButton1Click:Connect(function()
@@ -298,6 +300,7 @@ function CreateToggle(parent, text, callback)
     Stroke.Color = LINE_COLOR
     Stroke.Transparency = 0.6
     Stroke.Thickness = 1
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Stroke.Parent = Frame
     
     local Label = Instance.new("TextLabel")
