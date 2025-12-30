@@ -140,7 +140,7 @@ local StartHeight = math.clamp(Viewport.Y * 0.40, 250, 500)
 
 local DEFAULT_SIZE = UDim2.new(0, StartWidth, 0, StartHeight)
 local MIN_SIZE = Vector2.new(350, 240)
-local MINIMIZED_SIZE = UDim2.new(0, StartWidth, 0, 32)
+local MINIMIZED_SIZE = UDim2.new(0, 250, 0, 32)
 
 local MAIN_BG = Color3.fromRGB(15, 15, 15)
 local ELEMENT_BG = Color3.fromRGB(30, 30, 30)
