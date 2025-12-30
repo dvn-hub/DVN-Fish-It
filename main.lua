@@ -178,6 +178,7 @@ for index, tabName in ipairs(Tabs) do
     Page.BackgroundTransparency = 1
     Page.Visible = false
     Page.ScrollBarThickness = 2
+    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y -- PENTING: Agar bisa discroll dan konten muncul
     Page.ScrollBarImageColor3 = LINE_COLOR
     Page.Parent = Content
     
@@ -487,26 +488,24 @@ MinBtn.MouseButton1Click:Connect(function()
 end)
 
 -- B. Dragging (Header Only)
-local dragging, dragInput, dragStart, startPos
+local dragging = false
+local dragStart = Vector2.new()
+local startPos = UDim2.new()
+
 Header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
-        if input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
     end
 end)
-Header.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
+
 UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    if dragging then
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
