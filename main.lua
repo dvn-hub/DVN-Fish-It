@@ -1,9 +1,10 @@
 --[[ 
-    DVN HUB - FINAL REVISION
+    DVN HUB - FINAL VISIBILITY UPDATE
     Updates:
-    - RESPONSIVE: Panel size defaults to 65% of screen size.
-    - DROPDOWN: Added Scrollable area (Limit display to 5 items).
-    - HELPER LINE: Simpler animation, 60% width, draggable.
+    - DROPDOWN: Fixed text visibility (Now White/Bright).
+    - TELEPORT: Renamed "Waypoints" to "Island".
+    - HELPER LINE: Bold (5px) & Solid.
+    - RESPONSIVE: Defaults to 65% screen size.
 ]]
 
 local Players = game:GetService("Players")
@@ -24,10 +25,9 @@ ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 -- KONFIGURASI TAMPILAN
--- Hitung ukuran 65% dari layar saat ini
 local Viewport = Camera.ViewportSize
-local StartWidth = math.clamp(Viewport.X * 0.65, 400, 800) -- Minimal 400px
-local StartHeight = math.clamp(Viewport.Y * 0.65, 280, 600) -- Minimal 280px
+local StartWidth = math.clamp(Viewport.X * 0.65, 400, 800)
+local StartHeight = math.clamp(Viewport.Y * 0.65, 280, 600)
 
 local DEFAULT_SIZE = UDim2.new(0, StartWidth, 0, StartHeight)
 local MIN_SIZE = Vector2.new(380, 240)
@@ -37,8 +37,8 @@ local MINIMIZED_SIZE = UDim2.new(0, StartWidth, 0, 32)
 local MAIN_BG = Color3.fromRGB(15, 15, 15)
 local ELEMENT_BG = Color3.fromRGB(30, 30, 30)
 local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
-local TEXT_COLOR = Color3.fromRGB(240, 240, 240)
-local TEXT_DIM = Color3.fromRGB(120, 120, 120)
+local TEXT_COLOR = Color3.fromRGB(240, 240, 240) -- Putih Terang
+local TEXT_DIM = Color3.fromRGB(120, 120, 120)   -- Abu-abu
 
 -- 2. MAIN FRAME
 local MainFrame = Instance.new("Frame")
@@ -330,10 +330,9 @@ function CreateDropdown(parent, text, options, callback)
     Trigger.Text = ""
     Trigger.Parent = Frame
     
-    -- CONTAINER SCROLLING (UPDATED)
     local Container = Instance.new("ScrollingFrame")
     Container.Name = "DropScroll"
-    Container.Size = UDim2.new(1, -4, 0, 0) -- Tinggi akan dianimasikan
+    Container.Size = UDim2.new(1, -4, 0, 0)
     Container.Position = UDim2.new(0, 2, 0, 32)
     Container.BackgroundTransparency = 1
     Container.BorderSizePixel = 0
@@ -346,7 +345,6 @@ function CreateDropdown(parent, text, options, callback)
     UIList.SortOrder = Enum.SortOrder.LayoutOrder
     UIList.Parent = Container
     
-    -- Hitung Tinggi Konten
     local itemHeight = 24
     local maxVisibleItems = 5
     local contentHeight = #options * (itemHeight + 2)
@@ -360,7 +358,7 @@ function CreateDropdown(parent, text, options, callback)
         B.Size = UDim2.new(1, -4, 0, itemHeight)
         B.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         B.Text = opt
-        B.TextColor3 = TEXT_DIM
+        B.TextColor3 = TEXT_COLOR -- FIX: Ganti Warna jadi Putih agar Kelihatan
         B.Font = Enum.Font.Gotham
         B.TextSize = 11
         B.Parent = Container
@@ -432,7 +430,7 @@ CreateSection(TabFrames["Shop"], "Shop")
 CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
 
 -- [TELEPORT]
-CreateSection(TabFrames["Teleport"], "Waypoints")
+CreateSection(TabFrames["Teleport"], "Island") -- Update Judul: Island
 local Locations = {
     ["Ancient Jungle"] = Vector3.new(0, 0, 0), ["Ancient Ruin"] = Vector3.new(0, 0, 0),
     ["Christmas Cave"] = Vector3.new(0, 0, 0), ["Christmas Island"] = Vector3.new(0, 0, 0),
@@ -457,13 +455,13 @@ end)
 
 -- 8. CORE LOGIC
 
--- [HELPER LINE - UPDATED: 60% Width, Simple Anim, Draggable]
+-- [HELPER LINE - BOLDER (5px) & OPAQUE (0.3)]
 local HelperLine = Instance.new("TextButton")
 HelperLine.Name = "HelperLine"
 HelperLine.Text = ""
 HelperLine.BackgroundColor3 = ACCENT_COLOR
 HelperLine.BorderSizePixel = 0
-HelperLine.BackgroundTransparency = 0.6
+HelperLine.BackgroundTransparency = 0.3 -- Normal (Visible)
 HelperLine.AnchorPoint = Vector2.new(0.5, 0)
 HelperLine.Parent = ScreenGui
 HelperLine.ZIndex = MainFrame.ZIndex - 1
@@ -475,19 +473,18 @@ local function UpdateHelperLine()
     local centerX = mainPos.X + (mainSize.X / 2)
     local bottomY = mainPos.Y + mainSize.Y
     HelperLine.Position = UDim2.new(0, centerX, 0, bottomY + 4)
-    -- LEBAR 60% (Simple Update)
-    HelperLine.Size = UDim2.new(0, mainSize.X * 0.6, 0, 3) 
+    HelperLine.Size = UDim2.new(0, mainSize.X * 0.6, 0, 5) 
 end
 MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateHelperLine)
 MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateHelperLine)
 UpdateHelperLine()
 
--- Animasi Simple (Fade Only)
+-- Animasi Simple
 HelperLine.MouseEnter:Connect(function()
     TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
 end)
 HelperLine.MouseLeave:Connect(function()
-    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0.6}):Play()
+    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0.3}):Play()
 end)
 
 -- [DRAGGING LOGIC]
@@ -498,7 +495,7 @@ local function StartDrag(input)
     end
 end
 Header.InputBegan:Connect(StartDrag)
-HelperLine.InputBegan:Connect(StartDrag) -- Bisa drag dari garis
+HelperLine.InputBegan:Connect(StartDrag)
 
 UserInputService.InputChanged:Connect(function(input)
     if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
