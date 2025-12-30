@@ -54,6 +54,21 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 6)
 MainCorner.Parent = MainFrame
 
+-- DRAG BAR (HOME INDICATOR)
+local DragBar = Instance.new("Frame")
+DragBar.Name = "DragBar"
+DragBar.Size = UDim2.new(0, 100, 0, 4)
+DragBar.Position = UDim2.new(0.5, 0, 1, -8)
+DragBar.AnchorPoint = Vector2.new(0.5, 1)
+DragBar.BackgroundColor3 = LINE_COLOR
+DragBar.BackgroundTransparency = 0.5
+DragBar.BorderSizePixel = 0
+DragBar.Active = true
+DragBar.Parent = MainFrame
+local DragBarCorner = Instance.new("UICorner")
+DragBarCorner.CornerRadius = UDim.new(1, 0)
+DragBarCorner.Parent = DragBar
+
 -- 3. HEADER
 local Header = Instance.new("Frame")
 Header.Name = "Header"
@@ -252,6 +267,7 @@ function CreateToggle(parent, text, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 38)
     Frame.BackgroundColor3 = ELEMENT_BG
+    Frame.BackgroundTransparency = 1
     Frame.Parent = parent
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -381,18 +397,26 @@ end)
 
 -- B. Dragging (Header Only)
 local dragging, dragInput, dragStart, startPos
-Header.InputBegan:Connect(function(input)
+
+local function StartDrag(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
     end
-end)
-Header.InputChanged:Connect(function(input)
+end
+
+local function UpdateDragInput(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
-end)
+end
+
+Header.InputBegan:Connect(StartDrag)
+Header.InputChanged:Connect(UpdateDragInput)
+DragBar.InputBegan:Connect(StartDrag)
+DragBar.InputChanged:Connect(UpdateDragInput)
+
 UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         local delta = input.Position - dragStart
