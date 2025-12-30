@@ -1,10 +1,9 @@
 --[[ 
-    DVN HUB - MINIMALIST & FIXED VERSION
-    Updates:
-    - FIXED: Menu Bleeding (Text tembus saat minimize)
-    - FIXED: Visibility (Font lebih tebal/Bold)
-    - STYLE: Minimalist Components (Ukuran lebih kecil & rapi)
-    - FEATURE: Teleport Logic Template Ready
+    DVN HUB - FINAL COMPLETE VERSION
+    Features:
+    - DRAGGABLE HELPER LINE: Garis bawah sekarang bisa dipakai geser panel.
+    - TELEPORT: Full List Sorted A-Z
+    - UI: Minimalist, Bold, Anti-Bleeding
 ]]
 
 local Players = game:GetService("Players")
@@ -23,28 +22,28 @@ end
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- KONFIGURASI TAMPILAN (WARNA & UKURAN)
-local DEFAULT_SIZE = UDim2.new(0, 500, 0, 300) -- Ukuran standar
+-- KONFIGURASI TAMPILAN
+local DEFAULT_SIZE = UDim2.new(0, 500, 0, 300)
 local MIN_SIZE = Vector2.new(380, 240)
-local MINIMIZED_SIZE = UDim2.new(0, 500, 0, 32) -- Tinggi saat minimize
+local MINIMIZED_SIZE = UDim2.new(0, 500, 0, 32)
 
--- Palette Warna Gelap Minimalis
-local MAIN_BG = Color3.fromRGB(15, 15, 15)       -- Background Utama Gelap
-local ELEMENT_BG = Color3.fromRGB(30, 30, 30)    -- Background Tombol
-local ACCENT_COLOR = Color3.fromRGB(255, 255, 255) -- Warna Garis/Aksen
-local TEXT_COLOR = Color3.fromRGB(240, 240, 240) -- Warna Text Terang
-local TEXT_DIM = Color3.fromRGB(120, 120, 120)   -- Warna Text Mati
+-- Palette Warna
+local MAIN_BG = Color3.fromRGB(15, 15, 15)
+local ELEMENT_BG = Color3.fromRGB(30, 30, 30)
+local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
+local TEXT_COLOR = Color3.fromRGB(240, 240, 240)
+local TEXT_DIM = Color3.fromRGB(120, 120, 120)
 
--- 2. MAIN FRAME (WADAH UTAMA)
+-- 2. MAIN FRAME
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = DEFAULT_SIZE
 MainFrame.Position = UDim2.new(0.5, 0, 0.4, 0)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.BackgroundColor3 = MAIN_BG
-MainFrame.BackgroundTransparency = 0.05 -- Sedikit transparan tapi tetap gelap agar tulisan terbaca
+MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true -- PENTING: Mencegah text tembus keluar kotak
+MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
@@ -57,10 +56,10 @@ MainStroke.Transparency = 0.8
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
--- 3. HEADER (BAGIAN ATAS)
+-- 3. HEADER
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 32) -- Lebih tipis
+Header.Size = UDim2.new(1, 0, 0, 32)
 Header.BackgroundTransparency = 1
 Header.Parent = MainFrame
 
@@ -70,7 +69,7 @@ Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.TextColor3 = TEXT_COLOR
-Title.Font = Enum.Font.GothamBold -- Ganti Font jadi Bold agar jelas
+Title.Font = Enum.Font.GothamBold
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
@@ -94,7 +93,7 @@ HeaderLine.BackgroundTransparency = 0.8
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
--- 4. BODY & CONTENT CONTAINER
+-- 4. BODY & CONTENT
 local Body = Instance.new("Frame")
 Body.Name = "Body"
 Body.Size = UDim2.new(1, 0, 1, -32)
@@ -103,7 +102,6 @@ Body.BackgroundTransparency = 1
 Body.ClipsDescendants = true
 Body.Parent = MainFrame
 
--- Sidebar (Menu Kiri)
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0.28, 0, 1, 0)
 Sidebar.BackgroundTransparency = 1
@@ -119,7 +117,7 @@ local SidePad = Instance.new("UIPadding")
 SidePad.PaddingTop = UDim.new(0, 8)
 SidePad.Parent = Sidebar
 
-local SepLine = Instance.new("Frame") -- Garis Pemisah Vertikal
+local SepLine = Instance.new("Frame")
 SepLine.Size = UDim2.new(0, 1, 1, 0)
 SepLine.Position = UDim2.new(0.28, 0, 0, 0)
 SepLine.BackgroundColor3 = ACCENT_COLOR
@@ -127,7 +125,6 @@ SepLine.BackgroundTransparency = 0.8
 SepLine.BorderSizePixel = 0
 SepLine.Parent = Body
 
--- Content (Isi Kanan)
 local Content = Instance.new("Frame")
 Content.Size = UDim2.new(0.72, 0, 1, 0)
 Content.Position = UDim2.new(0.28, 0, 0, 0)
@@ -147,7 +144,7 @@ local function SwitchTab(activeName)
     for name, btn in pairs(TabButtons) do
         if name == activeName then
             btn.TextColor3 = TEXT_COLOR
-            btn.BackgroundTransparency = 0.9 -- Highlight aktif tipis
+            btn.BackgroundTransparency = 0.9
         else
             btn.TextColor3 = TEXT_DIM
             btn.BackgroundTransparency = 1
@@ -156,7 +153,6 @@ local function SwitchTab(activeName)
 end
 
 for i, name in ipairs(Tabs) do
-    -- Buat Halaman
     local Page = Instance.new("ScrollingFrame")
     Page.Name = name
     Page.Size = UDim2.new(1, -10, 1, -10)
@@ -170,7 +166,7 @@ for i, name in ipairs(Tabs) do
     Page.Parent = Content
     
     local PLayout = Instance.new("UIListLayout")
-    PLayout.Padding = UDim.new(0, 5) -- Jarak antar item lebih rapat (Minimalis)
+    PLayout.Padding = UDim.new(0, 5)
     PLayout.SortOrder = Enum.SortOrder.LayoutOrder
     PLayout.Parent = Page
     
@@ -182,15 +178,14 @@ for i, name in ipairs(Tabs) do
     
     TabFrames[name] = Page
     
-    -- Buat Tombol Sidebar
     local Btn = Instance.new("TextButton")
     Btn.Name = name
     Btn.LayoutOrder = i
-    Btn.Size = UDim2.new(1, -16, 0, 28) -- Tinggi tombol dikecilkan (32 -> 28)
+    Btn.Size = UDim2.new(1, -16, 0, 28)
     Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Btn.BackgroundTransparency = 1
     Btn.Text = name
-    Btn.Font = Enum.Font.GothamBold -- Font Bold
+    Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
     Btn.TextColor3 = TEXT_DIM
     Btn.Parent = Sidebar
@@ -203,14 +198,14 @@ for i, name in ipairs(Tabs) do
     TabButtons[name] = Btn
 end
 
--- 6. HELPER COMPONENTS (Minimalist Size)
+-- 6. HELPER COMPONENTS
 local function GetOrder(parent) return #parent:GetChildren() end
 
 function CreateSection(parent, text)
     local Lab = Instance.new("TextLabel")
     Lab.LayoutOrder = GetOrder(parent)
     Lab.Text = text:upper()
-    Lab.Size = UDim2.new(1, 0, 0, 24) -- Section lebih tipis
+    Lab.Size = UDim2.new(1, 0, 0, 24)
     Lab.BackgroundTransparency = 1
     Lab.TextColor3 = ACCENT_COLOR
     Lab.TextTransparency = 0.4
@@ -223,7 +218,7 @@ end
 function CreateButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
     Btn.LayoutOrder = GetOrder(parent)
-    Btn.Size = UDim2.new(1, 0, 0, 30) -- Tinggi tombol 30px (Minimalis)
+    Btn.Size = UDim2.new(1, 0, 0, 30)
     Btn.BackgroundColor3 = ELEMENT_BG
     Btn.Text = text
     Btn.TextColor3 = TEXT_COLOR
@@ -241,10 +236,9 @@ end
 function CreateToggle(parent, text, callback)
     local Frame = Instance.new("Frame")
     Frame.LayoutOrder = GetOrder(parent)
-    Frame.Size = UDim2.new(1, 0, 0, 30) -- Tinggi Toggle 30px
+    Frame.Size = UDim2.new(1, 0, 0, 30)
     Frame.BackgroundColor3 = ELEMENT_BG
     Frame.Parent = parent
-    
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
@@ -261,12 +255,11 @@ function CreateToggle(parent, text, callback)
     Lab.Parent = Frame
     
     local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Size = UDim2.new(0, 36, 0, 18) -- Switch lebih kecil
+    ToggleBtn.Size = UDim2.new(0, 36, 0, 18)
     ToggleBtn.Position = UDim2.new(1, -42, 0.5, -9)
     ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     ToggleBtn.Text = ""
     ToggleBtn.Parent = Frame
-    
     local TCorner = Instance.new("UICorner")
     TCorner.CornerRadius = UDim.new(1, 0)
     TCorner.Parent = ToggleBtn
@@ -276,7 +269,6 @@ function CreateToggle(parent, text, callback)
     Dot.Position = UDim2.new(0, 2, 0.5, -7)
     Dot.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
     Dot.Parent = ToggleBtn
-    
     local DCorner = Instance.new("UICorner")
     DCorner.CornerRadius = UDim.new(1, 0)
     DCorner.Parent = Dot
@@ -298,11 +290,10 @@ end
 function CreateDropdown(parent, text, options, callback)
     local Frame = Instance.new("Frame")
     Frame.LayoutOrder = GetOrder(parent)
-    Frame.Size = UDim2.new(1, 0, 0, 30) -- Tinggi Dropdown Awal 30px
+    Frame.Size = UDim2.new(1, 0, 0, 30)
     Frame.BackgroundColor3 = ELEMENT_BG
     Frame.ClipsDescendants = true
     Frame.Parent = parent
-    
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
@@ -347,14 +338,13 @@ function CreateDropdown(parent, text, options, callback)
     local isOpen = false
     for _, opt in ipairs(options) do
         local B = Instance.new("TextButton")
-        B.Size = UDim2.new(1, 0, 0, 24) -- Tinggi pilihan item 24px
+        B.Size = UDim2.new(1, 0, 0, 24)
         B.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         B.Text = opt
         B.TextColor3 = TEXT_DIM
         B.Font = Enum.Font.Gotham
         B.TextSize = 11
         B.Parent = Container
-        
         local C = Instance.new("UICorner")
         C.CornerRadius = UDim.new(0, 3)
         C.Parent = B
@@ -382,123 +372,148 @@ function CreateDropdown(parent, text, options, callback)
     end)
 end
 
--- 7. LOGIC & ISI KONTEN
+-- 7. KONTEN
 
 -- [INFO]
 CreateSection(TabFrames["Info"], "About")
 local InfoTxt = Instance.new("TextLabel")
+InfoTxt.LayoutOrder = GetOrder(TabFrames["Info"])
 InfoTxt.Text = "Thank you for using DVN Hub!\nThis tool is created to enhance your experience and make your gameplay easier.\n\nUse this tool at your own risk. DVN Team is not responsible for any misuse or consequences.\n\nBrought to you with care by DVN.\nEnjoy and have fun!"
-InfoTxt.Size = UDim2.new(1, 0, 0, 140)
+InfoTxt.Size = UDim2.new(1, 0, 0, 120)
 InfoTxt.BackgroundTransparency = 1
 InfoTxt.TextColor3 = TEXT_DIM
 InfoTxt.Font = Enum.Font.GothamBold
 InfoTxt.TextSize = 11
 InfoTxt.TextXAlignment = Enum.TextXAlignment.Left
+InfoTxt.TextWrapped = true
 InfoTxt.Parent = TabFrames["Info"]
 
 CreateSection(TabFrames["Info"], "Official Discord DVN!")
-local DiscordTxt = Instance.new("TextLabel")
-DiscordTxt.Text = "Join Us!"
-DiscordTxt.Size = UDim2.new(1, 0, 0, 20)
-DiscordTxt.BackgroundTransparency = 1
-DiscordTxt.TextColor3 = TEXT_DIM
-DiscordTxt.Font = Enum.Font.Gotham
-DiscordTxt.TextSize = 10
-DiscordTxt.TextXAlignment = Enum.TextXAlignment.Left
-DiscordTxt.Parent = TabFrames["Info"]
+local JoinUsTxt = Instance.new("TextLabel")
+JoinUsTxt.LayoutOrder = GetOrder(TabFrames["Info"])
+JoinUsTxt.Text = "Join Us!"
+JoinUsTxt.Size = UDim2.new(1, 0, 0, 15)
+JoinUsTxt.BackgroundTransparency = 1
+JoinUsTxt.TextColor3 = TEXT_DIM
+JoinUsTxt.Font = Enum.Font.Gotham
+JoinUsTxt.TextSize = 10
+JoinUsTxt.TextXAlignment = Enum.TextXAlignment.Left
+JoinUsTxt.Parent = TabFrames["Info"]
 
--- [FISHING]
+CreateButton(TabFrames["Info"], "Copy Discord Link", function()
+    setclipboard("https://discord.gg/YOUR_DISCORD_LINK") 
+end)
+
+-- [FISHING & SHOP]
 CreateSection(TabFrames["Fishing"], "Main")
 CreateToggle(TabFrames["Fishing"], "Auto Fish", function(v) end)
-
--- [SHOP]
 CreateSection(TabFrames["Shop"], "Shop")
 CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
 
--- [TELEPORT LOGIC - ISI KOORDINAT DI SINI]
+-- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Waypoints")
-
--- 1. ISI NAMA TEMPAT DI SINI
-local PlaceNames = {
-    "Christmas Island", 
-    "Fisherman Island", 
-    "Ocean",
-    "Kohana",
-    "Coral Reefs"
-}
-
--- 2. ISI KOORDINAT (X, Y, Z) DI SINI
 local Locations = {
-    ["Christmas Island"] = Vector3.new(0, 0, 0), -- Ganti 0,0,0 dengan koordinat asli
-    ["Fisherman Island"] = Vector3.new(100, 50, 100),
-    ["Ocean"]            = Vector3.new(-50, 10, -50),
-    ["Kohana"]           = Vector3.new(200, 50, 200),
-    ["Coral Reefs"]      = Vector3.new(300, 10, 300)
+    ["Ancient Jungle"] = Vector3.new(0, 0, 0), ["Ancient Ruin"] = Vector3.new(0, 0, 0),
+    ["Christmas Cave"] = Vector3.new(0, 0, 0), ["Christmas Island"] = Vector3.new(0, 0, 0),
+    ["Coral Reefs"] = Vector3.new(0, 0, 0), ["Crater Island"] = Vector3.new(0, 0, 0),
+    ["Esotoric Depths"] = Vector3.new(0, 0, 0), ["Fisherman Island"] = Vector3.new(0, 0, 0),
+    ["Kohana"] = Vector3.new(0, 0, 0), ["Kohana Volcano"] = Vector3.new(0, 0, 0),
+    ["Sacred Temple"] = Vector3.new(0, 0, 0), ["Sisyphus Statue"] = Vector3.new(0, 0, 0),
+    ["Treasure Room"] = Vector3.new(0, 0, 0), ["Tropical Grove"] = Vector3.new(0, 0, 0),
+    ["Underground Cellar"] = Vector3.new(0, 0, 0)
 }
+local PlaceNames = {}
+for name, _ in pairs(Locations) do table.insert(PlaceNames, name) end
+table.sort(PlaceNames)
 
 local selectedPlace = nil
-
-CreateDropdown(TabFrames["Teleport"], "Select Location", PlaceNames, function(val)
-    selectedPlace = val
-end)
-
-CreateButton(TabFrames["Teleport"], "Teleport Now", function()
-    if selectedPlace and Locations[selectedPlace] then
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Locations[selectedPlace])
-        end
-    else
-        print("Koordinat belum diisi!")
+CreateDropdown(TabFrames["Teleport"], "Select Location", PlaceNames, function(val) selectedPlace = val end)
+CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
+    if selectedPlace and Locations[selectedPlace] and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(Locations[selectedPlace])
     end
 end)
 
--- 8. WINDOW LOGIC (MINIMIZE & RESIZE FIXED)
+-- 8. CORE LOGIC (HELPER LINE, DRAG, MINIMIZE)
 
--- Minimize Logic
-local isMin = false
-local lastSize = DEFAULT_SIZE
+-- [HELPER LINE]
+local HelperLine = Instance.new("TextButton") -- Diganti TextButton agar bisa detect input lebih baik
+HelperLine.Name = "HelperLine"
+HelperLine.Text = ""
+HelperLine.BackgroundColor3 = ACCENT_COLOR
+HelperLine.BorderSizePixel = 0
+HelperLine.BackgroundTransparency = 0.6
+HelperLine.AnchorPoint = Vector2.new(0.5, 0)
+HelperLine.Parent = ScreenGui
+HelperLine.ZIndex = MainFrame.ZIndex - 1
 
-MinBtn.MouseButton1Click:Connect(function()
-    if isMin then
-        -- Expand
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = lastSize}):Play()
-        Body.Visible = true -- PENTING: Munculkan isi kembali
-        MinBtn.Text = "-"
-    else
-        -- Minimize
-        lastSize = MainFrame.Size
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = MINIMIZED_SIZE}):Play()
-        Body.Visible = false -- PENTING: Sembunyikan isi agar tidak tembus
-        MinBtn.Text = "+"
-    end
-    isMin = not isMin
+local function UpdateHelperLine()
+    if not MainFrame or not MainFrame.Parent then return end
+    local mainPos = MainFrame.AbsolutePosition
+    local mainSize = MainFrame.AbsoluteSize
+    local centerX = mainPos.X + (mainSize.X / 2)
+    local bottomY = mainPos.Y + mainSize.Y
+    HelperLine.Position = UDim2.new(0, centerX, 0, bottomY + 4)
+    HelperLine.Size = UDim2.new(0, mainSize.X * 0.25, 0, 2)
+end
+MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateHelperLine)
+MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateHelperLine)
+UpdateHelperLine()
+
+HelperLine.MouseEnter:Connect(function()
+    TweenService:Create(HelperLine, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0, MainFrame.AbsoluteSize.X * 0.4, 0, 4), BackgroundTransparency = 0}):Play()
+end)
+HelperLine.MouseLeave:Connect(function()
+    TweenService:Create(HelperLine, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0, MainFrame.AbsoluteSize.X * 0.25, 0, 2), BackgroundTransparency = 0.6}):Play()
 end)
 
--- Dragging Logic
+-- [DRAGGING LOGIC - UPDATED]
 local dragging, dragStart, startPos
-Header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+-- Fungsi mulai drag
+local function StartDrag(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
     end
-end)
+end
+
+-- Sambungkan ke Header DAN HelperLine
+Header.InputBegan:Connect(StartDrag)
+HelperLine.InputBegan:Connect(StartDrag)
+
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- Resize Logic
+-- [MINIMIZE & RESIZE]
+local isMin, lastSize = false, DEFAULT_SIZE
+MinBtn.MouseButton1Click:Connect(function()
+    if isMin then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = lastSize}):Play()
+        Body.Visible = true
+        MinBtn.Text = "-"
+    else
+        lastSize = MainFrame.Size
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = MINIMIZED_SIZE}):Play()
+        Body.Visible = false
+        MinBtn.Text = "+"
+    end
+    isMin = not isMin
+end)
+
 local ResizeBtn = Instance.new("ImageButton")
 ResizeBtn.Size = UDim2.new(0, 15, 0, 15)
 ResizeBtn.Position = UDim2.new(1, -15, 1, -15)
 ResizeBtn.BackgroundTransparency = 1
-ResizeBtn.Image = "rbxassetid://3599185146" -- Icon Segitiga
+ResizeBtn.Image = "rbxassetid://3599185146"
 ResizeBtn.ImageTransparency = 0.5
 ResizeBtn.ImageColor3 = ACCENT_COLOR
 ResizeBtn.Parent = MainFrame
@@ -506,17 +521,13 @@ ResizeBtn.Parent = MainFrame
 local resizing, resizeStart, startSize
 ResizeBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        resizeStart = input.Position
-        startSize = MainFrame.AbsoluteSize
+        resizing = true; resizeStart = input.Position; startSize = MainFrame.AbsoluteSize
     end
 end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
         local delta = input.Position - resizeStart
-        local newX = math.max(MIN_SIZE.X, startSize.X + delta.X)
-        local newY = math.max(MIN_SIZE.Y, startSize.Y + delta.Y)
-        MainFrame.Size = UDim2.new(0, newX, 0, newY)
+        MainFrame.Size = UDim2.new(0, math.max(MIN_SIZE.X, startSize.X + delta.X), 0, math.max(MIN_SIZE.Y, startSize.Y + delta.Y))
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
