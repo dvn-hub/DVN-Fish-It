@@ -1,8 +1,10 @@
 --[[ 
-    DVN HUB - FINAL 50% LINE (ARES ROD ADDED)
+    DVN HUB - KING'S EDITION (FINAL FIXED)
+    Based on: The Verified "Working" Script (50% Line UI).
     Updates:
-    - NEW ITEM: Ares Rod (ID 126) added to Shop.
-    - LOGIC: Remote Scanner + Number Method (Verified).
+    - BAIT SHOP: Now uses Dropdown (Floral, Midnight, Topwater, Luck).
+    - LOGIC: Fixed Bait Purchase (Sends Quantity 1).
+    - UI: 100% Original Logic Restored (Drag & Minimize Fixed).
 ]]
 
 local Players = game:GetService("Players")
@@ -13,7 +15,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 -- ====================================================================
--- [SYSTEM] SMART REMOTE FINDER (MESIN SCANNER)
+-- [SYSTEM] SMART REMOTE FINDER
 -- ====================================================================
 local CachedRemotes = {}
 
@@ -25,7 +27,7 @@ local function GetRemote(remoteName)
         for _, v in pairs(packages:GetDescendants()) do
             if v:IsA("RemoteFunction") then
                 if v.Name == remoteName or v.Name == "RF/" .. remoteName then
-                    print("✅ DVN SYSTEM: Remote ketemu ->", v.Name)
+                    print("✅ REMOTE CONNECTED:", v.Name)
                     CachedRemotes[remoteName] = v
                     return v
                 end
@@ -39,24 +41,28 @@ local function InvokeShop(remoteName, itemId)
     local remote = GetRemote(remoteName)
     
     if remote and itemId then
-        print("🛒 MENGIRIM ID:", itemId, "...")
+        print("🛒 PROCESSING ID:", itemId)
         
         task.spawn(function()
             local success, res = pcall(function()
-                return remote:InvokeServer(itemId)
+                -- [FIX] Logic khusus Bait harus kirim jumlah 1
+                if remoteName == "PurchaseBait" or remoteName == "RF/PurchaseBait" then
+                    return remote:InvokeServer(tonumber(itemId), 1) 
+                else
+                    return remote:InvokeServer(tonumber(itemId))
+                end
             end)
             
             if success and res == true then
-                print("✅ SUKSES! Barang terbeli.")
+                print("✅ SUKSES TERBELI!")
             elseif success then
-                warn("⚠️ GAGAL BELI (Server menolak):", tostring(res))
-                warn("   (Cek: Uang cukup? Level cukup?)")
+                warn("⚠️ DITOLAK SERVER (Cek Uang/Stok):", tostring(res))
             else
                 warn("❌ ERROR SCRIPT:", res)
             end
         end)
     else
-        warn("❌ FATAL: Remote belum siap atau tidak ditemukan.")
+        warn("❌ Remote belum siap.")
     end
 end
 -- ====================================================================
@@ -81,7 +87,7 @@ local DEFAULT_SIZE = UDim2.new(0, StartWidth, 0, StartHeight)
 local MIN_SIZE = Vector2.new(380, 240)
 local MINIMIZED_SIZE = UDim2.new(0, StartWidth, 0, 32)
 
--- Palette Warna
+-- Palette
 local MAIN_BG = Color3.fromRGB(15, 15, 15)
 local ELEMENT_BG = Color3.fromRGB(30, 30, 30)
 local ACCENT_COLOR = Color3.fromRGB(255, 255, 255)
@@ -279,11 +285,9 @@ function CreateButton(parent, text, callback)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
     Btn.Parent = parent
-    
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Btn
-    
     Btn.MouseButton1Click:Connect(function() pcall(callback) end)
 end
 
@@ -296,7 +300,6 @@ function CreateToggle(parent, text, callback)
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
-    
     local Lab = Instance.new("TextLabel")
     Lab.Text = text
     Lab.Size = UDim2.new(0.7, 0, 1, 0)
@@ -307,7 +310,6 @@ function CreateToggle(parent, text, callback)
     Lab.TextSize = 12
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = Frame
-    
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Size = UDim2.new(0, 36, 0, 18)
     ToggleBtn.Position = UDim2.new(1, -42, 0.5, -9)
@@ -317,7 +319,6 @@ function CreateToggle(parent, text, callback)
     local TCorner = Instance.new("UICorner")
     TCorner.CornerRadius = UDim.new(1, 0)
     TCorner.Parent = ToggleBtn
-    
     local Dot = Instance.new("Frame")
     Dot.Size = UDim2.new(0, 14, 0, 14)
     Dot.Position = UDim2.new(0, 2, 0.5, -7)
@@ -326,7 +327,6 @@ function CreateToggle(parent, text, callback)
     local DCorner = Instance.new("UICorner")
     DCorner.CornerRadius = UDim.new(1, 0)
     DCorner.Parent = Dot
-    
     local on = false
     ToggleBtn.MouseButton1Click:Connect(function()
         on = not on
@@ -351,7 +351,6 @@ function CreateDropdown(parent, text, options, callback)
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
-    
     local Lab = Instance.new("TextLabel")
     Lab.Text = text
     Lab.Size = UDim2.new(0.6, 0, 0, 30)
@@ -362,7 +361,6 @@ function CreateDropdown(parent, text, options, callback)
     Lab.TextSize = 12
     Lab.TextXAlignment = Enum.TextXAlignment.Left
     Lab.Parent = Frame
-    
     local Arrow = Instance.new("TextLabel")
     Arrow.Text = "▼"
     Arrow.Size = UDim2.new(0, 30, 0, 30)
@@ -371,13 +369,11 @@ function CreateDropdown(parent, text, options, callback)
     Arrow.TextColor3 = TEXT_DIM
     Arrow.TextSize = 10
     Arrow.Parent = Frame
-    
     local Trigger = Instance.new("TextButton")
     Trigger.Size = UDim2.new(1, 0, 0, 30)
     Trigger.BackgroundTransparency = 1
     Trigger.Text = ""
     Trigger.Parent = Frame
-    
     local Container = Instance.new("ScrollingFrame")
     Container.Name = "DropScroll"
     Container.Size = UDim2.new(1, -4, 0, 0)
@@ -387,19 +383,15 @@ function CreateDropdown(parent, text, options, callback)
     Container.ScrollBarThickness = 2
     Container.ScrollBarImageColor3 = ACCENT_COLOR
     Container.Parent = Frame
-    
     local UIList = Instance.new("UIListLayout")
     UIList.Padding = UDim.new(0, 2)
     UIList.SortOrder = Enum.SortOrder.LayoutOrder
     UIList.Parent = Container
-    
     local itemHeight = 24
     local maxVisibleItems = 5
     local contentHeight = #options * (itemHeight + 2)
     local viewHeight = math.min(contentHeight, maxVisibleItems * (itemHeight + 2))
-    
     Container.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
-
     local isOpen = false
     for _, opt in ipairs(options) do
         local B = Instance.new("TextButton")
@@ -413,7 +405,6 @@ function CreateDropdown(parent, text, options, callback)
         local C = Instance.new("UICorner")
         C.CornerRadius = UDim.new(0, 3)
         C.Parent = B
-        
         B.MouseButton1Click:Connect(function()
             Lab.Text = text .. ": " .. opt
             Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -424,7 +415,6 @@ function CreateDropdown(parent, text, options, callback)
             TweenService:Create(Arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
         end)
     end
-    
     Trigger.MouseButton1Click:Connect(function()
         isOpen = not isOpen
         if isOpen then
@@ -475,20 +465,20 @@ end)
 CreateSection(TabFrames["Fishing"], "Main")
 CreateToggle(TabFrames["Fishing"], "Auto Fish", function(v) end)
 
--- === SHOP SECTION (ARES ROD ADDED) ===
+-- === SHOP SECTION (ROD) ===
 CreateSection(TabFrames["Shop"], "Rod Shop")
 
 local RodList = {
-    ["Ares Rod"] = 126,    -- NEW ITEM
-    ["Demascus Rod"] = 77, -- PREV ITEM
-    ["Chrome Rod"] = 7     -- PREV ITEM
+    ["Ares Rod"] = 126,
+    ["Demascus Rod"] = 77,
+    ["Chrome Rod"] = 7
 }
 
 local RodNames = {}
 for name, _ in pairs(RodList) do table.insert(RodNames, name) end
 table.sort(RodNames)
 
-local selectedRod = "Ares Rod" -- AUTO SELECT ARES
+local selectedRod = "Ares Rod" 
 
 CreateDropdown(TabFrames["Shop"], "Select Rod", RodNames, function(val)
     selectedRod = val
@@ -501,14 +491,39 @@ CreateButton(TabFrames["Shop"], "Buy Selected Rod", function()
         warn("⚠️ Pilih rod dulu!")
     end
 end)
--- ============================================
 
+-- === BAIT SHOP (UPDATED: DROPDOWN) ===
 CreateSection(TabFrames["Shop"], "Bait Shop")
-CreateToggle(TabFrames["Shop"], "Auto Buy Bait", function(v) end)
+
+-- Daftar Bait
+local BaitList = {
+    ["Floral Bait"] = 20, -- ID 20 (Hidden)
+    ["Midnight Bait"] = 3, -- ID 3
+    ["Topwater Bait"] = 10, -- ID 10
+    ["Luck Bait"] = 2 -- ID 2
+}
+
+local BaitNames = {}
+for name, _ in pairs(BaitList) do table.insert(BaitNames, name) end
+table.sort(BaitNames)
+
+local selectedBait = "Topwater Bait"
+
+CreateDropdown(TabFrames["Shop"], "Select Bait", BaitNames, function(val)
+    selectedBait = val
+end)
+
+CreateButton(TabFrames["Shop"], "Buy Selected Bait", function()
+    if selectedBait and BaitList[selectedBait] then
+        InvokeShop("PurchaseBait", BaitList[selectedBait])
+    else
+        warn("⚠️ Pilih bait dulu!")
+    end
+end)
+-- (Auto Buy Button dihapus)
 
 -- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Island")
--- KOORDINAT LENGKAP
 local Locations = {
     ["Ancient Jungle"]     = Vector3.new(1472.61, 4.79, -331.18),
     ["Ancient Ruin"]       = Vector3.new(6046.77, -588.60, 4611.83),
@@ -539,23 +554,18 @@ CreateButton(TabFrames["Teleport"], "Teleport to Location", function()
     end
 end)
 
--- 8. CORE LOGIC
+-- 8. CORE LOGIC (DRAG & HELPER LINE)
 
--- [HELPER LINE - OVAL/PILL & AUTO HIDE & 50% WIDTH]
 local HelperLine = Instance.new("TextButton")
 HelperLine.Name = "HelperLine"
 HelperLine.Text = ""
 HelperLine.BackgroundColor3 = ACCENT_COLOR
 HelperLine.BorderSizePixel = 0
-HelperLine.BackgroundTransparency = 0.3 -- Normal (Visible)
+HelperLine.BackgroundTransparency = 0.3
 HelperLine.AnchorPoint = Vector2.new(0.5, 0)
 HelperLine.Parent = ScreenGui
 HelperLine.ZIndex = MainFrame.ZIndex - 1
-
--- OVAL SHAPE (PILL)
-local HCorner = Instance.new("UICorner")
-HCorner.CornerRadius = UDim.new(1, 0) 
-HCorner.Parent = HelperLine
+Instance.new("UICorner", HelperLine).CornerRadius = UDim.new(1, 0)
 
 local function UpdateHelperLine()
     if not MainFrame or not MainFrame.Parent then return end
@@ -564,22 +574,15 @@ local function UpdateHelperLine()
     local centerX = mainPos.X + (mainSize.X / 2)
     local bottomY = mainPos.Y + mainSize.Y
     HelperLine.Position = UDim2.new(0, centerX, 0, bottomY + 4)
-    -- LEBAR 50%
     HelperLine.Size = UDim2.new(0, mainSize.X * 0.5, 0, 5) 
 end
 MainFrame:GetPropertyChangedSignal("AbsolutePosition"):Connect(UpdateHelperLine)
 MainFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateHelperLine)
 UpdateHelperLine()
 
--- Animasi Simple
-HelperLine.MouseEnter:Connect(function()
-    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
-end)
-HelperLine.MouseLeave:Connect(function()
-    TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0.3}):Play()
-end)
+HelperLine.MouseEnter:Connect(function() TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play() end)
+HelperLine.MouseLeave:Connect(function() TweenService:Create(HelperLine, TweenInfo.new(0.2), {BackgroundTransparency = 0.3}):Play() end)
 
--- [DRAGGING LOGIC]
 local dragging, dragStart, startPos
 local function StartDrag(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -599,22 +602,15 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
 end)
 
--- [MINIMIZE & RESIZE (With Auto Hide Helper Line)]
 local isMin, lastSize = false, DEFAULT_SIZE
 MinBtn.MouseButton1Click:Connect(function()
     if isMin then
-        -- Expand
         TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = lastSize}):Play()
-        Body.Visible = true
-        HelperLine.Visible = true -- SHOW HELPER LINE
-        MinBtn.Text = "-"
+        Body.Visible = true; HelperLine.Visible = true; MinBtn.Text = "-"
     else
-        -- Minimize
         lastSize = MainFrame.Size
         TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = MINIMIZED_SIZE}):Play()
-        Body.Visible = false
-        HelperLine.Visible = false -- HIDE HELPER LINE
-        MinBtn.Text = "+"
+        Body.Visible = false; HelperLine.Visible = false; MinBtn.Text = "+"
     end
     isMin = not isMin
 end)
