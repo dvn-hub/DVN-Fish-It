@@ -128,6 +128,7 @@ end
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DVN_HUB_FIXED"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.DisplayOrder = 10000
 ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
 
