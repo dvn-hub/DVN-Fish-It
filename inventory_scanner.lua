@@ -146,25 +146,6 @@ local function GetItems()
             items[name] = (items[name] or 0) + qty
         end
     end
-    
-    -- Helper: Get Full Name with Variant (e.g. "Shiny Catfish")
-    local function getFullFishName(tile)
-        local nameLabel = tile:FindFirstChild("ItemName")
-        if not nameLabel or not nameLabel:IsA("TextLabel") then return nil end
-        
-        local name = nameLabel.Text
-        if name == "Item Name" or name == "Fish Name" or name == "" then return nil end
-
-        -- Check for Variant (Sibling or Child)
-        local variant = tile:FindFirstChild("Variant")
-        if variant then
-            local varLabel = variant:FindFirstChild("ItemName")
-            if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
-                name = varLabel.Text .. " " .. name
-            end
-        end
-        return name
-    end
 
     -- 1. Scan Standard Backpack (Tools)
     local function scanTools(loc)
@@ -178,32 +159,33 @@ local function GetItems()
     if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
     if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
-    -- 2. Scan PlayerGui UI (Specific Paths from Debug)
+    -- 2. Scan PlayerGui UI (Deep Scan - Like Debug Script)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
-        -- Path A: Main Inventory
-        -- Path: PlayerGui.Inventory.Main.Content.Pages.Inventory.Tile
-        local inv = pGui:FindFirstChild("Inventory")
-        if inv and inv:FindFirstChild("Main") and inv.Main:FindFirstChild("Content") then
-            local pages = inv.Main.Content:FindFirstChild("Pages")
-            if pages and pages:FindFirstChild("Inventory") then
-                for _, tile in pairs(pages.Inventory:GetChildren()) do
-                    local fullName = getFullFishName(tile)
-                    if fullName then add(fullName) end
-                end
-            end
-        end
-
-        -- Path B: Backpack Hotbar
-        -- Path: PlayerGui.Backpack.Display.Tile.Inner.Tags.ItemName
-        local backpack = pGui:FindFirstChild("Backpack")
-        if backpack and backpack:FindFirstChild("Display") then
-            for _, tile in pairs(backpack.Display:GetChildren()) do
-                local inner = tile:FindFirstChild("Inner")
-                if inner and inner:FindFirstChild("Tags") then
-                    local nameLabel = inner.Tags:FindFirstChild("ItemName")
-                    if nameLabel and nameLabel:IsA("TextLabel") and nameLabel.Text ~= "" then
-                        add(nameLabel.Text)
+        -- Kita scan Inventory dan Backpack UI secara menyeluruh
+        local targets = {pGui:FindFirstChild("Inventory"), pGui:FindFirstChild("Backpack")}
+        
+        for _, gui in ipairs(targets) do
+            if gui then
+                for _, v in pairs(gui:GetDescendants()) do
+                    -- Cari TextLabel bernama ItemName atau FishName
+                    if v:IsA("TextLabel") and (v.Name == "ItemName" or v.Name == "FishName") then
+                        if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
+                            local parent = v.Parent
+                            -- Pastikan ini bukan label varian (kita ambil varian dari label utama)
+                            if parent.Name ~= "Variant" then
+                                local fullName = v.Text
+                                -- Cek apakah ada folder Variant di sebelahnya (Struktur: Tile -> Variant -> ItemName)
+                                local variant = parent:FindFirstChild("Variant")
+                                if variant then
+                                    local varLabel = variant:FindFirstChild("ItemName")
+                                    if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
+                                        fullName = varLabel.Text .. " " .. fullName
+                                    end
+                                end
+                                add(fullName)
+                            end
+                        end
                     end
                 end
             end
@@ -239,44 +221,40 @@ local function UpdateList()
         if v:IsA("Frame") then v:Destroy() end
     end
     
-    -- [AUTO-OPEN] Use Key 3 to open inventory
-    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-    local wasVisible = false
+    Title.Text = "SCANNING..."
     
-    -- Check if inventory is already visible
-    if pGui and pGui:FindFirstChild("Inventory") and pGui.Inventory:FindFirstChild("Main") then
-        wasVisible = pGui.Inventory.Main.Visible
-    end
+    -- Cek dulu apakah item sudah ada (tanpa buka tas)
+    local initialData = GetItems()
+    local initialCount = 0
+    for _ in pairs(initialData) do initialCount = initialCount + 1 end
     
-    if not wasVisible then
-        Title.Text = "SCANNING..."
-        -- Press 3
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        
-        -- Wait for load (Smart Wait)
-        for i = 1, 30 do -- Max 3 seconds
-            local tempItems = GetItems()
-            local count = 0
-            for _ in pairs(tempItems) do count = count + 1 end
-            if count > 2 then -- Found items (more than just rod)
-                task.wait(0.2) -- Small buffer
-                break 
-            end
+    -- Jika item sedikit (mungkin cuma tools), coba buka tas dengan tombol 3
+    if initialCount <= 3 then
+        -- Tekan 3 (Buka)
+        pcall(function()
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
             task.wait(0.1)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        end)
+        
+        -- Tunggu sampai item bertambah (Max 2.5 detik)
+        for i = 1, 25 do
+            task.wait(0.1)
+            local check = GetItems()
+            local c = 0
+            for _ in pairs(check) do c = c + 1 end
+            if c > initialCount then break end -- Item baru ditemukan!
         end
+        
+        -- Tekan 3 lagi (Tutup)
+        pcall(function()
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+            task.wait(0.1)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        end)
     end
 
     local data = GetItems()
-    
-    -- [RESTORE] Close inventory if we opened it
-    if not wasVisible then
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-    end
-
     local sortedNames = {}
     for name, _ in pairs(data) do table.insert(sortedNames, name) end
     table.sort(sortedNames)
