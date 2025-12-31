@@ -198,9 +198,12 @@ local function GetItems()
         local inv = pGui:FindFirstChild("Inventory")
         if inv and inv:FindFirstChild("Main") and inv.Main:FindFirstChild("Content") then
             local pages = inv.Main.Content:FindFirstChild("Pages")
-            if pages and pages:FindFirstChild("Inventory") then
-                for _, tile in pairs(pages.Inventory:GetChildren()) do
-                    scanTile(tile)
+            if pages then
+                -- Scan semua halaman (Inventory, Fish, dll) untuk memastikan ikan terbaca
+                for _, page in pairs(pages:GetChildren()) do
+                    for _, tile in pairs(page:GetChildren()) do
+                        scanTile(tile)
+                    end
                 end
             end
         end
@@ -286,6 +289,18 @@ local function UpdateList()
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
         end
         
+        -- [FIX] KLIK TAB "FISH" (Penting agar ikan muncul, bukan item lain)
+        local fishTab = nil
+        if invGui then
+            for _, v in pairs(invGui:GetDescendants()) do
+                if (v:IsA("TextButton") or v:IsA("ImageButton")) and (v.Name == "Fish" or (v:IsA("TextButton") and v.Text == "Fish")) and v.Visible then
+                    fishTab = v
+                    break
+                end
+            end
+        end
+        if fishTab then clickGui(fishTab) end
+
         -- Tunggu sampai item bertambah (Max 2.5 detik)
         for i = 1, 25 do
             task.wait(0.1)
