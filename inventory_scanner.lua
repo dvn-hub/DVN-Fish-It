@@ -218,26 +218,34 @@ local function UpdateList()
         local targetGUIs = {"Backpack", "Inventory", "Bag", "FishInventory", "PlayerInventory"}
         for _, name in ipairs(targetGUIs) do
             local gui = pGui:FindFirstChild(name)
-            if gui then
-                -- 1. Enable ScreenGui if disabled
+            if gui and gui:IsA("ScreenGui") then
+                -- Cek apakah GUI sedang tertutup
                 if not gui.Enabled then
+                    -- 1. Nyalakan GUI
                     gui.Enabled = true
                     table.insert(forcedOpen, {Obj = gui, Type = "Gui"})
-                end
-                -- 2. Show Frames if hidden (Move off-screen)
-                for _, child in pairs(gui:GetChildren()) do
-                    if child:IsA("Frame") and not child.Visible then
-                        local oldPos = child.Position
-                        child.Position = UDim2.new(10, 0, 10, 0) -- Move far away
-                        child.Visible = true
-                        table.insert(forcedOpen, {Obj = child, Type = "Frame", OldPos = oldPos})
+                    
+                    -- 2. Pindahkan semua Frame ke luar layar (agar invisible tapi aktif)
+                    for _, child in pairs(gui:GetChildren()) do
+                        if child:IsA("Frame") then
+                            local oldPos = child.Position
+                            local oldVis = child.Visible
+                            
+                            child.Position = UDim2.new(10, 0, 10, 0) -- Lempar ke luar layar
+                            child.Visible = true -- Paksa visible agar konten di-load
+                            
+                            table.insert(forcedOpen, {Obj = child, Type = "Frame", OldPos = oldPos, OldVis = oldVis})
+                        end
                     end
                 end
             end
         end
     end
     
-    if #forcedOpen > 0 then task.wait(1.5) end -- Wait for UI to populate
+    if #forcedOpen > 0 then 
+        Title.Text = "SCANNING..."
+        task.wait(1.5) 
+    end
 
     local data = GetItems()
     
@@ -246,7 +254,7 @@ local function UpdateList()
         if item.Type == "Gui" then
             item.Obj.Enabled = false
         elseif item.Type == "Frame" then
-            item.Obj.Visible = false
+            item.Obj.Visible = item.OldVis
             item.Obj.Position = item.OldPos
         end
     end
