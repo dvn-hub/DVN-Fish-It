@@ -8,6 +8,7 @@
 ]]
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
@@ -109,6 +110,77 @@ ListLayout.Padding = UDim.new(0, 4)
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ListLayout.Parent = Scroll
 
+-- WEATHER FRAME (HIDDEN)
+local WeatherFrame = Instance.new("Frame")
+WeatherFrame.Size = UDim2.new(1, -20, 1, -80)
+WeatherFrame.Position = UDim2.new(0, 10, 0, 40)
+WeatherFrame.BackgroundTransparency = 1
+WeatherFrame.Visible = false
+WeatherFrame.Parent = MainFrame
+
+local WeatherListLayout = Instance.new("UIListLayout")
+WeatherListLayout.Padding = UDim.new(0, 5)
+WeatherListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+WeatherListLayout.Parent = WeatherFrame
+
+local WeatherDB = {
+    {Name = "None", Id = 0},
+    {Name = "Clear", Id = 1},
+    {Name = "Rain", Id = 2},
+    {Name = "Fog", Id = 3},
+    {Name = "Wind", Id = 4},
+    {Name = "Storm", Id = 5},
+    {Name = "Snow", Id = 6},
+    {Name = "Cloudy", Id = 7},
+    {Name = "Aurora", Id = 8}
+}
+
+local Slots = {1, 1, 1} -- Default indices (None)
+local AutoBuyActive = false
+
+local function CreateCycleButton(idx)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(1, 0, 0, 35)
+    Btn.BackgroundColor3 = ELEMENT_BG
+    Btn.TextColor3 = TEXT_COLOR
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 12
+    Btn.Text = "Slot " .. idx .. ": " .. WeatherDB[Slots[idx]].Name
+    Btn.Parent = WeatherFrame
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
+    
+    Btn.MouseButton1Click:Connect(function()
+        Slots[idx] = Slots[idx] + 1
+        if Slots[idx] > #WeatherDB then Slots[idx] = 1 end
+        Btn.Text = "Slot " .. idx .. ": " .. WeatherDB[Slots[idx]].Name
+    end)
+end
+
+CreateCycleButton(1)
+CreateCycleButton(2)
+CreateCycleButton(3)
+
+local ToggleAutoBtn = Instance.new("TextButton")
+ToggleAutoBtn.Size = UDim2.new(1, 0, 0, 40)
+ToggleAutoBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleAutoBtn.TextColor3 = ACCENT_COLOR
+ToggleAutoBtn.Font = Enum.Font.GothamBold
+ToggleAutoBtn.TextSize = 14
+ToggleAutoBtn.Text = "AUTO BUY: OFF"
+ToggleAutoBtn.Parent = WeatherFrame
+Instance.new("UICorner", ToggleAutoBtn).CornerRadius = UDim.new(0, 4)
+
+ToggleAutoBtn.MouseButton1Click:Connect(function()
+    AutoBuyActive = not AutoBuyActive
+    if AutoBuyActive then
+        ToggleAutoBtn.Text = "AUTO BUY: ON"
+        ToggleAutoBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+    else
+        ToggleAutoBtn.Text = "AUTO BUY: OFF"
+        ToggleAutoBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    end
+end)
+
 -- FOOTER (ACTIONS)
 local Footer = Instance.new("Frame")
 Footer.Size = UDim2.new(1, -20, 0, 30)
@@ -117,25 +189,43 @@ Footer.BackgroundTransparency = 1
 Footer.Parent = MainFrame
 
 local RefreshBtn = Instance.new("TextButton")
-RefreshBtn.Size = UDim2.new(0.48, 0, 1, 0)
+RefreshBtn.Size = UDim2.new(0.32, 0, 1, 0)
 RefreshBtn.Position = UDim2.new(0, 0, 0, 0)
 RefreshBtn.BackgroundColor3 = ELEMENT_BG
 RefreshBtn.Text = "REFRESH"
 RefreshBtn.TextColor3 = TEXT_COLOR
 RefreshBtn.Font = Enum.Font.GothamBold
-RefreshBtn.TextSize = 12
+RefreshBtn.TextSize = 10
 RefreshBtn.Parent = Footer
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 4)
 
+local WeatherBtn = Instance.new("TextButton")
+WeatherBtn.Size = UDim2.new(0.32, 0, 1, 0)
+WeatherBtn.Position = UDim2.new(0.34, 0, 0, 0)
+WeatherBtn.BackgroundColor3 = ELEMENT_BG
+WeatherBtn.Text = "WEATHER"
+WeatherBtn.TextColor3 = TEXT_COLOR
+WeatherBtn.Font = Enum.Font.GothamBold
+WeatherBtn.TextSize = 10
+WeatherBtn.Parent = Footer
+Instance.new("UICorner", WeatherBtn).CornerRadius = UDim.new(0, 4)
+
 local CopyBtn = Instance.new("TextButton")
-CopyBtn.Size = UDim2.new(0.48, 0, 1, 0)
-CopyBtn.Position = UDim2.new(0.52, 0, 0, 0)
+CopyBtn.Size = UDim2.new(0.32, 0, 1, 0)
+CopyBtn.Position = UDim2.new(0.68, 0, 0, 0)
 CopyBtn.BackgroundColor3 = ELEMENT_BG
 CopyBtn.Text = "COPY"
 CopyBtn.TextColor3 = TEXT_COLOR
-CopyBtn.TextSize = 12
+CopyBtn.TextSize = 10
 CopyBtn.Parent = Footer
 Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 4)
+
+WeatherBtn.MouseButton1Click:Connect(function()
+    local isWeather = WeatherFrame.Visible
+    WeatherFrame.Visible = not isWeather
+    Content.Visible = isWeather
+    Title.Text = isWeather and "DVN INVENTORY" or "WEATHER AUTO BUY"
+end)
 
 -- LOGIC FUNCTIONS
 local function ClickGui(obj)
@@ -421,6 +511,40 @@ CopyBtn.MouseButton1Click:Connect(function()
     CopyBtn.Text = "COPIED!"
     task.wait(1)
     CopyBtn.Text = "COPY"
+end)
+
+-- AUTO BUY LOOP
+task.spawn(function()
+    local function GetRemote(name)
+        local packages = ReplicatedStorage:FindFirstChild("Packages")
+        if packages then
+            for _, v in pairs(packages:GetDescendants()) do
+                if v:IsA("RemoteFunction") and (v.Name == name or v.Name == "RF/" .. name) then
+                    return v
+                end
+            end
+        end
+        return nil
+    end
+
+    while ScreenGui.Parent do
+        if AutoBuyActive then
+            for i = 1, 3 do
+                if not AutoBuyActive then break end
+                local weatherIdx = Slots[i]
+                local weatherData = WeatherDB[weatherIdx]
+                
+                if weatherData.Id > 0 then
+                    local remote = GetRemote("PurchaseWeather")
+                    if remote then
+                        pcall(function() remote:InvokeServer(weatherData.Id, 1) end)
+                    end
+                    task.wait(1.5)
+                end
+            end
+        end
+        task.wait(0.5)
+    end
 end)
 
 -- DRAGGING LOGIC
