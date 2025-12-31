@@ -601,6 +601,183 @@ CreateButton(TabFrames["Shop"], "Buy Selected Bait", function()
     end
 end)
 
+-- === WEATHER SHOP (MULTI-TOGGLE) ===
+CreateSection(TabFrames["Shop"], "Weather Shop")
+
+-- [LOGIC] Weather Auto-Buy
+_G.ActiveWeathers = {
+    ["Cloudy"] = false,
+    ["Wind"] = false,
+    ["Radiant"] = false,
+    ["Snow"] = false,
+    ["Storm"] = false,
+    ["Shark Hunt"] = false
+}
+
+local function GetWeatherRemote()
+    local path = ReplicatedStorage:FindFirstChild("Packages")
+    if path and path:FindFirstChild("_Index") then
+        local idx = path._Index
+        local netPkg = idx:FindFirstChild("sleitnick_net@0.2.0")
+        if netPkg and netPkg:FindFirstChild("net") then
+            return netPkg.net:FindFirstChild("RF/PurchaseWeatherEvent")
+        end
+    end
+    return nil
+end
+
+local function IsWeatherActive(name)
+    local UI = LocalPlayer.PlayerGui:FindFirstChild("Events")
+    if UI and UI:FindFirstChild("Frame") and UI.Frame:FindFirstChild("Events") then
+        local EventFrame = UI.Frame.Events:FindFirstChild(name)
+        return EventFrame and EventFrame.Visible == true
+    end
+    return false
+end
+
+task.spawn(function()
+    while task.wait(5) do
+        if _G.ActiveWeathers then
+            for name, isEnabled in pairs(_G.ActiveWeathers) do
+                if isEnabled and not IsWeatherActive(name) then
+                    local remote = GetWeatherRemote()
+                    if remote then
+                        remote:InvokeServer(name)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- [UI] Weather Dropdown (Custom Multi-Select)
+local WFrame = Instance.new("Frame")
+WFrame.LayoutOrder = GetOrder(TabFrames["Shop"])
+WFrame.Size = UDim2.new(1, 0, 0, 30)
+WFrame.BackgroundColor3 = ELEMENT_BG
+WFrame.ClipsDescendants = true
+WFrame.Parent = TabFrames["Shop"]
+
+local WCorner = Instance.new("UICorner")
+WCorner.CornerRadius = UDim.new(0, 4)
+WCorner.Parent = WFrame
+
+local WLabel = Instance.new("TextLabel")
+WLabel.Text = "Manage Weathers"
+WLabel.Size = UDim2.new(0.6, 0, 0, 30)
+WLabel.Position = UDim2.new(0, 10, 0, 0)
+WLabel.BackgroundTransparency = 1
+WLabel.TextColor3 = TEXT_COLOR
+WLabel.Font = Enum.Font.GothamBold
+WLabel.TextSize = 14
+WLabel.TextXAlignment = Enum.TextXAlignment.Left
+WLabel.Parent = WFrame
+
+local WArrow = Instance.new("TextLabel")
+WArrow.Text = "▼"
+WArrow.Size = UDim2.new(0, 30, 0, 30)
+WArrow.Position = UDim2.new(1, -30, 0, 0)
+WArrow.BackgroundTransparency = 1
+WArrow.TextColor3 = TEXT_DIM
+WArrow.TextSize = 12
+WArrow.Parent = WFrame
+
+local WTrigger = Instance.new("TextButton")
+WTrigger.Size = UDim2.new(1, 0, 0, 30)
+WTrigger.BackgroundTransparency = 1
+WTrigger.Text = ""
+WTrigger.Parent = WFrame
+
+local WContainer = Instance.new("ScrollingFrame")
+WContainer.Size = UDim2.new(1, -4, 0, 0)
+WContainer.Position = UDim2.new(0, 2, 0, 32)
+WContainer.BackgroundTransparency = 1
+WContainer.BorderSizePixel = 0
+WContainer.ScrollBarThickness = 2
+WContainer.ScrollBarImageColor3 = ACCENT_COLOR
+WContainer.Parent = WFrame
+
+local WList = Instance.new("UIListLayout")
+WList.Padding = UDim.new(0, 2)
+WList.SortOrder = Enum.SortOrder.LayoutOrder
+WList.Parent = WContainer
+
+local wOptions = {"Cloudy", "Wind", "Radiant", "Snow", "Storm", "Shark Hunt"}
+local wItemH = 30
+local wContentH = #wOptions * (wItemH + 2)
+local wViewH = math.min(wContentH, 5 * (wItemH + 2))
+
+WContainer.CanvasSize = UDim2.new(0, 0, 0, wContentH)
+
+for _, name in ipairs(wOptions) do
+    local Item = Instance.new("Frame")
+    Item.Size = UDim2.new(1, -4, 0, wItemH)
+    Item.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Item.Parent = WContainer
+    
+    local ICorner = Instance.new("UICorner")
+    ICorner.CornerRadius = UDim.new(0, 3)
+    ICorner.Parent = Item
+    
+    local ILabel = Instance.new("TextLabel")
+    ILabel.Text = name
+    ILabel.Size = UDim2.new(1, -50, 1, 0)
+    ILabel.Position = UDim2.new(0, 10, 0, 0)
+    ILabel.BackgroundTransparency = 1
+    ILabel.TextColor3 = TEXT_COLOR
+    ILabel.Font = Enum.Font.GothamBold
+    ILabel.TextSize = 13
+    ILabel.TextXAlignment = Enum.TextXAlignment.Left
+    ILabel.Parent = Item
+    
+    local Toggle = Instance.new("TextButton")
+    Toggle.Size = UDim2.new(0, 36, 0, 18)
+    Toggle.Position = UDim2.new(1, -42, 0.5, -9)
+    Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Toggle.Text = ""
+    Toggle.Parent = Item
+    
+    local TCorner = Instance.new("UICorner")
+    TCorner.CornerRadius = UDim.new(1, 0)
+    TCorner.Parent = Toggle
+    
+    local Dot = Instance.new("Frame")
+    Dot.Size = UDim2.new(0, 14, 0, 14)
+    Dot.Position = UDim2.new(0, 2, 0.5, -7)
+    Dot.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    Dot.Parent = Toggle
+    
+    local DCorner = Instance.new("UICorner")
+    DCorner.CornerRadius = UDim.new(1, 0)
+    DCorner.Parent = Dot
+    
+    Toggle.MouseButton1Click:Connect(function()
+        _G.ActiveWeathers[name] = not _G.ActiveWeathers[name]
+        local on = _G.ActiveWeathers[name]
+        if on then
+            TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(1, -16, 0.5, -7), BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+        else
+            TweenService:Create(Toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+            TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -7), BackgroundColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+        end
+    end)
+end
+
+local wOpen = false
+WTrigger.MouseButton1Click:Connect(function()
+    wOpen = not wOpen
+    if wOpen then
+        TweenService:Create(WFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30 + wViewH + 4)}):Play()
+        TweenService:Create(WContainer, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, wViewH)}):Play()
+        TweenService:Create(WArrow, TweenInfo.new(0.2), {Rotation = 180}):Play()
+    else
+        TweenService:Create(WFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 30)}):Play()
+        TweenService:Create(WContainer, TweenInfo.new(0.2), {Size = UDim2.new(1, -4, 0, 0)}):Play()
+        TweenService:Create(WArrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+    end
+end)
+
 -- [TELEPORT]
 CreateSection(TabFrames["Teleport"], "Island")
 local Locations = {
