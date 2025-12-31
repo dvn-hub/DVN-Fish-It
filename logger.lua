@@ -33,7 +33,7 @@ local SETTINGS = {
 
 -- CONFIG DATA
 local WEBHOOK_NAME = "Babu DVN"
-local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1454359791144140878/DVN.png"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1456009509632737417/DVN_New.png?ex=6956ce06&is=69557c86&hm=23a4a1c9eef5190b4192b3cafbb59ae8e6999f07bba85bb0d9a5b3dd93fcc8a5&"
 
 local RARITY_CONFIG = {
     Common    = { Enabled = true, Color = 0xAAAAAA, Icon = "⚪" },
