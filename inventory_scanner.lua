@@ -217,17 +217,26 @@ local function UpdateList()
     
     Title.Text = "SCANNING..."
     
-    -- Cek dulu apakah item sudah ada (tanpa buka tas)
-    local initialData = GetItems()
-    local initialCount = 0
-    for _ in pairs(initialData) do initialCount = initialCount + 1 end
+    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+    local invGui = pGui and pGui:FindFirstChild("Inventory")
+    local invMain = invGui and invGui:FindFirstChild("Main")
+    local wasVisible = invMain and invMain.Visible
     
-    -- Jika item sedikit (mungkin cuma tools), coba buka tas dengan tombol 3
-    if initialCount <= 3 then
+    local data = {}
+
+    if wasVisible then
+        -- Jika sudah terbuka, langsung scan
+        data = GetItems()
+    else
+        -- Jika tertutup, lakukan prosedur Buka -> Scan -> Tutup
         Title.Text = "OPENING BAG..."
         
+        -- Hitung baseline item (noise) sebelum buka
+        local initialData = GetItems()
+        local initialCount = 0
+        for _ in pairs(initialData) do initialCount = initialCount + 1 end
+
         -- Cari tombol Inventory di UI (Backpack -> Display -> Inventory)
-        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
         local invBtn = nil
         if pGui and pGui:FindFirstChild("Backpack") and pGui.Backpack:FindFirstChild("Display") then
             invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
@@ -251,12 +260,17 @@ local function UpdateList()
         -- Tunggu sampai item bertambah (Max 2.5 detik)
         for i = 1, 25 do
             task.wait(0.1)
-            local check = GetItems()
+            data = GetItems() -- Update data terus menerus
+            local check = data
             local c = 0
             for _ in pairs(check) do c = c + 1 end
-            if c > initialCount then break end -- Item baru ditemukan!
+            -- Jika item bertambah signifikan (lebih dari sekadar noise)
+            if c > initialCount + 2 then break end 
         end
         
+        -- Pastikan data terisi terakhir kali
+        if next(data) == nil then data = GetItems() end
+
         -- KLIK TUTUP
         if invBtn then clickGui(invBtn) else
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
@@ -265,7 +279,6 @@ local function UpdateList()
         end
     end
 
-    local data = GetItems()
     local sortedNames = {}
     for name, _ in pairs(data) do table.insert(sortedNames, name) end
     table.sort(sortedNames)
