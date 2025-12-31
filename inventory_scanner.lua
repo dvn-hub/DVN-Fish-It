@@ -159,29 +159,58 @@ local function GetItems()
     if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
     if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
-    -- 2. Scan PlayerGui UI (Deep Scan - Like Debug Script)
+    -- 2. Scan PlayerGui UI (Targeted Scan - Only Fish Inventory & Backpack)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
-        -- Scan SELURUH PlayerGui (agar sama dengan hasil debug 73 item)
-        for _, v in pairs(pGui:GetDescendants()) do
-            -- Cari TextLabel bernama ItemName atau FishName
-            if v:IsA("TextLabel") and (v.Name == "ItemName" or v.Name == "FishName") then
-                if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
-                    local parent = v.Parent
-                    -- Pastikan ini bukan label varian (kita ambil varian dari label utama)
-                    if parent.Name ~= "Variant" then
-                        local fullName = v.Text
-                        -- Cek apakah ada folder Variant di sebelahnya (Struktur: Tile -> Variant -> ItemName)
-                        local variant = parent:FindFirstChild("Variant")
-                        if variant then
-                            local varLabel = variant:FindFirstChild("ItemName")
-                            if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
-                                fullName = varLabel.Text .. " " .. fullName
-                            end
-                        end
-                        add(fullName)
+        -- Helper to extract name from a Tile
+        local function scanTile(tile)
+            -- Cek ItemName langsung (Inventory Style)
+            local nameLabel = tile:FindFirstChild("ItemName")
+            
+            -- Cek ItemName dalam Tags (Backpack Style)
+            if not nameLabel then
+                local inner = tile:FindFirstChild("Inner")
+                if inner then
+                    local tags = inner:FindFirstChild("Tags")
+                    if tags then nameLabel = tags:FindFirstChild("ItemName") end
+                end
+            end
+
+            if nameLabel and nameLabel:IsA("TextLabel") and nameLabel.Text ~= "" and nameLabel.Text ~= "Item Name" and nameLabel.Text ~= "Fish Name" then
+                local fullName = nameLabel.Text
+                
+                -- Cek Variant (Sibling dari ItemName atau di dalam Variant folder)
+                -- Struktur Inventory: Tile -> Variant -> ItemName
+                local variant = tile:FindFirstChild("Variant")
+                if variant then
+                    local varLabel = variant:FindFirstChild("ItemName")
+                    if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
+                        fullName = varLabel.Text .. " " .. fullName
                     end
                 end
+                
+                add(fullName)
+            end
+        end
+
+        -- Target A: Main Inventory
+        -- Path: PlayerGui.Inventory.Main.Content.Pages.Inventory
+        local inv = pGui:FindFirstChild("Inventory")
+        if inv and inv:FindFirstChild("Main") and inv.Main:FindFirstChild("Content") then
+            local pages = inv.Main.Content:FindFirstChild("Pages")
+            if pages and pages:FindFirstChild("Inventory") then
+                for _, tile in pairs(pages.Inventory:GetChildren()) do
+                    scanTile(tile)
+                end
+            end
+        end
+
+        -- Target B: Backpack/Hotbar
+        -- Path: PlayerGui.Backpack.Display
+        local backpack = pGui:FindFirstChild("Backpack")
+        if backpack and backpack:FindFirstChild("Display") then
+            for _, tile in pairs(backpack.Display:GetChildren()) do
+                scanTile(tile)
             end
         end
     end
@@ -264,8 +293,8 @@ local function UpdateList()
             local check = data
             local c = 0
             for _ in pairs(check) do c = c + 1 end
-            -- Jika item bertambah signifikan (lebih dari sekadar noise)
-            if c > initialCount + 2 then break end 
+            -- Jika item bertambah (karena scan sekarang spesifik, penambahan 1 pun berarti berhasil load)
+            if c > initialCount then break end 
         end
         
         -- Pastikan data terisi terakhir kali
