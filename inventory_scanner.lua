@@ -237,7 +237,7 @@ local function UpdateList()
         end
     end
     
-    if #forcedOpen > 0 then task.wait(0.2) end -- Wait for UI to populate
+    if #forcedOpen > 0 then task.wait(1.5) end -- Wait for UI to populate
 
     local data = GetItems()
     
