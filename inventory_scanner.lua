@@ -226,8 +226,9 @@ local function UpdateList()
                     table.insert(forcedOpen, {Obj = gui, Type = "Gui"})
                     
                     -- 2. Pindahkan semua Frame ke luar layar (agar invisible tapi aktif)
+                    -- Menggunakan IsA("GuiObject") agar CanvasGroup/ImageLabel juga terdeteksi
                     for _, child in pairs(gui:GetChildren()) do
-                        if child:IsA("Frame") then
+                        if child:IsA("GuiObject") then
                             local oldPos = child.Position
                             local oldVis = child.Visible
                             
@@ -244,7 +245,20 @@ local function UpdateList()
     
     if #forcedOpen > 0 then 
         Title.Text = "SCANNING..."
-        task.wait(1.5) 
+        -- Smart Wait: Cek setiap 0.1 detik apakah item sudah muncul (max 2 detik)
+        for i = 1, 20 do
+            local tempItems = GetItems()
+            local count = 0
+            for _ in pairs(tempItems) do count = count + 1 end
+            
+            -- Jika item ditemukan (lebih dari sekadar Tool di backpack), break
+            if count > 0 then 
+                -- Tambahan delay sedikit untuk memastikan semua item termuat
+                task.wait(0.5)
+                break 
+            end
+            task.wait(0.1)
+        end
     end
 
     local data = GetItems()
