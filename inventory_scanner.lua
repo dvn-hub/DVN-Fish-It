@@ -115,28 +115,62 @@ Footer.Position = UDim2.new(0, 10, 1, -40)
 Footer.BackgroundTransparency = 1
 Footer.Parent = MainFrame
 
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Size = UDim2.new(0.32, 0, 1, 0)
+OpenBtn.Position = UDim2.new(0, 0, 0, 0)
+OpenBtn.BackgroundColor3 = ELEMENT_BG
+OpenBtn.Text = "OPEN BAG"
+OpenBtn.TextColor3 = TEXT_COLOR
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.TextSize = 11
+OpenBtn.Parent = Footer
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 4)
+
 local RefreshBtn = Instance.new("TextButton")
-RefreshBtn.Size = UDim2.new(0.48, 0, 1, 0)
+RefreshBtn.Size = UDim2.new(0.32, 0, 1, 0)
+RefreshBtn.Position = UDim2.new(0.34, 0, 0, 0)
 RefreshBtn.BackgroundColor3 = ELEMENT_BG
 RefreshBtn.Text = "REFRESH"
 RefreshBtn.TextColor3 = TEXT_COLOR
 RefreshBtn.Font = Enum.Font.GothamBold
-RefreshBtn.TextSize = 12
+RefreshBtn.TextSize = 11
 RefreshBtn.Parent = Footer
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 4)
 
 local CopyBtn = Instance.new("TextButton")
-CopyBtn.Size = UDim2.new(0.48, 0, 1, 0)
-CopyBtn.Position = UDim2.new(0.52, 0, 0, 0)
+CopyBtn.Size = UDim2.new(0.32, 0, 1, 0)
+CopyBtn.Position = UDim2.new(0.68, 0, 0, 0)
 CopyBtn.BackgroundColor3 = ELEMENT_BG
-CopyBtn.Text = "COPY LIST"
+CopyBtn.Text = "COPY"
 CopyBtn.TextColor3 = TEXT_COLOR
 CopyBtn.Font = Enum.Font.GothamBold
-CopyBtn.TextSize = 12
+CopyBtn.TextSize = 11
 CopyBtn.Parent = Footer
 Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 4)
 
 -- LOGIC FUNCTIONS
+local function ClickGui(obj)
+    if not obj then return end
+    
+    -- [DEBUG] Visualisasi Klik (Kotak Merah)
+    local debugBox = Instance.new("Frame")
+    debugBox.Name = "DebugClickBox"
+    debugBox.Size = UDim2.new(0, obj.AbsoluteSize.X, 0, obj.AbsoluteSize.Y)
+    debugBox.Position = UDim2.new(0, obj.AbsolutePosition.X, 0, obj.AbsolutePosition.Y)
+    debugBox.BackgroundTransparency = 1
+    debugBox.Parent = ScreenGui
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 4
+    stroke.Parent = debugBox
+    game:GetService("Debris"):AddItem(debugBox, 2)
+
+    local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2)
+    VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
+    task.wait(0.1)
+    VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
+end
+
 local function GetItems()
     local items = {}
     
@@ -272,30 +306,8 @@ local function UpdateList()
             invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
         end
 
-        local function clickGui(obj)
-            if not obj then return end
-            
-            -- [DEBUG] Visualisasi Klik (Kotak Merah) untuk memastikan lokasi benar
-            local debugBox = Instance.new("Frame")
-            debugBox.Name = "DebugClickBox"
-            debugBox.Size = UDim2.new(0, obj.AbsoluteSize.X, 0, obj.AbsoluteSize.Y)
-            debugBox.Position = UDim2.new(0, obj.AbsolutePosition.X, 0, obj.AbsolutePosition.Y)
-            debugBox.BackgroundTransparency = 1
-            debugBox.Parent = ScreenGui
-            local stroke = Instance.new("UIStroke")
-            stroke.Color = Color3.fromRGB(255, 0, 0)
-            stroke.Thickness = 4
-            stroke.Parent = debugBox
-            game:GetService("Debris"):AddItem(debugBox, 2)
-
-            local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2)
-            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
-            task.wait(0.1)
-            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
-        end
-
         -- KLIK BUKA (Prioritas: Klik UI -> Fallback: Tombol 3)
-        if invBtn then clickGui(invBtn) else 
+        if invBtn then ClickGui(invBtn) else 
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
             task.wait(0.1)
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
@@ -309,7 +321,7 @@ local function UpdateList()
             and invMain.Top.Options:FindFirstChild("Fish")
             
         if fishTab then 
-            clickGui(fishTab)
+            ClickGui(fishTab)
             task.wait(0.2) -- Tunggu tab berpindah
         end
 
@@ -381,6 +393,41 @@ end
 
 RefreshBtn.MouseButton1Click:Connect(UpdateList)
 
+OpenBtn.MouseButton1Click:Connect(function()
+    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if not pGui then return end
+    
+    -- 1. Click Bag Button
+    local invBtn = nil
+    if pGui:FindFirstChild("Backpack") and pGui.Backpack:FindFirstChild("Display") then
+        invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
+    end
+    
+    if invBtn then
+        ClickGui(invBtn)
+    else
+        -- Fallback key 3
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+        task.wait(0.1)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+    end
+    
+    task.wait(0.5) -- Wait for animation
+    
+    -- 2. Click Fish Tab
+    local invGui = pGui:FindFirstChild("Inventory")
+    local invMain = invGui and invGui:FindFirstChild("Main")
+    
+    local fishTab = invMain 
+        and invMain:FindFirstChild("Top") 
+        and invMain.Top:FindFirstChild("Options") 
+        and invMain.Top.Options:FindFirstChild("Fish")
+        
+    if fishTab then
+        ClickGui(fishTab)
+    end
+end)
+
 CopyBtn.MouseButton1Click:Connect(function()
     local data = GetItems()
     local str = "DVN INVENTORY LIST:\n"
@@ -390,7 +437,7 @@ CopyBtn.MouseButton1Click:Connect(function()
     setclipboard(str)
     CopyBtn.Text = "COPIED!"
     task.wait(1)
-    CopyBtn.Text = "COPY LIST"
+    CopyBtn.Text = "COPY"
 end)
 
 -- DRAGGING LOGIC
