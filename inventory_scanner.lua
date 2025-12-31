@@ -9,6 +9,7 @@
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local Camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
@@ -145,6 +146,25 @@ local function GetItems()
             items[name] = (items[name] or 0) + qty
         end
     end
+    
+    -- Helper: Get Full Name with Variant (e.g. "Shiny Catfish")
+    local function getFullFishName(tile)
+        local nameLabel = tile:FindFirstChild("ItemName")
+        if not nameLabel or not nameLabel:IsA("TextLabel") then return nil end
+        
+        local name = nameLabel.Text
+        if name == "Item Name" or name == "Fish Name" or name == "" then return nil end
+
+        -- Check for Variant (Sibling or Child)
+        local variant = tile:FindFirstChild("Variant")
+        if variant then
+            local varLabel = variant:FindFirstChild("ItemName")
+            if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
+                name = varLabel.Text .. " " .. name
+            end
+        end
+        return name
+    end
 
     -- 1. Scan Standard Backpack (Tools)
     local function scanTools(loc)
@@ -158,23 +178,32 @@ local function GetItems()
     if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
     if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
-    -- 2. Scan PlayerGui UI (Backpack & Inventory - DEEP SCAN)
+    -- 2. Scan PlayerGui UI (Specific Paths from Debug)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
-        -- Daftar nama GUI yang mungkin berisi item pemain
-        local targetGUIs = {"Backpack", "Inventory", "Bag", "FishInventory", "PlayerInventory"}
-        
-        for _, guiName in ipairs(targetGUIs) do
-            local gui = pGui:FindFirstChild(guiName)
-            if gui then
-                -- Gunakan GetDescendants untuk mencari item di kedalaman berapapun
-                for _, v in pairs(gui:GetDescendants()) do
-                    -- Filter: Cari TextLabel bernama "ItemName" atau "FishName"
-                    if (v.Name == "ItemName" or v.Name == "FishName") and v:IsA("TextLabel") then
-                        -- Pastikan bukan teks template/kosong
-                        if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
-                            add(v.Text)
-                        end
+        -- Path A: Main Inventory
+        -- Path: PlayerGui.Inventory.Main.Content.Pages.Inventory.Tile
+        local inv = pGui:FindFirstChild("Inventory")
+        if inv and inv:FindFirstChild("Main") and inv.Main:FindFirstChild("Content") then
+            local pages = inv.Main.Content:FindFirstChild("Pages")
+            if pages and pages:FindFirstChild("Inventory") then
+                for _, tile in pairs(pages.Inventory:GetChildren()) do
+                    local fullName = getFullFishName(tile)
+                    if fullName then add(fullName) end
+                end
+            end
+        end
+
+        -- Path B: Backpack Hotbar
+        -- Path: PlayerGui.Backpack.Display.Tile.Inner.Tags.ItemName
+        local backpack = pGui:FindFirstChild("Backpack")
+        if backpack and backpack:FindFirstChild("Display") then
+            for _, tile in pairs(backpack.Display:GetChildren()) do
+                local inner = tile:FindFirstChild("Inner")
+                if inner and inner:FindFirstChild("Tags") then
+                    local nameLabel = inner.Tags:FindFirstChild("ItemName")
+                    if nameLabel and nameLabel:IsA("TextLabel") and nameLabel.Text ~= "" then
+                        add(nameLabel.Text)
                     end
                 end
             end
@@ -210,51 +239,29 @@ local function UpdateList()
         if v:IsA("Frame") then v:Destroy() end
     end
     
-    -- [AUTO-OPEN] Force open inventory invisibly to load items
+    -- [AUTO-OPEN] Use Key 3 to open inventory
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-    local forcedOpen = {}
+    local wasVisible = false
     
-    if pGui then
-        local targetGUIs = {"Backpack", "Inventory", "Bag", "FishInventory", "PlayerInventory"}
-        for _, name in ipairs(targetGUIs) do
-            local gui = pGui:FindFirstChild(name)
-            if gui and gui:IsA("ScreenGui") then
-                -- Cek apakah GUI sedang tertutup
-                if not gui.Enabled then
-                    -- 1. Nyalakan GUI
-                    gui.Enabled = true
-                    table.insert(forcedOpen, {Obj = gui, Type = "Gui"})
-                    
-                    -- 2. Pindahkan semua Frame ke luar layar (agar invisible tapi aktif)
-                    -- Menggunakan IsA("GuiObject") agar CanvasGroup/ImageLabel juga terdeteksi
-                    for _, child in pairs(gui:GetChildren()) do
-                        if child:IsA("GuiObject") then
-                            local oldPos = child.Position
-                            local oldVis = child.Visible
-                            
-                            child.Position = UDim2.new(10, 0, 10, 0) -- Lempar ke luar layar
-                            child.Visible = true -- Paksa visible agar konten di-load
-                            
-                            table.insert(forcedOpen, {Obj = child, Type = "Frame", OldPos = oldPos, OldVis = oldVis})
-                        end
-                    end
-                end
-            end
-        end
+    -- Check if inventory is already visible
+    if pGui and pGui:FindFirstChild("Inventory") and pGui.Inventory:FindFirstChild("Main") then
+        wasVisible = pGui.Inventory.Main.Visible
     end
     
-    if #forcedOpen > 0 then 
+    if not wasVisible then
         Title.Text = "SCANNING..."
-        -- Smart Wait: Cek setiap 0.1 detik apakah item sudah muncul (max 2 detik)
-        for i = 1, 20 do
+        -- Press 3
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        
+        -- Wait for load (Smart Wait)
+        for i = 1, 30 do -- Max 3 seconds
             local tempItems = GetItems()
             local count = 0
             for _ in pairs(tempItems) do count = count + 1 end
-            
-            -- Jika item ditemukan (lebih dari sekadar Tool di backpack), break
-            if count > 0 then 
-                -- Tambahan delay sedikit untuk memastikan semua item termuat
-                task.wait(0.5)
+            if count > 2 then -- Found items (more than just rod)
+                task.wait(0.2) -- Small buffer
                 break 
             end
             task.wait(0.1)
@@ -263,14 +270,11 @@ local function UpdateList()
 
     local data = GetItems()
     
-    -- [RESTORE] Hide inventory back
-    for _, item in ipairs(forcedOpen) do
-        if item.Type == "Gui" then
-            item.Obj.Enabled = false
-        elseif item.Type == "Frame" then
-            item.Obj.Visible = item.OldVis
-            item.Obj.Position = item.OldPos
-        end
+    -- [RESTORE] Close inventory if we opened it
+    if not wasVisible then
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
     end
 
     local sortedNames = {}
