@@ -162,30 +162,24 @@ local function GetItems()
     -- 2. Scan PlayerGui UI (Deep Scan - Like Debug Script)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
-        -- Kita scan Inventory dan Backpack UI secara menyeluruh
-        local targets = {pGui:FindFirstChild("Inventory"), pGui:FindFirstChild("Backpack")}
-        
-        for _, gui in ipairs(targets) do
-            if gui then
-                for _, v in pairs(gui:GetDescendants()) do
-                    -- Cari TextLabel bernama ItemName atau FishName
-                    if v:IsA("TextLabel") and (v.Name == "ItemName" or v.Name == "FishName") then
-                        if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
-                            local parent = v.Parent
-                            -- Pastikan ini bukan label varian (kita ambil varian dari label utama)
-                            if parent.Name ~= "Variant" then
-                                local fullName = v.Text
-                                -- Cek apakah ada folder Variant di sebelahnya (Struktur: Tile -> Variant -> ItemName)
-                                local variant = parent:FindFirstChild("Variant")
-                                if variant then
-                                    local varLabel = variant:FindFirstChild("ItemName")
-                                    if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
-                                        fullName = varLabel.Text .. " " .. fullName
-                                    end
-                                end
-                                add(fullName)
+        -- Scan SELURUH PlayerGui (agar sama dengan hasil debug 73 item)
+        for _, v in pairs(pGui:GetDescendants()) do
+            -- Cari TextLabel bernama ItemName atau FishName
+            if v:IsA("TextLabel") and (v.Name == "ItemName" or v.Name == "FishName") then
+                if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
+                    local parent = v.Parent
+                    -- Pastikan ini bukan label varian (kita ambil varian dari label utama)
+                    if parent.Name ~= "Variant" then
+                        local fullName = v.Text
+                        -- Cek apakah ada folder Variant di sebelahnya (Struktur: Tile -> Variant -> ItemName)
+                        local variant = parent:FindFirstChild("Variant")
+                        if variant then
+                            local varLabel = variant:FindFirstChild("ItemName")
+                            if varLabel and varLabel:IsA("TextLabel") and varLabel.Text ~= "" then
+                                fullName = varLabel.Text .. " " .. fullName
                             end
                         end
+                        add(fullName)
                     end
                 end
             end
