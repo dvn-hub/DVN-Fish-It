@@ -158,7 +158,31 @@ local function GetItems()
     if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
     if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
-    -- 2. Scan Custom Inventory (Folder inside Player)
+    -- 2. Scan PlayerGui UI (Backpack Display)
+    -- Path based on debug: PlayerGui.Backpack.Display.Tile.Inner.Tags.ItemName
+    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+    if pGui then
+        local backpackUI = pGui:FindFirstChild("Backpack")
+        if backpackUI then
+            local display = backpackUI:FindFirstChild("Display")
+            if display then
+                for _, tile in pairs(display:GetChildren()) do
+                    local inner = tile:FindFirstChild("Inner")
+                    if inner then
+                        local tags = inner:FindFirstChild("Tags")
+                        if tags then
+                            local nameLabel = tags:FindFirstChild("ItemName")
+                            if nameLabel and nameLabel:IsA("TextLabel") then
+                                add(nameLabel.Text)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- 3. Scan Custom Inventory (Folder inside Player)
     -- Mencari folder umum: "Inventory", "FishInventory", "Bag", "Fish"
     local customFolders = {"Inventory", "FishInventory", "Bag", "Fish"}
     for _, folderName in ipairs(customFolders) do
