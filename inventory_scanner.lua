@@ -210,7 +210,47 @@ local function UpdateList()
         if v:IsA("Frame") then v:Destroy() end
     end
     
+    -- [AUTO-OPEN] Force open inventory invisibly to load items
+    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+    local forcedOpen = {}
+    
+    if pGui then
+        local targetGUIs = {"Backpack", "Inventory", "Bag", "FishInventory", "PlayerInventory"}
+        for _, name in ipairs(targetGUIs) do
+            local gui = pGui:FindFirstChild(name)
+            if gui then
+                -- 1. Enable ScreenGui if disabled
+                if not gui.Enabled then
+                    gui.Enabled = true
+                    table.insert(forcedOpen, {Obj = gui, Type = "Gui"})
+                end
+                -- 2. Show Frames if hidden (Move off-screen)
+                for _, child in pairs(gui:GetChildren()) do
+                    if child:IsA("Frame") and not child.Visible then
+                        local oldPos = child.Position
+                        child.Position = UDim2.new(10, 0, 10, 0) -- Move far away
+                        child.Visible = true
+                        table.insert(forcedOpen, {Obj = child, Type = "Frame", OldPos = oldPos})
+                    end
+                end
+            end
+        end
+    end
+    
+    if #forcedOpen > 0 then task.wait(0.2) end -- Wait for UI to populate
+
     local data = GetItems()
+    
+    -- [RESTORE] Hide inventory back
+    for _, item in ipairs(forcedOpen) do
+        if item.Type == "Gui" then
+            item.Obj.Enabled = false
+        elseif item.Type == "Frame" then
+            item.Obj.Visible = false
+            item.Obj.Position = item.OldPos
+        end
+    end
+
     local sortedNames = {}
     for name, _ in pairs(data) do table.insert(sortedNames, name) end
     table.sort(sortedNames)
