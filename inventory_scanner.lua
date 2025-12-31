@@ -115,36 +115,24 @@ Footer.Position = UDim2.new(0, 10, 1, -40)
 Footer.BackgroundTransparency = 1
 Footer.Parent = MainFrame
 
-local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.new(0.32, 0, 1, 0)
-OpenBtn.Position = UDim2.new(0, 0, 0, 0)
-OpenBtn.BackgroundColor3 = ELEMENT_BG
-OpenBtn.Text = "OPEN BAG"
-OpenBtn.TextColor3 = TEXT_COLOR
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.TextSize = 11
-OpenBtn.Parent = Footer
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 4)
-
 local RefreshBtn = Instance.new("TextButton")
-RefreshBtn.Size = UDim2.new(0.32, 0, 1, 0)
-RefreshBtn.Position = UDim2.new(0.34, 0, 0, 0)
+RefreshBtn.Size = UDim2.new(0.48, 0, 1, 0)
+RefreshBtn.Position = UDim2.new(0, 0, 0, 0)
 RefreshBtn.BackgroundColor3 = ELEMENT_BG
 RefreshBtn.Text = "REFRESH"
 RefreshBtn.TextColor3 = TEXT_COLOR
 RefreshBtn.Font = Enum.Font.GothamBold
-RefreshBtn.TextSize = 11
+RefreshBtn.TextSize = 12
 RefreshBtn.Parent = Footer
 Instance.new("UICorner", RefreshBtn).CornerRadius = UDim.new(0, 4)
 
 local CopyBtn = Instance.new("TextButton")
-CopyBtn.Size = UDim2.new(0.32, 0, 1, 0)
-CopyBtn.Position = UDim2.new(0.68, 0, 0, 0)
+CopyBtn.Size = UDim2.new(0.48, 0, 1, 0)
+CopyBtn.Position = UDim2.new(0.52, 0, 0, 0)
 CopyBtn.BackgroundColor3 = ELEMENT_BG
 CopyBtn.Text = "COPY"
 CopyBtn.TextColor3 = TEXT_COLOR
-CopyBtn.Font = Enum.Font.GothamBold
-CopyBtn.TextSize = 11
+CopyBtn.TextSize = 12
 CopyBtn.Parent = Footer
 Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 4)
 
@@ -324,6 +312,8 @@ local function UpdateList()
             if invMain then invMain.Visible = true end
         end
         
+        task.wait(0.1) -- Tunggu UI render sebentar
+        
         local fishTab = invMain 
             and invMain:FindFirstChild("Top") 
             and invMain.Top:FindFirstChild("Options") 
@@ -398,32 +388,6 @@ local function UpdateList()
 end
 
 RefreshBtn.MouseButton1Click:Connect(UpdateList)
-
-OpenBtn.MouseButton1Click:Connect(function()
-    local pGui = LocalPlayer:FindFirstChild("PlayerGui")
-    if not pGui then return end
-    
-    -- 1. Force Open Bag
-    local invGui = pGui:FindFirstChild("Inventory")
-    if invGui then
-        invGui.Enabled = true
-        if invGui:FindFirstChild("Main") then invGui.Main.Visible = true end
-    end
-    
-    task.wait(0.5) -- Wait for animation
-    
-    -- 2. Click Fish Tab
-    local invMain = invGui and invGui:FindFirstChild("Main")
-    
-    local fishTab = invMain 
-        and invMain:FindFirstChild("Top") 
-        and invMain.Top:FindFirstChild("Options") 
-        and invMain.Top.Options:FindFirstChild("Fish")
-        
-    if fishTab then
-        ClickGui(fishTab)
-    end
-end)
 
 CopyBtn.MouseButton1Click:Connect(function()
     local data = GetItems()
