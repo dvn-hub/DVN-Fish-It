@@ -274,6 +274,20 @@ local function UpdateList()
 
         local function clickGui(obj)
             if not obj then return end
+            
+            -- [DEBUG] Visualisasi Klik (Kotak Merah) untuk memastikan lokasi benar
+            local debugBox = Instance.new("Frame")
+            debugBox.Name = "DebugClickBox"
+            debugBox.Size = UDim2.new(0, obj.AbsoluteSize.X, 0, obj.AbsoluteSize.Y)
+            debugBox.Position = UDim2.new(0, obj.AbsolutePosition.X, 0, obj.AbsolutePosition.Y)
+            debugBox.BackgroundTransparency = 1
+            debugBox.Parent = ScreenGui
+            local stroke = Instance.new("UIStroke")
+            stroke.Color = Color3.fromRGB(255, 0, 0)
+            stroke.Thickness = 4
+            stroke.Parent = debugBox
+            game:GetService("Debris"):AddItem(debugBox, 2)
+
             local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2)
             VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
             task.wait(0.1)
@@ -313,12 +327,13 @@ local function UpdateList()
         -- Pastikan data terisi terakhir kali
         if next(data) == nil then data = GetItems() end
 
-        -- KLIK TUTUP
-        if invBtn then clickGui(invBtn) else
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-            task.wait(0.1)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        end
+        -- [DEBUG] Auto-Close dimatikan sementara agar user bisa melihat tas terbuka
+        -- Jika ingin menutup otomatis, uncomment baris di bawah ini:
+        -- if invBtn then clickGui(invBtn) else
+        --     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+        --     task.wait(0.1)
+        --     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        -- end
     end
 
     local sortedNames = {}
