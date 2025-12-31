@@ -230,12 +230,29 @@ local function UpdateList()
     
     -- Jika item sedikit (mungkin cuma tools), coba buka tas dengan tombol 3
     if initialCount <= 3 then
-        -- Tekan 3 (Buka)
-        pcall(function()
+        Title.Text = "OPENING BAG..."
+        
+        -- Cari tombol Inventory di UI (Backpack -> Display -> Inventory)
+        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+        local invBtn = nil
+        if pGui and pGui:FindFirstChild("Backpack") and pGui.Backpack:FindFirstChild("Display") then
+            invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
+        end
+
+        local function clickGui(obj)
+            if not obj then return end
+            local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2)
+            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
+            task.wait(0.1)
+            VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
+        end
+
+        -- KLIK BUKA (Prioritas: Klik UI -> Fallback: Tombol 3)
+        if invBtn then clickGui(invBtn) else 
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
             task.wait(0.1)
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        end)
+        end
         
         -- Tunggu sampai item bertambah (Max 2.5 detik)
         for i = 1, 25 do
@@ -246,12 +263,12 @@ local function UpdateList()
             if c > initialCount then break end -- Item baru ditemukan!
         end
         
-        -- Tekan 3 lagi (Tutup)
-        pcall(function()
+        -- KLIK TUTUP
+        if invBtn then clickGui(invBtn) else
             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
             task.wait(0.1)
             VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        end)
+        end
     end
 
     local data = GetItems()
