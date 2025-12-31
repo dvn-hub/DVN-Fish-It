@@ -189,23 +189,36 @@ local function GetItems()
         end
     end
 
-    -- 1. Scan Standard Backpack (Tools)
-    local function scanTools(loc)
-        for _, v in pairs(loc:GetChildren()) do
-            if v:IsA("Tool") then
-                add(v.Name)
-            end
-        end
-    end
-    
-    if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
-    if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
+    -- [DISABLED] 1. Scan Standard Backpack (Tools) - Agar Rod tidak masuk list
+    -- local function scanTools(loc)
+    --     for _, v in pairs(loc:GetChildren()) do
+    --         if v:IsA("Tool") then
+    --             add(v.Name)
+    --         end
+    --     end
+    -- end
+    -- if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
+    -- if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
     -- 2. Scan PlayerGui UI (Targeted Scan - Only Fish Inventory & Backpack)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
+        -- Helper: Cek apakah object benar-benar terlihat di layar (Recursive check)
+        local function isVisible(obj)
+            local curr = obj
+            while curr and curr ~= pGui do
+                if curr:IsA("GuiObject") and not curr.Visible then return false end
+                if curr:IsA("ScreenGui") and not curr.Enabled then return false end
+                curr = curr.Parent
+            end
+            return true
+        end
+
         -- Helper to extract name from a Tile
         local function scanTile(tile)
+            -- [FILTER] Hanya ambil item yang Visible (Aktif di layar)
+            if not isVisible(tile) then return end
+            
             -- Cek ItemName langsung (Inventory Style)
             local nameLabel = tile:FindFirstChild("ItemName")
             
@@ -243,19 +256,18 @@ local function GetItems()
             for _, v in pairs(inv.Main.Content:GetDescendants()) do
                 if v.Name == "ItemName" and v.Parent then
                     -- v.Parent adalah Tile atau Tags, kita scan tile-nya
-                    scanTile(v.Parent.Parent) -- Naik ke Tile
+                    scanTile(v.Parent) -- [FIX] v.Parent adalah Tile
                 end
             end
         end
 
-        -- Target B: Backpack/Hotbar
-        -- Path: PlayerGui.Backpack.Display
-        local backpack = pGui:FindFirstChild("Backpack")
-        if backpack and backpack:FindFirstChild("Display") then
-            for _, tile in pairs(backpack.Display:GetChildren()) do
-                scanTile(tile)
-            end
-        end
+        -- [DISABLED] Target B: Backpack/Hotbar - Agar Rod tidak masuk list
+        -- local backpack = pGui:FindFirstChild("Backpack")
+        -- if backpack and backpack:FindFirstChild("Display") then
+        --     for _, tile in pairs(backpack.Display:GetChildren()) do
+        --         scanTile(tile)
+        --     end
+        -- end
     end
 
     -- 3. Scan Custom Inventory (Folder inside Player)
