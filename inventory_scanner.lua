@@ -138,17 +138,47 @@ Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 4)
 -- LOGIC FUNCTIONS
 local function GetItems()
     local items = {}
-    local function scan(loc)
+    
+    local function add(name, qty)
+        qty = qty or 1
+        if name and name ~= "" then
+            items[name] = (items[name] or 0) + qty
+        end
+    end
+
+    -- 1. Scan Standard Backpack (Tools)
+    local function scanTools(loc)
         for _, v in pairs(loc:GetChildren()) do
             if v:IsA("Tool") then
-                items[v.Name] = (items[v.Name] or 0) + 1
+                add(v.Name)
             end
         end
     end
     
-    if LocalPlayer:FindFirstChild("Backpack") then scan(LocalPlayer.Backpack) end
-    if LocalPlayer.Character then scan(LocalPlayer.Character) end
+    if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
+    if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
+    -- 2. Scan Custom Inventory (Folder inside Player)
+    -- Mencari folder umum: "Inventory", "FishInventory", "Bag", "Fish"
+    local customFolders = {"Inventory", "FishInventory", "Bag", "Fish"}
+    for _, folderName in ipairs(customFolders) do
+        local folder = LocalPlayer:FindFirstChild(folderName)
+        if folder then
+            for _, v in pairs(folder:GetChildren()) do
+                -- Cek StringValue (Slot -> Nama Ikan)
+                if v:IsA("StringValue") then
+                    add(v.Value)
+                -- Cek IntValue (Nama Ikan -> Jumlah)
+                elseif v:IsA("IntValue") then
+                    add(v.Name, v.Value)
+                -- Cek Object biasa (Model/Folder/Part)
+                elseif not v:IsA("Script") and not v:IsA("LocalScript") then
+                    add(v.Name)
+                end
+            end
+        end
+    end
+
     return items
 end
 
