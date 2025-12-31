@@ -194,16 +194,14 @@ local function GetItems()
         end
 
         -- Target A: Main Inventory
-        -- Path: PlayerGui.Inventory.Main.Content.Pages.Inventory
+        -- Path: PlayerGui.Inventory.Main.Content (Scan Recursive untuk menangkap semua halaman)
         local inv = pGui:FindFirstChild("Inventory")
         if inv and inv:FindFirstChild("Main") and inv.Main:FindFirstChild("Content") then
-            local pages = inv.Main.Content:FindFirstChild("Pages")
-            if pages then
-                -- Scan semua halaman (Inventory, Fish, dll) untuk memastikan ikan terbaca
-                for _, page in pairs(pages:GetChildren()) do
-                    for _, tile in pairs(page:GetChildren()) do
-                        scanTile(tile)
-                    end
+            -- Scan seluruh Content agar tidak peduli nama halamannya (Pages/Fish/dll)
+            for _, v in pairs(inv.Main.Content:GetDescendants()) do
+                if v.Name == "ItemName" and v.Parent then
+                    -- v.Parent adalah Tile atau Tags, kita scan tile-nya
+                    scanTile(v.Parent.Parent) -- Naik ke Tile
                 end
             end
         end
@@ -290,16 +288,16 @@ local function UpdateList()
         end
         
         -- [FIX] KLIK TAB "FISH" (Penting agar ikan muncul, bukan item lain)
-        local fishTab = nil
-        if invGui then
-            for _, v in pairs(invGui:GetDescendants()) do
-                if (v:IsA("TextButton") or v:IsA("ImageButton")) and (v.Name == "Fish" or (v:IsA("TextButton") and v.Text == "Fish")) and v.Visible then
-                    fishTab = v
-                    break
-                end
-            end
+        -- Path Akurat dari Dump: Inventory.Main.Top.Options.Fish
+        local fishTab = invMain 
+            and invMain:FindFirstChild("Top") 
+            and invMain.Top:FindFirstChild("Options") 
+            and invMain.Top.Options:FindFirstChild("Fish")
+            
+        if fishTab then 
+            clickGui(fishTab)
+            task.wait(0.2) -- Tunggu tab berpindah
         end
-        if fishTab then clickGui(fishTab) end
 
         -- Tunggu sampai item bertambah (Max 2.5 detik)
         for i = 1, 25 do
