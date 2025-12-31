@@ -165,7 +165,8 @@ local function ClickGui(obj)
     stroke.Parent = debugBox
     game:GetService("Debris"):AddItem(debugBox, 2)
 
-    local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2)
+    -- [FIX] Menambahkan offset Y (+25 px) agar kursor turun ke bawah (Kompensasi TopBar)
+    local center = obj.AbsolutePosition + (obj.AbsoluteSize / 2) + Vector2.new(0, 25)
     VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
     task.wait(0.1)
     VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
