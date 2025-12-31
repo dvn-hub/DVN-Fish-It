@@ -158,23 +158,22 @@ local function GetItems()
     if LocalPlayer:FindFirstChild("Backpack") then scanTools(LocalPlayer.Backpack) end
     if LocalPlayer.Character then scanTools(LocalPlayer.Character) end
     
-    -- 2. Scan PlayerGui UI (Backpack Display)
-    -- Path based on debug: PlayerGui.Backpack.Display.Tile.Inner.Tags.ItemName
+    -- 2. Scan PlayerGui UI (Backpack & Inventory - DEEP SCAN)
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if pGui then
-        local backpackUI = pGui:FindFirstChild("Backpack")
-        if backpackUI then
-            local display = backpackUI:FindFirstChild("Display")
-            if display then
-                for _, tile in pairs(display:GetChildren()) do
-                    local inner = tile:FindFirstChild("Inner")
-                    if inner then
-                        local tags = inner:FindFirstChild("Tags")
-                        if tags then
-                            local nameLabel = tags:FindFirstChild("ItemName")
-                            if nameLabel and nameLabel:IsA("TextLabel") then
-                                add(nameLabel.Text)
-                            end
+        -- Daftar nama GUI yang mungkin berisi item pemain
+        local targetGUIs = {"Backpack", "Inventory", "Bag", "FishInventory", "PlayerInventory"}
+        
+        for _, guiName in ipairs(targetGUIs) do
+            local gui = pGui:FindFirstChild(guiName)
+            if gui then
+                -- Gunakan GetDescendants untuk mencari item di kedalaman berapapun
+                for _, v in pairs(gui:GetDescendants()) do
+                    -- Filter: Cari TextLabel bernama "ItemName" atau "FishName"
+                    if (v.Name == "ItemName" or v.Name == "FishName") and v:IsA("TextLabel") then
+                        -- Pastikan bukan teks template/kosong
+                        if v.Text ~= "" and v.Text ~= "Item Name" and v.Text ~= "Fish Name" then
+                            add(v.Text)
                         end
                     end
                 end
