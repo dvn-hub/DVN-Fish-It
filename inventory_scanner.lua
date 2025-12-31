@@ -316,22 +316,13 @@ local function UpdateList()
         local initialData = GetItems()
         local initialCount = 0
         for _ in pairs(initialData) do initialCount = initialCount + 1 end
-
-        -- Cari tombol Inventory di UI (Backpack -> Display -> Inventory)
-        local invBtn = nil
-        if pGui and pGui:FindFirstChild("Backpack") and pGui.Backpack:FindFirstChild("Display") then
-            invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
-        end
-
-        -- KLIK BUKA (Prioritas: Klik UI -> Fallback: Tombol 3)
-        if invBtn then ClickGui(invBtn) else 
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-            task.wait(0.1)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        
+        -- [FORCE OPEN] Manipulasi Property UI Langsung (Bypass Klik)
+        if invGui then
+            invGui.Enabled = true
+            if invMain then invMain.Visible = true end
         end
         
-        -- [FIX] KLIK TAB "FISH" (Penting agar ikan muncul, bukan item lain)
-        -- Path Akurat dari Dump: Inventory.Main.Top.Options.Fish
         local fishTab = invMain 
             and invMain:FindFirstChild("Top") 
             and invMain.Top:FindFirstChild("Options") 
@@ -356,19 +347,10 @@ local function UpdateList()
         -- Pastikan data terisi terakhir kali
         if next(data) == nil then data = GetItems() end
 
-        -- [DEBUG] Auto-Close dimatikan sementara agar user bisa melihat tas terbuka
-        -- Jika ingin menutup otomatis, uncomment baris di bawah ini:
-        -- if invBtn then ClickGui(invBtn) else
-        --     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-        --     task.wait(0.1)
-        --     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        -- end
-        -- [RESTORE] Auto-Close enabled (Tutup otomatis setelah scan)
-        -- if invBtn then ClickGui(invBtn) else
-        --     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-        --     task.wait(0.1)
-        --     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-        -- end
+        -- [RESTORE] Tutup kembali (Force Close)
+        if invMain then
+            invMain.Visible = false
+        end
     end
 
     local sortedNames = {}
@@ -420,25 +402,16 @@ OpenBtn.MouseButton1Click:Connect(function()
     local pGui = LocalPlayer:FindFirstChild("PlayerGui")
     if not pGui then return end
     
-    -- 1. Click Bag Button
-    local invBtn = nil
-    if pGui:FindFirstChild("Backpack") and pGui.Backpack:FindFirstChild("Display") then
-        invBtn = pGui.Backpack.Display:FindFirstChild("Inventory")
-    end
-    
-    if invBtn then
-        ClickGui(invBtn)
-    else
-        -- Fallback key 3
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-        task.wait(0.1)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+    -- 1. Force Open Bag
+    local invGui = pGui:FindFirstChild("Inventory")
+    if invGui then
+        invGui.Enabled = true
+        if invGui:FindFirstChild("Main") then invGui.Main.Visible = true end
     end
     
     task.wait(0.5) -- Wait for animation
     
     -- 2. Click Fish Tab
-    local invGui = pGui:FindFirstChild("Inventory")
     local invMain = invGui and invGui:FindFirstChild("Main")
     
     local fishTab = invMain 
