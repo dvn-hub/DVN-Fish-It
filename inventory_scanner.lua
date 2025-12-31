@@ -169,6 +169,23 @@ local function ClickGui(obj)
     VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, true, game, 1)
     task.wait(0.1)
     VirtualInputManager:SendMouseButtonEvent(center.X, center.Y, 0, false, game, 1)
+    
+    -- Method 2: Direct Event Firing (Fallback for Executors)
+    -- Jika klik virtual gagal, kita coba paksa trigger event-nya menggunakan getconnections
+    if typeof(getconnections) == "function" then
+        local btn = obj
+        if not btn:IsA("GuiButton") then
+            btn = obj:FindFirstChildWhichIsA("GuiButton", true)
+        end
+        
+        if btn then
+            for _, event in ipairs({"MouseButton1Click", "MouseButton1Down", "Activated"}) do
+                for _, conn in pairs(getconnections(btn[event])) do
+                    conn:Fire()
+                end
+            end
+        end
+    end
 end
 
 local function GetItems()
@@ -341,7 +358,13 @@ local function UpdateList()
 
         -- [DEBUG] Auto-Close dimatikan sementara agar user bisa melihat tas terbuka
         -- Jika ingin menutup otomatis, uncomment baris di bawah ini:
-        -- if invBtn then clickGui(invBtn) else
+        -- if invBtn then ClickGui(invBtn) else
+        --     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
+        --     task.wait(0.1)
+        --     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
+        -- end
+        -- [RESTORE] Auto-Close enabled (Tutup otomatis setelah scan)
+        -- if invBtn then ClickGui(invBtn) else
         --     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
         --     task.wait(0.1)
         --     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
