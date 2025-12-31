@@ -1,7 +1,7 @@
 --[[ 
-    DVN DEBUG OPENER v6 (AUTO-OPEN TEST)
-    Script ini akan mencoba membuka inventory secara otomatis
-    dan mendeteksi kapan daftar ikan muncul.
+    DVN DEBUG OPENER v7 (BUTTON HUNTER)
+    Mencari tombol Inventory secara otomatis di seluruh UI
+    dan mencoba mengkliknya satu per satu.
 ]]
 
 local Players = game:GetService("Players")
@@ -26,7 +26,7 @@ Frame.Parent = ScreenGui
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -140, 0, 30)
-Title.Text = "DVN INVENTORY DEBUG"
+Title.Text = "DVN BUTTON HUNTER"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 18
@@ -91,74 +91,43 @@ task.spawn(function()
     local initial = ScanItems()
     Log("📊 Item Terlihat Awal: " .. initial)
     
-    if initial > 5 then
-        Log("✅ Item sudah terlihat! Tidak perlu aksi.", Color3.new(0, 1, 0))
-        return
-    end
+    -- 2. Cari Tombol Inventory/Bag/Backpack
+    Log("🔍 Mencari tombol 'Inventory' / 'Bag'...", Color3.new(1, 0.5, 0))
     
-    -- 2. Coba Tombol '3'
-    Log("⌨️ Mencoba Tombol Keyboard '3'...", Color3.new(1, 0.5, 0))
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Three, false, game)
-    task.wait(0.1)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Three, false, game)
-
-    Log("⏳ Menunggu 2 detik...")
-    task.wait(2)
-
-    local afterKey = ScanItems()
-    Log("📊 Item setelah Tombol '3': " .. afterKey)
-    
-    if afterKey > initial then
-        Log("✅ Tombol '3' Berhasil!", Color3.new(0, 1, 0))
-        return
-    end
-    
-    -- 3. Coba Klik Tombol Inventory di Layar
-    Log("🔍 Mencari Tombol Inventory di Layar...", Color3.new(1, 0.5, 0))
-    local invBtn = nil
-    
-    -- Path spesifik game ini (Backpack -> Display -> Inventory)
-    if PlayerGui:FindFirstChild("Backpack") and PlayerGui.Backpack:FindFirstChild("Display") then
-        invBtn = PlayerGui.Backpack.Display:FindFirstChild("Inventory")
-    end
-    
-    if invBtn then
-        ClickObject(invBtn)
-        Log("⏳ Menunggu 2 detik...")
-        task.wait(2)
-        
-        local afterClick = ScanItems()
-        Log("📊 Item setelah Klik UI: " .. afterClick)
-        
-        if afterClick > initial then
-            Log("✅ Klik UI Berhasil!", Color3.new(0, 1, 0))
-            return
-        else
-            Log("❌ Klik UI gagal memuat item.")
-        end
-    else
-        Log("❌ Tombol Inventory tidak ditemukan di PlayerGui.")
-    end
-    
-    -- 4. Coba Cari Tab "Fish" (Jika tas terbuka tapi kosong)
-    Log("🔍 Mencari Tab 'Fish'...", Color3.new(1, 0.5, 0))
-    local fishTab = nil
-    local invGui = PlayerGui:FindFirstChild("Inventory")
-    if invGui then
-        for _, v in pairs(invGui:GetDescendants()) do
-            if (v:IsA("TextButton") or v:IsA("ImageButton")) and (v.Name == "Fish" or (v:IsA("TextButton") and v.Text == "Fish")) then
-                fishTab = v
-                break
+    local buttons = {}
+    for _, v in pairs(PlayerGui:GetDescendants()) do
+        if (v:IsA("TextButton") or v:IsA("ImageButton")) and v.Visible then
+            local name = v.Name:lower()
+            local text = (v:IsA("TextButton") and v.Text:lower()) or ""
+            
+            -- Filter tombol yang relevan
+            if name == "inventory" or name == "bag" or name == "backpack" or text == "inventory" or text == "bag" then
+                table.insert(buttons, v)
             end
         end
     end
     
-    if fishTab then
-        ClickObject(fishTab)
-        task.wait(1)
-        Log("📊 Item setelah Klik Tab Fish: " .. ScanItems())
+    if #buttons == 0 then
+        Log("❌ Tidak ditemukan tombol Inventory.", Color3.new(1, 0, 0))
     else
-        Log("❌ Tab Fish tidak ditemukan.")
+        Log("✅ Ditemukan " .. #buttons .. " tombol potensial.", Color3.new(0, 1, 0))
+        
+        for i, btn in ipairs(buttons) do
+            Log("Testing Tombol #" .. i .. ": " .. btn.Name, Color3.new(0, 1, 1))
+            Log("Path: " .. btn:GetFullName())
+            
+            ClickObject(btn)
+            task.wait(1.5)
+            
+            local current = ScanItems()
+            Log("📊 Item sekarang: " .. current)
+            
+            if current > initial then
+                Log("🎉 SUKSES! Tombol ini membuka tas.", Color3.new(0, 1, 0))
+                Log("SIMPAN PATH INI!", Color3.new(1, 1, 0))
+                break
+            end
+        end
     end
     
     Log("🏁 Debug Selesai.", Color3.new(1, 1, 1))
