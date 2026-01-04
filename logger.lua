@@ -45,8 +45,8 @@ local RARITY_CONFIG = {
 
 -- [NEW] FOCUS FISH CONFIG (Default OFF)
 local FOCUS_FISH = {
-    ["Sacred Guardian Squid"] = { Enabled = false, Ping = true, Color = 0x00FBFF }, -- Cyan
-    ["GEMSTONE Ruby"]         = { Enabled = false, Ping = true, Color = 0xFF0040 }  -- Ruby Red
+    ["Sacred Guardian Squid"] = { Enabled = false, Color = 0x00FBFF }, -- Cyan
+    ["GEMSTONE Ruby"]         = { Enabled = false, Color = 0xFF0040 }  -- Ruby Red
 }
 
 local RGB_RARITY = {
@@ -103,11 +103,9 @@ local function sendFish(data)
     -- 1. Check Priority: FOCUS FISH (ByName)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
-        local content = focusData.Ping and "@everyone" or ""
         send({ 
             username = WEBHOOK_NAME, 
             avatar_url = WEBHOOK_AVATAR, 
-            content = content,
             embeds = {{ 
                 title = "🚨 TARGET ACQUIRED! 🚨", 
                 description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
