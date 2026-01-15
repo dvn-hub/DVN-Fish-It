@@ -9,7 +9,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
         },
-        ["Auto Accept Trade"] = false,
+        ["Auto Accept Trade"] = true,
 
         ["Auto Friend Request"] = true,
     },
@@ -32,7 +32,7 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Selling"] = {
         ["Auto Sell"] = true,
-        ["Auto Sell Threshold"] = "Legendary",
+        ["Auto Sell Threshold"] = "Mythic",
         ["Auto Sell Every"] = 100,
     },
     ["Doing Quest"] = {
@@ -139,6 +139,7 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
             ["Kohana"] = {"Element Rod", "Ghostfinn Rod", "Angler Rod", "Ares Rod"},
+            ["Ancient Ruin"] = {"Astral Rod", "Ares Rod", "Angler Rod"},
         },
         ["Endgame"] = "",
     },
@@ -149,6 +150,6 @@ _G.FishItConfig = _G.FishItConfig or {
     ["AutoRemovePlayer"] = true,
 
     ["AutoReconnect"] = false,
-    ["HideGUI"] = true,
+    ["HideGUI"] = false,
     ["EXIT_MAP_IF_DISCONNECT"] = true,
 }
