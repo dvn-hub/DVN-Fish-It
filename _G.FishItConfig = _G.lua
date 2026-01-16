@@ -38,7 +38,7 @@ _G.FishItConfig = _G.FishItConfig or {
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
         ["Auto Element Rod"] = false,
-        ["Unlock Ancient Ruin"] = false,
+        ["Unlock Ancient Ruin"] = true,
         ["Allowed Sacrifice"] = {
             "Ghost Shark",
             "Cryoshade Glider",
@@ -153,28 +153,3 @@ _G.FishItConfig = _G.FishItConfig or {
     ["HideGUI"] = false,
     ["EXIT_MAP_IF_DISCONNECT"] = true,
 }
-
--- [AUTO SWITCH QUEST LOGIC]
--- Script ini otomatis ngecek kalo Ghostfinn Rod udah didapet.
--- Kalo ada, dia bakal matiin quest Ghostfinn dan nyalain quest Ancient Ruin.
-task.spawn(function()
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-    
-    while task.wait(5) do
-        if _G.FishItConfig and _G.FishItConfig["Doing Quest"] then
-            local questConfig = _G.FishItConfig["Doing Quest"]
-            
-            if questConfig["Auto Ghostfinn Rod"] == true then
-                local hasRod = (LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("Ghostfinn Rod")) 
-                            or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Ghostfinn Rod"))
-                
-                if hasRod then
-                    questConfig["Auto Ghostfinn Rod"] = false
-                    questConfig["Unlock Ancient Ruin"] = true
-                    print("✅ [AUTO SWITCH] Ghostfinn Rod Ditemukan! Lanjut ke Ancient Ruin Quest.")
-                end
-            end
-        end
-    end
-end)
