@@ -8,19 +8,26 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Fish Name"] = {
             "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
+            {Variant = "Leviathan's Rage", "Leviathan Rage"}
+            {Name = "Runic Sea Crustacean", "Sea Crustacean", "Flatheaded Whale Shark", "Fossillized Shark", "Primordial Octopus", "Cavern Dweller", "Runic Squid", "Ancient Squid"}
+            -- {Tier = "Secret", Variant = "Leviathan's Rage"},  -- Tier + Variant
         },
-        ["Auto Accept Trade"] = true,
 
+        ["Auto Accept Trade"] = true,
         ["Auto Friend Request"] = true,
     },
     ["Auto Trade"] = {
-        ["Enabled"] = false,
-        ["Whitelist Username"] = {""},
+        ["Enabled"] = true,
+        ["Whitelist Username"] = {"dvn_store"},
         ["Category Fish"] = {
-            "Secret",
+            "Secret", "Mythic"
+            -- {Tier = "Mythic", Variant = "Stone"}, -- Tier + Variant
         },
         ["Fish Name"] = {
+            "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
+            {Variant = "Leviathan's Rage", "Leviathan Rage"},
+            -- {Variant = "Leviathan's Rage"}, -- Variant Only
         },
         ["Item Name"] = {
             "Evolved Enchant Stone",
@@ -54,11 +61,11 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Minimum Rod"] = "Astral Rod",
     },
     ["WebHook"] = {
-        ["Link Webhook"] = "",
-        ["Auto Sending"] = false,
+        ["Link Webhook"] = "https://discord.com/api/webhooks/1422865888390021262/76qvUPwZ_nUQedBr_q42jm_7y9ddmU34ozVE2r0W4derVkPWMTJ47bvzZvxT1bZmCb_h",
+        ["Auto Sending"] = true,
         ["Category"] = {"Secret"},
 
-        ["Link Webhook Quest Complete"] = "",
+        ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1422865888390021262/76qvUPwZ_nUQedBr_q42jm_7y9ddmU34ozVE2r0W4derVkPWMTJ47bvzZvxT1bZmCb_h",
     },
     ["Weather"] = {
         ["Auto Buying"] = false,
@@ -81,27 +88,21 @@ _G.FishItConfig = _G.FishItConfig or {
         },
     },
     ["Event"] = {
-        ["Start Farm"] = false,
+        ["Start Farm"] = true,
         ["Minimum Rod"] = "Ghostfinn Rod",
         ["Event List"] = {
             "Megalodon Hunt",
             "Ghost Shark Hunt",
             "Shark Hunt",
-            ["Christmas Cave"] = false,
+            -- ["Ancient Lochness Monster"] = true,
         },
     },
     ["Enchant"] = {
-        ["Auto Enchant"] = false,
+        ["Auto Enchant"] = true,
         ["Roll Enchant"] = false,
-        ["Evolved Roll Enchant"] = false,
+        ["Evolved Roll Enchant"] = true,
         ["Enchant List"] = {
-            "Reeler II",
             "SECRET Hunter",
-            "Shark Hunter",
-            "Mutation Hunter III",
-            "Leprechaun II",
-            "Mutation Hunter II",
-            "Prismatic I",
         },
         ["Second Enchant"] = false,
         ["Allowed Sacrifice"] = {
@@ -135,7 +136,6 @@ _G.FishItConfig = _G.FishItConfig or {
             "Angler Rod",
         },
         ["Location Rods"] = {
-            ["Ancient Ruin"] = {"Ghostfinn Rod"},
             ["Fisherman Island"] = {"Starter Rod"},
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
@@ -146,10 +146,10 @@ _G.FishItConfig = _G.FishItConfig or {
 
     ["ExtremeFpsBoost"] = true,
     ["UltimatePerformance"] = true,
-    ["Disable3DRender"] = false,
+    ["Disable3DRender"] = true,
     ["AutoRemovePlayer"] = true,
 
     ["AutoReconnect"] = false,
     ["HideGUI"] = false,
-    ["EXIT_MAP_IF_DISCONNECT"] = true,
+    ["EXIT_MAP_IF_DISCONNECT"] = false,
 }
