@@ -1,23 +1,163 @@
--- ====================================================================
--- LISTENERS (ANTI-SPOOF & LOGIC BARU)
--- ====================================================================
+--[[ 
+    💎 DVN LOGGER v9.5 — ANTI-SPOOF FULL FIX
+    
+    Fitur:
+    - ✅ LOGIC BARU: Hanya menerima chat yang diawali "[Server]:"
+    - 🛡️ ANTI-SPOOF: Chat player manual (format "Nama: [Server]:") otomatis DIBUANG.
+    - 🤖 AUTO CONFIG: Logger langsung nyala, Webhook terisi.
+]]
 
+-- ====================================================================
+-- 1. SERVICES & VARIABLES
+-- ====================================================================
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TextChatService = game:GetService("TextChatService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local Camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
+local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request)
+
+local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
+
+-- ====================================================================
+-- 2. SETTINGS
+-- ====================================================================
+local SETTINGS = {
+    WebhookURL = "https://discord.com/api/webhooks/1455188929824161914/ianT2aawksflHN7vmM0_Ptal1PSVGq81O89Y03eP81Y-00obrY4sY6nDwqGxvQPuS8zh",
+    LogFish = true, 
+    LogJoinLeave = false 
+}
+
+local WEBHOOK_NAME = "Babu DVN"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1456009509632737417/DVN_New.png"
+
+local RARITY_CONFIG = {
+    Epic      = { Enabled = false, Color = 0xB373F8, Icon = "🟣" },
+    Legendary = { Enabled = false, Color = 0xFFB92B, Icon = "🟡" },
+    Mythic    = { Enabled = false, Color = 0xFF1919, Icon = "🔴" },
+    Secret    = { Enabled = true, Color = 0x18FF98, Icon = "💎" },
+}
+
+local FOCUS_FISH = {
+    ["Sacred Guardian Squid"] = { Enabled = true, Color = 0x00FBFF },
+    ["GEMSTONE Ruby"]         = { Enabled = true, Color = 0xFF0040 },
+    ["GEMSTONE Shiny Ruby"]   = { Enabled = true, Color = 0xFF0040 },
+    ["GEMSTONE Big Ruby"]     = { Enabled = true, Color = 0xFF0040 }
+}
+
+local RGB_RARITY = {
+    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary", 
+    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
+}
+
+-- ====================================================================
+-- 3. HELPER FUNCTIONS (JANGAN DIHAPUS)
+-- ====================================================================
+local function stripRichText(t) return t:gsub("<.->", "") end
+
+local function extractDisplayName(text)
+    local clean = stripRichText(text)
+    -- Logic nama: ambil teks setelah "[Server]:" dan sebelum "obtained"
+    return clean:match("^%[Server%]:%s*(.-)%s*obtained") or clean:match("^(.-)%s*obtained") or "Unknown"
+end
+
+local function detectChance(t) return t:match("1 in ([%dKMB]+)") or "?" end
+
+local function detectRarity(text)
+    local r,g,b = text:match("rgb%((%d+),%s*(%d+),%s*(%d+)%)")
+    return r and (RGB_RARITY[r..","..g..","..b] or "Other") or "Other"
+end
+
+local function detectFishNameAndWeight(text)
+    local clean = stripRichText(text)
+    local openParen = clean:match("^.*()%(")
+    local fish, weight
+    if openParen then
+        local fishPart = clean:sub(1, openParen - 1)
+        local weightPart = clean:sub(openParen + 1)
+        fish = fishPart:match("obtained%s+a[n]?%s+(.+)") or fishPart:match("obtained%s+(.+)")
+        weight = weightPart:match("^(.-)%)")
+    else
+        fish = clean:match("obtained%s+a[n]?%s+(.+)") or clean:match("obtained%s+(.+)")
+        weight = "-"
+    end
+    return (fish and fish:gsub("%s+$", "") or "Unknown Fish"), (weight or "-")
+end
+
+-- ====================================================================
+-- 4. WEBHOOK LOGIC
+-- ====================================================================
+local function send(payload)
+    if SETTINGS.WebhookURL == "" or not req then return end
+    pcall(function()
+        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+    end)
+end
+
+local function testWebhook()
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = "✅ Webhook Connected", description = "Logger Anti-Tipu Siap!", color = 0x2ECC71 }} })
+end
+
+local function sendFish(data)
+    -- Cek Focus Fish
+    local focusData = FOCUS_FISH[data.Fish]
+    if focusData and focusData.Enabled then
+        send({ 
+            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
+            embeds = {{ 
+                title = "🚨 TARGET ACQUIRED! 🚨", description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", color = focusData.Color, 
+                fields = { { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } }, 
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
+            }} 
+        })
+        return
+    end
+    -- Cek Rarity
+    local cfg = RARITY_CONFIG[data.Rarity]
+    if cfg and cfg.Enabled then
+        send({ 
+            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
+            embeds = {{ 
+                title = cfg.Icon.." "..data.Rarity.." Catch!", color = cfg.Color, 
+                fields = { { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true }, { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } }, 
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
+            }} 
+        })
+    end
+end
+
+local function sendJoinLeave(player, joined)
+    if not SETTINGS.LogJoinLeave then return end
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Joined" or "🚪 Left", description = "**"..player.DisplayName.."**", color = joined and 0x2ECC71 or 0xE74C3C }} })
+end
+
+-- ====================================================================
+-- 5. LISTENER UTAMA (ANTI-SPOOF)
+-- ====================================================================
 TextChatService.OnIncomingMessage = function(msg)
-    -- 1. Cek apakah Logger nyala & Pesan ada isinya
+    -- Cek Setting
     if not SETTINGS.LogFish then return end
     if not msg.Text then return end
 
-    -- [[ 🛡️ ANTI-SPOOF PROTECTION 🛡️ ]]
-    -- Kita cek 9 huruf pertama. WAJIB "[Server]:"
-    -- Kalau player ngetik manual, formatnya pasti "NamaPlayer: [Server]: ..." -> INI BAKAL DITOLAK.
-    if string.sub(msg.Text, 1, 9) ~= "[Server]:" then
-        return -- Skip, ini pesan palsu dari player iseng!
+    -- [[ 🛡️ LOGIC ANTI-TIPU 🛡️ ]]
+    -- Kita cek 9 huruf pertama dari pesan.
+    -- Pesan asli dari game WAJIB diawali dengan: "[Server]:"
+    -- Pesan palsu player pasti: "NamaPlayer: [Server]:" (Huruf depannya bukan '[')
+    
+    local first9 = string.sub(msg.Text, 1, 9)
+    if first9 ~= "[Server]:" then
+        -- Kalau bukan server, kita abaikan total!
+        return 
     end
 
-    -- 2. Cek kata kunci 'obtained'
+    -- Cek kata kunci "obtained"
     if not msg.Text:find("obtained") then return end
-    
-    -- 3. Proses Data
+
+    -- Kalau lolos, berarti ASLI dari game
     local fishName, weight = detectFishNameAndWeight(msg.Text)
     local rarity = detectRarity(msg.Text)
     
@@ -32,3 +172,15 @@ end
 
 Players.PlayerAdded:Connect(function(player) sendJoinLeave(player, true) end)
 Players.PlayerRemoving:Connect(function(player) sendJoinLeave(player, false) end)
+
+-- ====================================================================
+-- 6. UI SIMPLE (Biar Tahu Script Jalan)
+-- ====================================================================
+if GUI_PARENT:FindFirstChild("DVN_HUB_LOGGER") then GUI_PARENT.DVN_HUB_LOGGER:Destroy() end
+local ScreenGui = Instance.new("ScreenGui"); ScreenGui.Name = "DVN_HUB_LOGGER"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0, 200, 0, 50); MainFrame.Position = UDim2.new(0.5, -100, 0, 10); MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20); MainFrame.Active = true; MainFrame.Draggable = true
+local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 10)
+local Title = Instance.new("TextLabel", MainFrame); Title.Text = "🛡️ DVN ANTI-SPOOF ON"; Title.Size = UDim2.new(1,0,1,0); Title.TextColor3 = Color3.new(0,1,0.5); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold
+
+print("✅ DVN LOGGER v9.5 LOADED (ANTI-SPOOF ACTIVE)")
+testWebhook()
