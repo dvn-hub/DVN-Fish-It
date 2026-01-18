@@ -6,9 +6,17 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Auto Favorite"] = true,
         ["Auto Unfavorite"] = false,
         ["Fish Name"] = {
-            "Sacred Guardian Squid", "Runic Sea Crustacean", "Sea Crustacean", "Flatheaded Whale Shark", "Fossillized Shark", "Primordial Octopus", "Cavern Dweller", "Runic Squid", "Ancient Squid"
+            "Sacred Guardian Squid", 
+            "Runic Sea Crustacean", 
+            "Sea Crustacean", 
+            "Flatheaded Whale Shark", 
+            "Fossillized Shark", 
+            "Primordial Octopus", 
+            "Cavern Dweller", 
+            "Runic Squid", 
+            "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
-            {Variant = "Leviathan's Rage", "Leviathan Rage"}
+            {Variant = "Leviathan's Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
             -- {Variant = "Leviathan's Rage"}, -- Variant Only
             -- {Tier = "Secret", Variant = "Leviathan's Rage"},  -- Tier + Variant
         },
@@ -20,13 +28,14 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Enabled"] = true,
         ["Whitelist Username"] = {"dvn_store"},
         ["Category Fish"] = {
-            "Secret", "Mythic"
+            "Secret", 
+            "Mythic",
             -- {Tier = "Mythic", Variant = "Stone"}, -- Tier + Variant
         },
         ["Fish Name"] = {
             "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
-            {Variant = "Leviathan's Rage", "Leviathan Rage"},
+            {Variant = "Leviathan's Rage"},
             -- {Variant = "Leviathan's Rage"}, -- Variant Only
         },
         ["Item Name"] = {
