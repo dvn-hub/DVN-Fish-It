@@ -6,10 +6,10 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Auto Favorite"] = true,
         ["Auto Unfavorite"] = false,
         ["Fish Name"] = {
-            "Sacred Guardian Squid",
+            "Sacred Guardian Squid", "Runic Sea Crustacean", "Sea Crustacean", "Flatheaded Whale Shark", "Fossillized Shark", "Primordial Octopus", "Cavern Dweller", "Runic Squid", "Ancient Squid"
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage", "Leviathan Rage"}
-            {Name = "Runic Sea Crustacean", "Sea Crustacean", "Flatheaded Whale Shark", "Fossillized Shark", "Primordial Octopus", "Cavern Dweller", "Runic Squid", "Ancient Squid"}
+            -- {Variant = "Leviathan's Rage"}, -- Variant Only
             -- {Tier = "Secret", Variant = "Leviathan's Rage"},  -- Tier + Variant
         },
 
