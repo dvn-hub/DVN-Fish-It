@@ -3,8 +3,10 @@
     Status: UNDETECTABLE SPOOF
     
     Update Log:
-    - [WEBHOOK] Updated Link Webhook (New DVN Server)
     - [SECURITY] Menggunakan 'TextSource Verification'.
+      Player yang ngetik manual (sekalipun pake exploit chat) akan DITOLAK karena punya TextSource.
+      Hanya pesan murni dari System (nil source) yang diterima.
+    - [UI] Tampilan Webhook Premium (Dark Mode + Executor Info).
 ]]
 
 -- ====================================================================
@@ -26,7 +28,6 @@ local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:Wa
 -- 2. SETTINGS (AUTO CONFIG)
 -- ====================================================================
 local SETTINGS = {
-    -- Link Webhook Sudah Diupdate Sesuai Request
     WebhookURL = "https://discord.com/api/webhooks/1422865888390021262/76qvUPwZ_nUQedBr_q42jm_7y9ddmU34ozVE2r0W4derVkPWMTJ47bvzZvxT1bZmCb_h",
     LogFish = true, 
     LogJoinLeave = false 
@@ -105,7 +106,7 @@ local function testWebhook()
         embeds = {{ 
             title = "💎 DVN HUB • SYSTEM ONLINE",
             description = "```ini\n[ SERVICE STARTED ]\nWaiting for specific targets...```",
-            color = 0x2B2D31, 
+            color = 0x2B2D31, -- Dark/Elegant
             thumbnail = { url = WEBHOOK_AVATAR },
             fields = {
                 { name = "👤 User Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
@@ -119,6 +120,7 @@ local function testWebhook()
 end
 
 local function sendFish(data)
+    -- 1. FOCUS FISH (Priority)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         send({ 
@@ -140,6 +142,7 @@ local function sendFish(data)
         return
     end
 
+    -- 2. RARITY CHECK
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         send({ 
@@ -172,12 +175,21 @@ TextChatService.OnIncomingMessage = function(msg)
     if not SETTINGS.LogFish then return end
     if not msg.Text then return end
 
+    -- [[ 🛡️ JURUS KUNCI MATI 🛡️ ]]
+    -- msg.TextSource adalah "KTP" pengirim pesan.
+    -- Jika TextSource ADA ISINYA, berarti itu diketik oleh PLAYER (Manusia/Exploiter).
+    -- Jika TextSource NIL (Kosong), berarti itu pesan SYSTEM/SERVER Murni.
+    
     if msg.TextSource then
+        -- Ada KTP-nya? Buang! Kita gak peduli tulisannya "[Server]" atau bukan.
+        -- Kalau ada user ID-nya, berarti palsu.
         return 
     end
 
+    -- Filter Kata Kunci
     if not msg.Text:find("obtained") then return end
 
+    -- Kalau lolos filter di atas, berarti ini 100% Pesan Server
     local fishName, weight = detectFishNameAndWeight(msg.Text)
     local rarity = detectRarity(msg.Text)
     
