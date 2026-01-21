@@ -28,7 +28,7 @@ local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:Wa
 -- 2. SETTINGS (AUTO CONFIG)
 -- ====================================================================
 local SETTINGS = {
-    WebhookURL = "https://discord.com/api/webhooks/1462326264567431292/wIFAWnL4mbHj4YsbZHJEP_bU2TR71Z2YAs6w1wIWC3aQAEr-GPK4EN8BTjbuRnyVt1Bl",
+    WebhookURL = "https://discord.com/api/webhooks/1455188929824161914/ianT2aawksflHN7vmM0_Ptal1PSVGq81O89Y03eP81Y-00obrY4sY6nDwqGxvQPuS8zh",
     LogFish = true, 
     LogJoinLeave = false 
 }
