@@ -1,12 +1,6 @@
 --[[ 
-    💎 DVN LOGGER v10 — GOD MODE EDITION
-    Status: UNDETECTABLE SPOOF
-    
-    Update Log:
-    - [SECURITY] Menggunakan 'TextSource Verification'.
-      Player yang ngetik manual (sekalipun pake exploit chat) akan DITOLAK karena punya TextSource.
-      Hanya pesan murni dari System (nil source) yang diterima.
-    - [UI] Tampilan Webhook Premium (Dark Mode + Executor Info).
+    💎 DVN LOGGER v10 — FLUXUS FIX EDITION
+    Status: UNDETECTABLE SPOOF + FLUXUS SUPPORT
 ]]
 
 -- ====================================================================
@@ -19,6 +13,8 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
+-- DETEKSI EXECUTOR YANG LEBIH KUAT
 local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request) or (getgenv and getgenv().request)
 
 -- Safe GUI Parent
@@ -89,23 +85,28 @@ local function detectFishNameAndWeight(text)
 end
 
 -- ====================================================================
--- 4. WEBHOOK SYSTEM (PREMIUM STYLE)
+-- 4. WEBHOOK SYSTEM (FLUXUS FIX)
 -- ====================================================================
 local function send(payload)
-    if SETTINGS.WebhookURL == "" then
-        warn("[DVN] Webhook URL is empty!")
-        return
-    end
-    if not req then
-        warn("[DVN] HTTP Request function is missing. Your executor might not support it.")
-        return
+    if SETTINGS.WebhookURL == "" then return end
+    if not req then 
+        warn("HTTP Request Not Supported")
+        return 
     end
     
     task.spawn(function()
-        local success, err = pcall(function()
-            req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+        pcall(function()
+            req({
+                Url = SETTINGS.WebhookURL,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    -- INI KUNCINYA BUAT FLUXUS BIAR GAK DIBLOKIR DISCORD:
+                    ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 
+                },
+                Body = HttpService:JSONEncode(payload)
+            })
         end)
-        if not success then warn("[DVN] Webhook Failed:", err) end
     end)
 end
 
@@ -116,13 +117,13 @@ local function testWebhook()
         avatar_url = WEBHOOK_AVATAR, 
         embeds = {{ 
             title = "💎 DVN HUB • SYSTEM ONLINE",
-            description = "```ini\n[ SERVICE STARTED ]\nWaiting for specific targets...```",
-            color = 0x2B2D31, -- Dark/Elegant
+            description = "```ini\n[ SERVICE STARTED ]\nFluxus Fix Applied!```",
+            color = 0x2B2D31, 
             thumbnail = { url = WEBHOOK_AVATAR },
             fields = {
-                { name = "👤 User Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
-                { name = "💻 Client Info", value = "**Exec:** " .. executor .. "\n**Ping:** " .. math.floor(LocalPlayer:GetNetworkPing() * 1000) .. "ms", inline = true },
-                { name = "🛡️ Security", value = "✅ TextSource Verify\n✅ Anti-Spoof v10", inline = true }
+                { name = "👤 User Session", value = "**" .. LocalPlayer.DisplayName .. "**", inline = true },
+                { name = "💻 Client Info", value = "**Exec:** " .. executor, inline = true },
+                { name = "🛡️ Security", value = "✅ Anti-Spoof v10\n✅ Fluxus Headers", inline = true }
             },
             footer = { text = "DVN HUB • Enterprise Edition" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
@@ -131,7 +132,6 @@ local function testWebhook()
 end
 
 local function sendFish(data)
-    -- 1. FOCUS FISH (Priority)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         send({ 
@@ -153,7 +153,6 @@ local function sendFish(data)
         return
     end
 
-    -- 2. RARITY CHECK
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         send({ 
@@ -185,22 +184,9 @@ end
 TextChatService.OnIncomingMessage = function(msg)
     if not SETTINGS.LogFish then return end
     if not msg.Text then return end
-
-    -- [[ 🛡️ JURUS KUNCI MATI 🛡️ ]]
-    -- msg.TextSource adalah "KTP" pengirim pesan.
-    -- Jika TextSource ADA ISINYA, berarti itu diketik oleh PLAYER (Manusia/Exploiter).
-    -- Jika TextSource NIL (Kosong), berarti itu pesan SYSTEM/SERVER Murni.
-    
-    if msg.TextSource then
-        -- Ada KTP-nya? Buang! Kita gak peduli tulisannya "[Server]" atau bukan.
-        -- Kalau ada user ID-nya, berarti palsu.
-        return 
-    end
-
-    -- Filter Kata Kunci
+    if msg.TextSource then return end -- Anti Spoof
     if not msg.Text:find("obtained") then return end
 
-    -- Kalau lolos filter di atas, berarti ini 100% Pesan Server
     local fishName, weight = detectFishNameAndWeight(msg.Text)
     local rarity = detectRarity(msg.Text)
     
@@ -217,7 +203,7 @@ Players.PlayerAdded:Connect(function(player) sendJoinLeave(player, true) end)
 Players.PlayerRemoving:Connect(function(player) sendJoinLeave(player, false) end)
 
 -- ====================================================================
--- 6. UI INDICATOR (Clean)
+-- 6. UI INDICATOR
 -- ====================================================================
 if GUI_PARENT:FindFirstChild("DVN_HUB_LOGGER") then GUI_PARENT.DVN_HUB_LOGGER:Destroy() end
 local ScreenGui = Instance.new("ScreenGui"); ScreenGui.Name = "DVN_HUB_LOGGER"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
@@ -225,7 +211,7 @@ local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0
 local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(60,60,60); Stroke.Thickness = 1
 local StatusDot = Instance.new("Frame", MainFrame); StatusDot.Size = UDim2.new(0, 10, 0, 10); StatusDot.Position = UDim2.new(0, 15, 0.5, -5); StatusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 128); Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1,0)
-local Title = Instance.new("TextLabel", MainFrame); Title.Text = "DVN LOGGER : ACTIVE"; Title.Size = UDim2.new(1, -40, 1, 0); Title.Position = UDim2.new(0, 35, 0, 0); Title.TextColor3 = Color3.fromRGB(240,240,240); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
+local Title = Instance.new("TextLabel", MainFrame); Title.Text = "DVN LOGGER : FLUXUS FIX"; Title.Size = UDim2.new(1, -40, 1, 0); Title.Position = UDim2.new(0, 35, 0, 0); Title.TextColor3 = Color3.fromRGB(240,240,240); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
 
-print("✅ DVN LOGGER v10 LOADED (GOD MODE SECURITY)")
+print("✅ DVN LOGGER v10 LOADED (FLUXUS SUPPORT)")
 testWebhook()
