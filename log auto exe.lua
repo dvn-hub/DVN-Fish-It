@@ -19,7 +19,7 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request)
+local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request) or (getgenv and getgenv().request)
 
 -- Safe GUI Parent
 local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
@@ -92,7 +92,6 @@ end
 -- 4. WEBHOOK SYSTEM (PREMIUM STYLE)
 -- ====================================================================
 local function send(payload)
-<<<<<<< HEAD
     if SETTINGS.WebhookURL == "" then 
         warn("[Webhook] URL Kosong! Masukkan Webhook URL.")
         return 
@@ -111,12 +110,6 @@ local function send(payload)
     elseif success then
         print("[Webhook] Terkirim! Status:", res and res.StatusCode or "Unknown")
     end
-=======
-    if SETTINGS.WebhookURL == "" or not req then return end
-    pcall(function()
-        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
-    end)
->>>>>>> 55a42fec45adf39efe57e52cdc6fd9eb5a93dc5f
 end
 
 local function testWebhook()
