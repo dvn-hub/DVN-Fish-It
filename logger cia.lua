@@ -32,8 +32,8 @@ local SETTINGS = {
 }
 
 -- CONFIG DATA
-local WEBHOOK_NAME = "Babu CIA"
-local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1456009509632737417/DVN_New.png"
+local WEBHOOK_NAME = "Alicia ❤️"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452679772428828827/1463498077351575656/IMG_5096.png?ex=69720c4c&is=6970bacc&hm=91adf6da7781dcfc506a07deca76b9cb4920cbdf69d26aba28cfd5198babb93c&"
 
 -- [UPDATE] Removed Common/Uncommon/Rare. All Default OFF.
 local RARITY_CONFIG = {
@@ -98,7 +98,7 @@ local function send(payload)
 end
 
 local function testWebhook()
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = "✅ Webhook Connected", description = "Babu CIA is ready to log!", color = 0x2ECC71, footer = { text = "Babu CIA • System" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = "✅ Webhook Connected", description = "Ciaa is ready to log!", color = 0x2ECC71, footer = { text = "Ciaa • System" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
 end
 
 local function sendFish(data)
@@ -117,7 +117,7 @@ local function sendFish(data)
                     { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
                     { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
                 }, 
-                footer = { text = "Babu CIA • Focus Tracker" }, 
+                footer = { text = "Ciaa • Focus Tracker" }, 
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
             }} 
         })
@@ -140,7 +140,7 @@ local function sendFish(data)
                     { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
                     { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
                 }, 
-                footer = { text = "Babu CIA • Fish Logger" }, 
+                footer = { text = "Ciaa • Fish Logger" }, 
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
             }} 
         })
@@ -149,7 +149,7 @@ end
 
 local function sendJoinLeave(player, joined)
     if not SETTINGS.LogJoinLeave then return end
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Player Joined" or "🚪 Player Left", description = "**"..player.DisplayName.."** (@"..player.Name..")", color = joined and 0x2ECC71 or 0xE74C3C, footer = { text = "Babu CIA • Server Activity" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Player Joined" or "🚪 Player Left", description = "**"..player.DisplayName.."** (@"..player.Name..")", color = joined and 0x2ECC71 or 0xE74C3C, footer = { text = "Ciaa • Server Activity" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
 end
 
 -- LISTENERS
