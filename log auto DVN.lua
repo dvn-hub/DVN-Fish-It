@@ -1,30 +1,25 @@
 --[[ 
-    💎 DVN LOGGER v10 — FLUXUS FIX EDITION
-    Status: UNDETECTABLE SPOOF + FLUXUS SUPPORT
+    💎 DVN LOGGER v11 — PROXY EDITION (ANTI-429)
+    Fitur: 
+    - Auto Proxy (Bypass Discord Block/429)
+    - Anti Spoof God Mode
+    - Fluxus/Delta/Mobile Support
 ]]
 
--- ====================================================================
--- 1. SERVICES & VARIABLES
--- ====================================================================
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TextChatService = game:GetService("TextChatService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
--- DETEKSI EXECUTOR YANG LEBIH KUAT
-local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request) or (getgenv and getgenv().request)
-
--- Safe GUI Parent
-local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
+-- PILIH EXECUTOR DRIVER
+local req = http_request or request or (fluxus and fluxus.request) or (getgenv and getgenv().request) or (syn and syn.request)
 
 -- ====================================================================
--- 2. SETTINGS (AUTO CONFIG)
+-- CONFIG WEBHOOK (MASUKKAN LINK ASLI DISCORD DISINI)
+-- Script akan otomatis mengubahnya jadi Proxy biar tembus.
 -- ====================================================================
 local SETTINGS = {
-    WebhookURL = "https://discord.com/api/webhooks/1455188929824161914/ianT2aawksflHN7vmM0_Ptal1PSVGq81O89Y03eP81Y-00obrY4sY6nDwqGxvQPuS8zh",
+    WebhookURL = "https://discord.com/api/webhooks/1455188929824161914/ianT2aawksflHN7vmM0_Ptal1PSVGq81O89Y03eP81Y-00obrY4sY6nDwqGxvQPuS8zh", 
     LogFish = true, 
     LogJoinLeave = false 
 }
@@ -32,13 +27,42 @@ local SETTINGS = {
 local WEBHOOK_NAME = "Babu DVN"
 local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1456009509632737417/DVN_New.png"
 
+-- ====================================================================
+-- SISTEM PENGIRIM (DENGAN PROXY HYRA)
+-- ====================================================================
+local function send(payload)
+    if SETTINGS.WebhookURL == "" then return end
+    if not req then return end
+
+    -- 🛡️ AUTO PROXY SWITCHER 🛡️
+    -- Mengubah 'discord.com' menjadi 'hooks.hyra.io' untuk bypass blokir 429
+    local proxyURL = SETTINGS.WebhookURL:gsub("discord.com", "hooks.hyra.io")
+    
+    task.spawn(function()
+        pcall(function()
+            req({
+                Url = proxyURL, -- Kita pakai URL Proxy
+                Method = "POST",
+                Headers = { ["Content-Type"] = "application/json" },
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end)
+end
+
+-- ====================================================================
+-- LOGIC LOGGER (SAMA KAYAK KEMARIN)
+-- ====================================================================
+local RGB_RARITY = {
+    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary", 
+    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
+}
 local RARITY_CONFIG = {
     Epic      = { Enabled = false, Color = 0xB373F8, Icon = "🟣" },
     Legendary = { Enabled = false, Color = 0xFFB92B, Icon = "🟡" },
     Mythic    = { Enabled = false, Color = 0xFF1919, Icon = "🔴" },
     Secret    = { Enabled = true, Color = 0x18FF98, Icon = "💎" },
 }
-
 local FOCUS_FISH = {
     ["Sacred Guardian Squid"] = { Enabled = true, Color = 0x00FBFF },
     ["GEMSTONE Ruby"]         = { Enabled = true, Color = 0xFF0040 },
@@ -46,28 +70,11 @@ local FOCUS_FISH = {
     ["GEMSTONE Big Ruby"]     = { Enabled = true, Color = 0xFF0040 }
 }
 
-local RGB_RARITY = {
-    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary", 
-    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
-}
-
--- ====================================================================
--- 3. HELPER FUNCTIONS
--- ====================================================================
 local function stripRichText(t) return t:gsub("<.->", "") end
-
-local function extractDisplayName(text)
-    local clean = stripRichText(text)
-    return clean:match("^%[Server%]:%s*(.-)%s*obtained") or clean:match("^(.-)%s*obtained") or "Unknown"
-end
-
-local function detectChance(t) return t:match("1 in ([%dKMB]+)") or "?" end
-
 local function detectRarity(text)
     local r,g,b = text:match("rgb%((%d+),%s*(%d+),%s*(%d+)%)")
     return r and (RGB_RARITY[r..","..g..","..b] or "Other") or "Other"
 end
-
 local function detectFishNameAndWeight(text)
     local clean = stripRichText(text)
     local openParen = clean:match("^.*()%(")
@@ -83,31 +90,10 @@ local function detectFishNameAndWeight(text)
     end
     return (fish and fish:gsub("%s+$", "") or "Unknown Fish"), (weight or "-")
 end
-
--- ====================================================================
--- 4. WEBHOOK SYSTEM (FLUXUS FIX)
--- ====================================================================
-local function send(payload)
-    if SETTINGS.WebhookURL == "" then return end
-    if not req then 
-        warn("HTTP Request Not Supported")
-        return 
-    end
-    
-    task.spawn(function()
-        pcall(function()
-            req({
-                Url = SETTINGS.WebhookURL,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    -- INI KUNCINYA BUAT FLUXUS BIAR GAK DIBLOKIR DISCORD:
-                    ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-    end)
+local function detectChance(t) return t:match("1 in ([%dKMB]+)") or "?" end
+local function extractDisplayName(text)
+    local clean = stripRichText(text)
+    return clean:match("^%[Server%]:%s*(.-)%s*obtained") or clean:match("^(.-)%s*obtained") or "Unknown"
 end
 
 local function testWebhook()
@@ -116,17 +102,13 @@ local function testWebhook()
         username = WEBHOOK_NAME, 
         avatar_url = WEBHOOK_AVATAR, 
         embeds = {{ 
-            title = "💎 DVN HUB • SYSTEM ONLINE",
-            description = "```ini\n[ SERVICE STARTED ]\nFluxus Fix Applied!```",
+            title = "💎 DVN HUB • PROXY CONNECTED",
+            description = "```ini\n[ STATUS: BYPASSED ]\nProxy Hyra.io Active!\nRate Limit 429 Defeated.```",
             color = 0x2B2D31, 
-            thumbnail = { url = WEBHOOK_AVATAR },
             fields = {
-                { name = "👤 User Session", value = "**" .. LocalPlayer.DisplayName .. "**", inline = true },
-                { name = "💻 Client Info", value = "**Exec:** " .. executor, inline = true },
-                { name = "🛡️ Security", value = "✅ Anti-Spoof v10\n✅ Fluxus Headers", inline = true }
-            },
-            footer = { text = "DVN HUB • Enterprise Edition" },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
+                { name = "👤 User", value = LocalPlayer.DisplayName, inline = true },
+                { name = "💻 Exec", value = executor, inline = true }
+            }
         }} 
     })
 end
@@ -140,13 +122,12 @@ local function sendFish(data)
                 title = "🚨 TARGET ACQUIRED! 🚨", 
                 description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
                 color = focusData.Color, 
-                thumbnail = { url = WEBHOOK_AVATAR },
                 fields = { 
                     { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
                     { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
                     { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
                 }, 
-                footer = { text = "DVN HUB • Focus Tracker" },
+                footer = { text = "DVN HUB • Proxy Mode" },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
             }} 
         })
@@ -166,21 +147,13 @@ local function sendFish(data)
                     { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
                     { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
                 }, 
-                footer = { text = "DVN HUB • Rarity Logger" },
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
+                footer = { text = "DVN HUB • Proxy Mode" }
             }} 
         })
     end
 end
 
-local function sendJoinLeave(player, joined)
-    if not SETTINGS.LogJoinLeave then return end
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Joined" or "🚪 Left", description = "**"..player.DisplayName.."**", color = joined and 0x2ECC71 or 0xE74C3C }} })
-end
-
--- ====================================================================
--- 5. LISTENER (ANTI-SPOOF GOD MODE)
--- ====================================================================
+-- MAIN LISTENER
 TextChatService.OnIncomingMessage = function(msg)
     if not SETTINGS.LogFish then return end
     if not msg.Text then return end
@@ -199,19 +172,5 @@ TextChatService.OnIncomingMessage = function(msg)
     })
 end
 
-Players.PlayerAdded:Connect(function(player) sendJoinLeave(player, true) end)
-Players.PlayerRemoving:Connect(function(player) sendJoinLeave(player, false) end)
-
--- ====================================================================
--- 6. UI INDICATOR
--- ====================================================================
-if GUI_PARENT:FindFirstChild("DVN_HUB_LOGGER") then GUI_PARENT.DVN_HUB_LOGGER:Destroy() end
-local ScreenGui = Instance.new("ScreenGui"); ScreenGui.Name = "DVN_HUB_LOGGER"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
-local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0, 220, 0, 40); MainFrame.Position = UDim2.new(0.5, -110, 0, 5); MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35); MainFrame.BorderSizePixel = 0; MainFrame.Active = true; MainFrame.Draggable = true
-local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 8)
-local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(60,60,60); Stroke.Thickness = 1
-local StatusDot = Instance.new("Frame", MainFrame); StatusDot.Size = UDim2.new(0, 10, 0, 10); StatusDot.Position = UDim2.new(0, 15, 0.5, -5); StatusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 128); Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1,0)
-local Title = Instance.new("TextLabel", MainFrame); Title.Text = "DVN LOGGER : FLUXUS FIX"; Title.Size = UDim2.new(1, -40, 1, 0); Title.Position = UDim2.new(0, 35, 0, 0); Title.TextColor3 = Color3.fromRGB(240,240,240); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
-
-print("✅ DVN LOGGER v10 LOADED (FLUXUS SUPPORT)")
+print("✅ DVN LOGGER: PROXY MODE ACTIVATED")
 testWebhook()
