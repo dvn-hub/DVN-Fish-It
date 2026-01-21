@@ -92,6 +92,7 @@ end
 -- 4. WEBHOOK SYSTEM (PREMIUM STYLE)
 -- ====================================================================
 local function send(payload)
+<<<<<<< HEAD
     if SETTINGS.WebhookURL == "" then 
         warn("[Webhook] URL Kosong! Masukkan Webhook URL.")
         return 
@@ -110,6 +111,12 @@ local function send(payload)
     elseif success then
         print("[Webhook] Terkirim! Status:", res and res.StatusCode or "Unknown")
     end
+=======
+    if SETTINGS.WebhookURL == "" or not req then return end
+    pcall(function()
+        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+    end)
+>>>>>>> 55a42fec45adf39efe57e52cdc6fd9eb5a93dc5f
 end
 
 local function testWebhook()
