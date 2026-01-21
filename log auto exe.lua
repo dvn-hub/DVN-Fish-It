@@ -34,7 +34,7 @@ local SETTINGS = {
 }
 
 local WEBHOOK_NAME = "Babu DVN"
-local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452251463337377902/1456009509632737417/DVN_New.png"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=69724f7b&is=6970fdfb&hm=a5c01f6fd791c0c8e58ca6732eba77b1a21256f63329654d99d4b24498e9bc6d&"
 
 local RARITY_CONFIG = {
     Epic      = { Enabled = false, Color = 0xB373F8, Icon = "🟣" },
