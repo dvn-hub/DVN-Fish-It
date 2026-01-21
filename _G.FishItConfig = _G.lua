@@ -77,10 +77,12 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Link Webhook Quest Complete"] = "https://discord.com/api/webhooks/1422865888390021262/76qvUPwZ_nUQedBr_q42jm_7y9ddmU34ozVE2r0W4derVkPWMTJ47bvzZvxT1bZmCb_h",
     },
     ["Weather"] = {
-        ["Auto Buying"] = false,
+        ["Auto Buying"] = true,
         ["Minimum Rod"] = "Astral Rod",
         ["Weather List"] = {
             "Wind",
+            "Storm",
+            "Cloudy",
         },
     },
     ["Potions"] = {
@@ -88,16 +90,14 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Minimum Rod"] = "Astral Rod",
     },
     ["Totems"] = {
-        ["Auto Use"] = false,
-        ["Minimum Rod"] = "Ghostfinn Rod",
+        ["Auto Use"] = true,
+        ["Minimum Rod"] = "Element Rod",
         ["Buy List"] = {
-            ["Luck Totem"] = 5,
-            "Mutation Totem",
-            "Shiny Totem",
+            ["Mutation Totem"] = 5,
         },
     },
     ["Event"] = {
-        ["Start Farm"] = true,
+        ["Start Farm"] = false,
         ["Minimum Rod"] = "Element Rod",
         ["Event List"] = {
             "Megalodon Hunt",
@@ -132,6 +132,8 @@ _G.FishItConfig = _G.FishItConfig or {
             "Chroma Bait",
             "Corrupt Bait",
             "Aether Bait",
+            "Floral Bait",
+            "Singularity Bait",
         },
         ["Endgame"] = "",
     },
@@ -149,7 +151,7 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
             ["Ancient Ruin"] = {"Ghostfin Rod", "Angler Rod", "Ares Rod"},
-            ["Kohana"] = {"Element Rod"},
+            ["Treasure Room"] = {"Element Rod"},
         },
         ["Endgame"] = "",
     },
