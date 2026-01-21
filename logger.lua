@@ -17,7 +17,7 @@ local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local Camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
-local req = http_request or request
+local req = http_request or request or (fluxus and fluxus.request) or (getgenv and getgenv().request) or (syn and syn.request)
 
 -- GUI PARENT SAFE
 local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
@@ -96,13 +96,34 @@ local function send(payload)
         return
     end
     if not req then return end
+
+    -- [[ MAGIC FIX: LEGACY DOMAIN ]]
+    local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
+
     pcall(function()
-        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+        req({ Url = finalURL, Method = "POST", Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/Linux" }, Body = HttpService:JSONEncode(payload) })
     end)
 end
 
 local function testWebhook()
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = "✅ Webhook Connected", description = "Babu DVN is ready to log!", color = 0x2ECC71, footer = { text = "Babu DVN • System" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
+    local executor = (identifyexecutor and identifyexecutor()) or "Unknown Client"
+    send({ 
+        username = WEBHOOK_NAME, 
+        avatar_url = WEBHOOK_AVATAR, 
+        embeds = {{ 
+            title = "💎 DVN HUB • SYSTEM ONLINE", 
+            description = "```ini\n[ STATUS: CONNECTED ]\nWaiting for targets...```", 
+            color = 0x2B2D31, 
+            thumbnail = { url = WEBHOOK_AVATAR },
+            fields = {
+                { name = "👤 User Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
+                { name = "💻 Client Info", value = "**Exec:** " .. executor .. "\n**Ping:** " .. math.floor(LocalPlayer:GetNetworkPing() * 1000) .. "ms", inline = true },
+                { name = "🛡️ Security", value = "✅ TextSource Verify\n✅ Anti-Spoof v10", inline = true }
+            },
+            footer = { text = "Babu DVN • System" }, 
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
+        }} 
+    })
 end
 
 local function sendFish(data)
@@ -116,6 +137,7 @@ local function sendFish(data)
                 title = "🚨 TARGET ACQUIRED! 🚨", 
                 description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
                 color = focusData.Color, 
+                thumbnail = { url = WEBHOOK_AVATAR },
                 fields = { 
                     { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
                     { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
@@ -159,7 +181,9 @@ end
 -- LISTENERS
 TextChatService.OnIncomingMessage = function(msg)
     if not SETTINGS.LogFish then return end
-    if not msg.Text or not msg.Text:find("obtained") then return end
+    if not msg.Text then return end
+    if msg.TextSource then return end -- Anti Spoof
+    if not msg.Text:find("obtained") then return end
     
     local fishName, weight = detectFishNameAndWeight(msg.Text)
     local rarity = detectRarity(msg.Text)
