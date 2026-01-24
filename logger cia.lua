@@ -33,7 +33,7 @@ local SETTINGS = {
 
 -- CONFIG DATA
 local WEBHOOK_NAME = "Alicia ❤️"
-local WEBHOOK_AVATAR = "https://media.discordapp.net/attachments/1452840240484974696/1464645059856044204/IMG_5096.png?ex=69763882&is=6974e702&hm=a5d224b24aa15e91ae7b09ca0f07e55431384ad2d49f8b11163dad0155443adc&=&format=webp&quality=lossless&width=767&height=767"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1452679772428828827/1464646946575749181/IMG_5096.png?ex=69763a43&is=6974e8c3&hm=7e809899697e3139b6d420ad86f3fd9e99fd64caec97a029e3df5efe17cd0bcd&"
 
 -- [UPDATE] Removed Common/Uncommon/Rare. All Default OFF.
 local RARITY_CONFIG = {
