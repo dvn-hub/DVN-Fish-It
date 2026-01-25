@@ -54,6 +54,7 @@ _G.FishItConfig = _G.FishItConfig or {
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
         ["Auto Element Rod"] = true,
+        ["Auto Diamond Rod"] = true,
         ["Unlock Ancient Ruin"] = true,
         ["Allowed Sacrifice"] = {
             "Ghost Shark",
@@ -64,6 +65,9 @@ _G.FishItConfig = _G.FishItConfig or {
             "Giant Squid",
             "Blob Shark",
             "Ghost Shark",
+            "Mosasaur Shark",
+            "Bone Shark",
+            "King Jelly",
         },
         ["FARM_LOC_SECRET_SACRIFICE"] = "Ocean",
 
