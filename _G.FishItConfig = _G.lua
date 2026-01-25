@@ -7,10 +7,7 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Auto Unfavorite"] = false,
         ["Fish Name"] = {
             "Sacred Guardian Squid", 
-            "Runic Sea Crustacean", 
-            "Sea Crustacean", 
             "Flatheaded Whale Shark", 
-            "Fossillized Shark", 
             "Primordial Octopus", 
             "Cavern Dweller", 
             "Runic Squid", 
@@ -168,4 +165,5 @@ _G.FishItConfig = _G.FishItConfig or {
     ["AutoReconnect"] = false,
     ["HideGUI"] = false,
     ["EXIT_MAP_IF_DISCONNECT"] = false,
+
 }
