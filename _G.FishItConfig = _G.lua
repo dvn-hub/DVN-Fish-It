@@ -7,12 +7,8 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Auto Unfavorite"] = false,
         ["Fish Name"] = {
             "Sacred Guardian Squid", 
-            "Runic Sea Crustacean", 
-            "Sea Crustacean", 
             "Flatheaded Whale Shark", 
-            "Fossillized Shark", 
             "Primordial Octopus", 
-            "Cavern Dweller", 
             "Runic Squid", 
             "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
@@ -53,8 +49,8 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
-        ["Auto Element Rod"] = true,
-        ["Auto Diamond Rod"] = true,
+        ["Auto Element Rod"] = false,
+        ["Auto Diamond Rod"] = false,
         ["Unlock Ancient Ruin"] = true,
         ["Allowed Sacrifice"] = {
             "Ghost Shark",
@@ -68,6 +64,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Mosasaur Shark",
             "Bone Shark",
             "King Jelly",
+            "Gladiator Shark",
         },
         ["FARM_LOC_SECRET_SACRIFICE"] = "Ocean",
 
@@ -167,5 +164,5 @@ _G.FishItConfig = _G.FishItConfig or {
 
     ["AutoReconnect"] = false,
     ["HideGUI"] = false,
-    ["EXIT_MAP_IF_DISCONNECT"] = false,
+    ["EXIT_MAP_IF_DISCONNECT"] = true,
 }
