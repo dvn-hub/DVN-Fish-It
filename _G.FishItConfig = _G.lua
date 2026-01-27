@@ -12,7 +12,8 @@ _G.FishItConfig = _G.FishItConfig or {
             "Runic Squid", 
             "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
-            {Variant = "Leviathan's Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
+            {Variant = "Leviathan's Rage"},
+            {Variant = "Leviathan Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
             -- {Variant = "Leviathan's Rage"}, -- Variant Only
             -- {Tier = "Secret", Variant = "Leviathan's Rage"},  -- Tier + Variant
         },
@@ -32,6 +33,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage"},
+            {Variant = "Leviathan Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
             -- {Variant = "Leviathan's Rage"}, -- Variant Only
         },
         ["Item Name"] = {
