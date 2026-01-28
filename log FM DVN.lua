@@ -68,26 +68,44 @@ local function ReportToDiscord(PlayerName, RealValue, FM)
 
             },
 
-            ["footer"] = { ["text"] = "Divine CCTV • Real Value Tracking" }
+            ["footer"] = { ["text"] = "Divine Tools • discord.gg/dvn • " .. os.date("%X") }
 
         }}
 
     }
 
+   -- LOGIC EDIT MODE (Supaya gak berisik)
+    local Data = SessionData[PlayerName]
+    local TargetURL = getgenv().WebhookURL
+    local Method = "POST"
 
+    if Data and Data.MessageID then
+        TargetURL = getgenv().WebhookURL .. "/messages/" .. Data.MessageID
+        Method = "PATCH"
+    else
+        TargetURL = getgenv().WebhookURL .. "?wait=true"
+    end
 
-    Request({
+      local Response = Request({
 
-        Url = getgenv().WebhookURL,
+        Url = TargetURL,
 
-        Method = "POST",
+        Method = Method,
 
         Headers = {["Content-Type"] = "application/json"},
 
         Body = HttpService:JSONEncode(Payload)
 
     })
-
+    -- Simpan Message ID jika baru pertama kirim (POST)
+    if Method == "POST" and Response and Response.Body then
+        local Success, Body = pcall(function() return HttpService:JSONDecode(Response.Body) end)
+        if Success and Body and Body.id then
+            if SessionData[PlayerName] then
+                SessionData[PlayerName].MessageID = Body.id
+            end
+        end
+    end
 end
 
 
