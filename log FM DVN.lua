@@ -148,12 +148,20 @@ local function MonitorPlayer(Player)
 
         if not Data then return end
 
+        local Gained = NewValue - Data.StartCount
 
+        -- [FIX] Anti-Glitch Angka Jutaan (Data Loading)
+        -- Jika stat naik drastis (> 500) tiba-tiba, anggap itu loading data awal.
+        if Gained > 500 then
+            Data.StartCount = NewValue
+            Data.StartTime = tick()
+            return
+        end
 
         local TimeElapsed = tick() - Data.StartTime
 
-        local Gained = NewValue - Data.StartCount
-
+        -- [FIX] Minimal waktu sampling 1 detik biar gak infinity/jutaan
+        if TimeElapsed < 1 then return end
         
 
         -- Filter: Cuma lapor kalau nambah positif
