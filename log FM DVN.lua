@@ -2,13 +2,13 @@
 
 -- Script ini membaca Value Asli (1644659) bukan Teks Layar (1.6M)
 
-
+-- v2.0 - Single Embed Edition
 
 -- ⚙️ SETTING WEBHOOK
 
 getgenv().WebhookURL = "https://discord.com/api/webhooks/1463022024577519719/rZyVFL5-F2p5YZLgYeGevW7YVHuaToPAHfs76bvrcUf_Y-lFVslNtohcPH95DXqlAxHE"
 
-
+getgenv().MasterMessageID = nil -- ID Global untuk 1 embed
 
 -- ✅ CONFIG OTOMATIS (Berdasarkan hasil scan abang)
 
@@ -26,25 +26,40 @@ local HttpService = game:GetService("HttpService")
 
 local Request = (syn and syn.request) or (http and http.request) or http_request or request
 
-local SessionData = {} 
-
 
 
 -- 📨 FUNGSI LAPOR KE DISCORD
 
-local function ReportToDiscord(PlayerName, RealValue, FM)
+local SessionData = {} -- { [PlayerName] = { StartTime, StartCount, CurrentValue, FM } }
 
-    local EmbedColor = 3066993 -- Hijau (Normal)
+-- 📨 FUNGSI LAPOR GABUNGAN (Premium Embed)
+local function SendMasterReport()
+    local description = "```\n"
+    description = description .. string.format("%-20s | %-12s | %-15s\n", "PLAYER", "FM (/min)", "TOTAL CAUGHT")
+    description = description .. string.rep("-", 54) .. "\n"
 
-    if FM < 1 then EmbedColor = 15158332 end -- Merah (Macet)
+    local playersToReport = {}
+    for name, data in pairs(SessionData) do
+        if data.CurrentValue then
+            table.insert(playersToReport, {
+                name = name,
+                fm = data.FM or 0,
+                value = data.CurrentValue
+            })
+        end
+    end
+    
+    if #playersToReport == 0 then
+        description = description .. "Menunggu data pemain...\n"
+    else
+        table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
+        for _, data in ipairs(playersToReport) do
+            local formattedValue = tostring(data.value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+            description = description .. string.format("%-20s | %-12.2f | %-15s\n", data.name:sub(1, 20), data.fm, formattedValue)
+        end
+    end
 
-    if FM > 15 then EmbedColor = 3447003 end -- Biru (Ngebut)
-
-
-
-    -- Format Angka biar ada komanya (Contoh: 1,644,659)
-
-    local FormattedValue = tostring(RealValue):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+    description = description .. "```"
 
 
 
@@ -55,54 +70,40 @@ local function ReportToDiscord(PlayerName, RealValue, FM)
         ["avatar_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&",
 
         ["embeds"] = {{
-
-            ["title"] = "🎣 STATUS: " .. PlayerName,
-
-            ["color"] = EmbedColor,
-
-            ["fields"] = {
-
-                { ["name"] = "🚀 Kecepatan (F/M)", ["value"] = "**" .. tostring(FM) .. "** / min", ["inline"] = true },
-
-                { ["name"] = "🔢 Total Asli", ["value"] = FormattedValue, ["inline"] = true }
-
+            ["title"] = "📈 Divine Tools | Server Performance Monitor",
+            ["description"] = description,
+            ["color"] = 0x2B2D31,
+            ["footer"] = { 
+                ["text"] = "Divine Tools • discord.gg/dvn",
+                ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
             },
 
-            ["footer"] = { ["text"] = "Divine Tools • discord.gg/dvn • " .. os.date("%X") }
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
 
         }}
 
     }
 
-   -- LOGIC EDIT MODE (Supaya gak berisik)
-    local Data = SessionData[PlayerName]
     local TargetURL = getgenv().WebhookURL
     local Method = "POST"
 
-    if Data and Data.MessageID then
-        TargetURL = getgenv().WebhookURL .. "/messages/" .. Data.MessageID
+    if getgenv().MasterMessageID then
+        TargetURL = getgenv().WebhookURL .. "/messages/" .. getgenv().MasterMessageID
         Method = "PATCH"
     else
         TargetURL = getgenv().WebhookURL .. "?wait=true"
     end
 
-      local Response = Request({
+    local Response = Request({ Url = TargetURL, Method = Method, Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
 
-        Url = TargetURL,
-
-        Method = Method,
-
-        Headers = {["Content-Type"] = "application/json"},
-
-        Body = HttpService:JSONEncode(Payload)
-
-    })
-    -- Simpan Message ID jika baru pertama kirim (POST)
-    if Method == "POST" and Response and Response.Body then
+    if Response and Response.Body then
         local Success, Body = pcall(function() return HttpService:JSONDecode(Response.Body) end)
-        if Success and Body and Body.id then
-            if SessionData[PlayerName] then
-                SessionData[PlayerName].MessageID = Body.id
+        if Success and Body then
+            if Body.id and Method == "POST" then
+                getgenv().MasterMessageID = Body.id
+            end
+            if Response.StatusCode == 404 then
+                getgenv().MasterMessageID = nil
             end
         end
     end
@@ -114,7 +115,6 @@ end
 
 local function MonitorPlayer(Player)
 
-    -- Tunggu Leaderstats & Caught Muncul
 
     local StatsFolder = Player:WaitForChild(getgenv().FolderName, 60)
 
@@ -126,21 +126,7 @@ local function MonitorPlayer(Player)
 
     if not TargetStat then return end
 
-
-
-    -- Simpan Angka Awal (Ini ngambil angka murni 1644659)
-
-    SessionData[Player.Name] = {
-
-        StartTime = tick(),
-
-        StartCount = TargetStat.Value 
-
-    }
-
-
-
-    -- Pasang Alat Sadap: Kalau angka berubah, lapor!
+    SessionData[Player.Name] = { StartTime = tick(), StartCount = TargetStat.Value, CurrentValue = TargetStat.Value, FM = 0 }
 
     TargetStat.Changed:Connect(function(NewValue)
 
@@ -150,8 +136,6 @@ local function MonitorPlayer(Player)
 
         local Gained = NewValue - Data.StartCount
 
-        -- [FIX] Anti-Glitch Angka Jutaan (Data Loading)
-        -- Jika stat naik drastis (> 500) tiba-tiba, anggap itu loading data awal.
         if Gained > 500 then
             Data.StartCount = NewValue
             Data.StartTime = tick()
@@ -160,33 +144,14 @@ local function MonitorPlayer(Player)
 
         local TimeElapsed = tick() - Data.StartTime
 
-        -- [FIX] Minimal waktu sampling 1 detik biar gak infinity/jutaan
-        if TimeElapsed < 1 then return end
-        
-
-        -- Filter: Cuma lapor kalau nambah positif
-
-        if Gained <= 0 then return end 
-
-
+        if TimeElapsed < 1 or Gained <= 0 then return end 
 
         local Minutes = TimeElapsed / 60
 
-        local FM = 0
-
-        if Minutes > 0 then 
-
-            FM = math.floor((Gained / Minutes) * 100) / 100 
-
-        end
-
-
-
-        -- Lapor pakai angka asli
-
-        ReportToDiscord(Player.Name, NewValue, FM)
-
+        Data.CurrentValue = NewValue
+        Data.FM = (Minutes > 0) and (math.floor((Gained / Minutes) * 100) / 100) or 0
     end)
+
 
 end
 
@@ -194,7 +159,7 @@ end
 
 -- 🔄 JALANKAN KE SEMUA PLAYER
 
-print("✅ CCTV DIAKTIFKAN! Target: " .. getgenv().StatName)
+print("✅ CCTV DIAKTIFKAN! Laporan gabungan setiap 60 detik.")
 
 for _, P in pairs(Players:GetPlayers()) do
 
@@ -210,4 +175,17 @@ Players.PlayerAdded:Connect(function(P)
 
     task.spawn(function() MonitorPlayer(P) end)
 
+end)
+
+Players.PlayerRemoving:Connect(function(Player)
+    if SessionData[Player.Name] then
+        SessionData[Player.Name] = nil
+    end
+end)
+
+-- 🔄 LOOP UTAMA UNTUK MENGIRIM LAPORAN GABUNGAN
+task.spawn(function()
+    while task.wait(60) do
+        pcall(SendMasterReport)
+    end
 end)
