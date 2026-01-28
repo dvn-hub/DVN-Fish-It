@@ -15,6 +15,8 @@ getgenv().WebhookURL = "https://discord.com/api/webhooks/1466009680785707252/qnk
 getgenv().FolderName = "leaderstats" 
 
 getgenv().StatName = "Caught" 
+getgenv().WarningEnabled = false -- Default OFF (Diatur lewat GUI)
+getgenv().WarningThreshold = 13
 
 
 -- 🛑 HENTIKAN LOOP LAMA JIKA RE-EXECUTE
@@ -27,6 +29,8 @@ end
 local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local LuckStatus = "Inactive" -- Status Server Luck
 
 local HttpService = game:GetService("HttpService")
@@ -110,7 +114,7 @@ local function SendMasterReport()
             ["description"] = description,
             ["color"] = 0x2B2D31,
             ["footer"] = { 
-                ["text"] = "Divine Tools • discord.gg/dvn",
+                ["text"] = "Divine Tools • Today at " .. os.date("%H:%M") .. " • discord.gg/dvn",
                 ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
             },
 
@@ -145,6 +149,32 @@ local function SendMasterReport()
     end
 end
 
+-- ⚠️ FUNGSI WARNING (JIKA FM > 13)
+local function SendWarning(name, fm, total)
+    local description = "**⚠️ ABNORMAL ACTIVITY DETECTED**\n\n"
+    description = description .. "**👤 Player:** `" .. name .. "`\n"
+    description = description .. "**⚡ FM Rate:** `" .. fm .. " / min`\n"
+    description = description .. "**📦 Total Caught:** `" .. tostring(total):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "") .. "`\n"
+    description = description .. "\n*This player has exceeded the safety threshold ("..getgenv().WarningThreshold..").*"
+
+    local Payload = {
+        ["username"] = "Babu DVN",
+        ["avatar_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&",
+        ["embeds"] = {{
+            ["title"] = "🚨 HIGH FM WARNING",
+            ["description"] = description,
+            ["color"] = 0xFF0000, -- Red Warning Color
+            ["footer"] = { 
+                ["text"] = "Divine Tools • Today at " .. os.date("%H:%M") .. " • discord.gg/dvn",
+                ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+    
+    local TargetURL = getgenv().WebhookURL
+    Request({ Url = TargetURL, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
+end
 
 
 -- 🕵️ FUNGSI MATA-MATA (CCTV)
@@ -162,7 +192,7 @@ local function MonitorPlayer(Player)
 
     if not TargetStat then return end
 
-    SessionData[Player.Name] = { StartTime = tick(), StartCount = TargetStat.Value, CurrentValue = TargetStat.Value, FM = 0 }
+    SessionData[Player.Name] = { StartTime = tick(), StartCount = TargetStat.Value, CurrentValue = TargetStat.Value, FM = 0, LastWarning = 0 }
 
     TargetStat.Changed:Connect(function(NewValue)
 
@@ -189,6 +219,14 @@ local function MonitorPlayer(Player)
         local Minutes = TimeElapsed / 60
 
         Data.FM = (Minutes > 0) and (math.floor((Gained / Minutes) * 100) / 100) or 0
+
+        -- [CHECK WARNING]
+        if getgenv().WarningEnabled and Data.FM > getgenv().WarningThreshold then
+            if not Data.LastWarning or (tick() - Data.LastWarning > 60) then -- Cooldown 60s agar tidak spam
+                SendWarning(Player.Name, Data.FM, Data.CurrentValue)
+                Data.LastWarning = tick()
+            end
+        end
     end)
 
 
@@ -226,5 +264,55 @@ end)
 getgenv().DVN_CCTV_Loop = task.spawn(function()
     while task.wait(60) do
         pcall(SendMasterReport)
+    end
+end)
+
+-- 🖥️ GUI CONTROL PANEL (TOGGLE WARNING)
+local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
+if GUI_PARENT:FindFirstChild("DVN_CCTV_UI") then GUI_PARENT.DVN_CCTV_UI:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui"); ScreenGui.Name = "DVN_CCTV_UI"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 240, 0, 80)
+MainFrame.Position = UDim2.new(0.5, -120, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 8)
+local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(60,60,60); Stroke.Thickness = 1
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Text = "DVN CCTV MONITOR"
+Title.Size = UDim2.new(1, -20, 0, 30)
+Title.Position = UDim2.new(0, 10, 0, 5)
+Title.TextColor3 = Color3.fromRGB(240,240,240)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local ToggleBtn = Instance.new("TextButton", MainFrame)
+ToggleBtn.Size = UDim2.new(1, -20, 0, 30)
+ToggleBtn.Position = UDim2.new(0, 10, 0, 40)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+ToggleBtn.Text = "⚠️ Warning Mode: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+ToggleBtn.Font = Enum.Font.GothamBold
+ToggleBtn.TextSize = 12
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    getgenv().WarningEnabled = not getgenv().WarningEnabled
+    if getgenv().WarningEnabled then
+        ToggleBtn.Text = "⚠️ Warning Mode: ON (>13)"
+        ToggleBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 20, 20)}):Play()
+    else
+        ToggleBtn.Text = "⚠️ Warning Mode: OFF"
+        ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 45)}):Play()
     end
 end)
