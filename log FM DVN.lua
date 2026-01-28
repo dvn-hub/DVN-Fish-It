@@ -114,7 +114,7 @@ local function SendMasterReport()
             ["description"] = description,
             ["color"] = 0x2B2D31,
             ["footer"] = { 
-                ["text"] = "Divine Tools • Today at " .. os.date("%H:%M") .. " • discord.gg/dvn",
+                ["text"] = "Divine Tools • discord.gg/dvn",
                 ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
             },
 
@@ -165,7 +165,7 @@ local function SendWarning(name, fm, total)
             ["description"] = description,
             ["color"] = 0xFF0000, -- Red Warning Color
             ["footer"] = { 
-                ["text"] = "Divine Tools • Today at " .. os.date("%H:%M") .. " • discord.gg/dvn",
+                ["text"] = "Divine Tools • discord.gg/dvn",
                 ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
             },
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
