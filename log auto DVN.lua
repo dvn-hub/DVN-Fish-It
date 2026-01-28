@@ -114,12 +114,16 @@ local function testWebhook()
         embeds = {{ 
             title = "💎 DVN HUB • SYSTEM ONLINE",
             description = "```ini\n[ STATUS: CONNECTED ]\nUsing Legacy Domain (discordapp.com)\nFluxus Fix Applied!```",
-            color = 0x2B2D31, 
+            color = 0x2B2D31,
+            thumbnail = { url = WEBHOOK_AVATAR }, 
             fields = {
                 { name = "👤 User", value = LocalPlayer.DisplayName, inline = true },
                 { name = "💻 Exec", value = executor, inline = true }
             },
-            footer = { text = "DVN HUB • Fluxus Edition" },
+            footer = {
+                text = "Divine Tools • discord.gg/dvn",
+                icon_url = WEBHOOK_AVATAR
+            },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
         }} 
     })
@@ -128,19 +132,24 @@ end
 local function sendFish(data)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = "🚨 TARGET ACQUIRED! 🚨", 
-                description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
+                send({
+            username = WEBHOOK_NAME,
+            avatar_url = WEBHOOK_AVATAR,
+            embeds = {{
+                title = "🚨 TARGET ACQUIRED! 🚨",
+                description = "**" .. data.Player .. "** has caught a focused target!",
                 color = focusData.Color, 
                 thumbnail = { url = WEBHOOK_AVATAR },
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
-                footer = { text = "DVN HUB • Focus Tracker" },
+                fields = {
+                    { name = "👑 Fish", value = "**" .. data.Fish .. "**", inline = false },
+                    { name = "👤 Player", value = "`" .. data.Player .. "`", inline = true },
+                    { name = "⚖️ Weight", value = "`" .. data.Weight .. "`", inline = true },
+                    { name = "🎲 Chance", value = "`1 in " .. data.Chance .. "`", inline = true }
+                },
+                footer = {
+                    text = "Divine Tools • discord.gg/dvn",
+                    icon_url = WEBHOOK_AVATAR
+                },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
             }} 
         })
@@ -149,18 +158,24 @@ local function sendFish(data)
 
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = cfg.Icon.." "..data.Rarity.." Catch!", 
-                color = cfg.Color, 
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
-                footer = { text = "DVN HUB • Rarity Logger" },
+        send({
+            username = WEBHOOK_NAME,
+            avatar_url = WEBHOOK_AVATAR,
+            embeds = {{
+                title = cfg.Icon .. " A wild " .. data.Rarity .. " appeared!",
+                description = "A rare fish has been caught on the server.",
+                color = cfg.Color,
+                thumbnail = { url = WEBHOOK_AVATAR },
+                fields = {
+                    { name = "🐟 Fish", value = "**" .. data.Fish .. "**", inline = false },
+                    { name = "👤 Player", value = "`" .. data.Player .. "`", inline = true },
+                    { name = "⚖️ Weight", value = "`" .. data.Weight .. "`", inline = true },
+                    { name = "🎲 Chance", value = "`1 in " .. data.Chance .. "`", inline = true }
+                },
+                footer = {
+                    text = "Divine Tools • discord.gg/dvn",
+                    icon_url = WEBHOOK_AVATAR
+                },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
             }} 
         })
@@ -169,7 +184,20 @@ end
 
 local function sendJoinLeave(player, joined)
     if not SETTINGS.LogJoinLeave then return end
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Joined" or "🚪 Left", description = "**"..player.DisplayName.."**", color = joined and 0x2ECC71 or 0xE74C3C }} })
+    send({
+        username = WEBHOOK_NAME,
+        avatar_url = WEBHOOK_AVATAR,
+        embeds = {{
+            title = joined and "👋 Player Joined" or "🚪 Player Left",
+            description = "**" .. player.DisplayName .. "** (`@" .. player.Name .. "`) has " .. (joined and "joined" or "left") .. " the server.",
+            color = joined and 0x2ECC71 or 0xE74C3C,
+            footer = {
+                text = "Divine Tools • discord.gg/dvn",
+                icon_url = WEBHOOK_AVATAR
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    })
 end
 
 -- ====================================================================
