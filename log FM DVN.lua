@@ -26,6 +26,8 @@ end
 
 local Players = game:GetService("Players")
 
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
 local HttpService = game:GetService("HttpService")
 
 local Request = (syn and syn.request) or (http and http.request) or http_request or request
@@ -77,6 +79,13 @@ local function SendMasterReport()
             ["title"] = "📈 Divine Tools | Server Performance Monitor",
             ["description"] = description,
             ["color"] = 0x2B2D31,
+            ["fields"] = {
+                {
+                    ["name"] = "Host",
+                    ["value"] = LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)",
+                    ["inline"] = false
+                }
+            },
             ["footer"] = { 
                 ["text"] = "Divine Tools • discord.gg/dvn",
                 ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
@@ -143,13 +152,14 @@ local function MonitorPlayer(Player)
 
         local Gained = NewValue - Data.StartCount
 
-        if Gained > 500 then
+        local TimeElapsed = tick() - Data.StartTime
+
+        -- [FIX v2] Anti-Glitch lebih pintar, deteksi lonjakan cepat walau angka kecil
+        if (Gained > 500) or (Gained > 10 and TimeElapsed < 15) then
             Data.StartCount = NewValue
             Data.StartTime = tick()
             return
         end
-
-        local TimeElapsed = tick() - Data.StartTime
 
         if TimeElapsed < 1 or Gained <= 0 then return end 
 
