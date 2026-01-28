@@ -40,7 +40,8 @@ local SessionData = {} -- { [PlayerName] = { StartTime, StartCount, CurrentValue
 
 -- 📨 FUNGSI LAPOR GABUNGAN (Premium Embed)
 local function SendMasterReport()
-    local description = "```\n"
+    local description = "**Host:** " .. LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)\n\n"
+    description = description .. "```\n"
     description = description .. string.format("%-20s | %-12s | %-15s\n", "PLAYER", "FM (/min)", "TOTAL CAUGHT")
     description = description .. string.rep("-", 54) .. "\n"
 
@@ -79,13 +80,6 @@ local function SendMasterReport()
             ["title"] = "📈 Divine Tools | Server Performance Monitor",
             ["description"] = description,
             ["color"] = 0x2B2D31,
-            ["fields"] = {
-                {
-                    ["name"] = "Host",
-                    ["value"] = LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)",
-                    ["inline"] = false
-                }
-            },
             ["footer"] = { 
                 ["text"] = "Divine Tools • discord.gg/dvn",
                 ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
