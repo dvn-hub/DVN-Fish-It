@@ -8,7 +8,7 @@
 
 getgenv().WebhookURL = "https://discord.com/api/webhooks/1463022024577519719/rZyVFL5-F2p5YZLgYeGevW7YVHuaToPAHfs76bvrcUf_Y-lFVslNtohcPH95DXqlAxHE"
 
-getgenv().MasterMessageID = nil -- ID Global untuk 1 embed
+-- [FIX] ID Global disimpan biar gak kirim pesan baru kalau re-execute
 
 -- ✅ CONFIG OTOMATIS (Berdasarkan hasil scan abang)
 
@@ -17,6 +17,10 @@ getgenv().FolderName = "leaderstats"
 getgenv().StatName = "Caught" 
 
 
+-- 🛑 HENTIKAN LOOP LAMA JIKA RE-EXECUTE
+if getgenv().DVN_CCTV_Loop then
+    task.cancel(getgenv().DVN_CCTV_Loop)
+end
 
 -- 📊 VARIABLES SYSTEM
 
@@ -133,6 +137,9 @@ local function MonitorPlayer(Player)
         local Data = SessionData[Player.Name]
 
         if not Data then return end
+        
+        -- [FIX] Update Total Asli DULUAN biar selalu akurat
+        Data.CurrentValue = NewValue
 
         local Gained = NewValue - Data.StartCount
 
@@ -148,7 +155,6 @@ local function MonitorPlayer(Player)
 
         local Minutes = TimeElapsed / 60
 
-        Data.CurrentValue = NewValue
         Data.FM = (Minutes > 0) and (math.floor((Gained / Minutes) * 100) / 100) or 0
     end)
 
@@ -184,7 +190,7 @@ Players.PlayerRemoving:Connect(function(Player)
 end)
 
 -- 🔄 LOOP UTAMA UNTUK MENGIRIM LAPORAN GABUNGAN
-task.spawn(function()
+getgenv().DVN_CCTV_Loop = task.spawn(function()
     while task.wait(60) do
         pcall(SendMasterReport)
     end
