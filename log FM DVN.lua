@@ -27,6 +27,7 @@ end
 local Players = game:GetService("Players")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local LuckStatus = "Inactive" -- Status Server Luck
 
 local HttpService = game:GetService("HttpService")
 
@@ -38,9 +39,37 @@ local Request = (syn and syn.request) or (http and http.request) or http_request
 
 local SessionData = {} -- { [PlayerName] = { StartTime, StartCount, CurrentValue, FM } }
 
+-- 🍀 FUNGSI DETEKSI SERVER LUCK
+local function GetLuckDuration()
+    local success, text, seconds = pcall(function()
+        local pGui = LocalPlayer:FindFirstChild("PlayerGui")
+        if not pGui then return nil end
+        
+        local gui = pGui:FindFirstChild("!!! Server Luck")
+        if not gui then return nil end
+        
+        -- Path: Frame["Server Luck"].Inside.Toggles.Timer
+        local timer = gui.Frame["Server Luck"].Inside.Toggles.Timer
+        if not timer or not timer.Visible then return nil end
+        
+        local rawText = timer.Text -- "Ends: 52m 39s"
+        local cleanText = rawText:gsub("Ends: ", "")
+        
+        local h = tonumber(cleanText:match("(%d+)h")) or 0
+        local m = tonumber(cleanText:match("(%d+)m")) or 0
+        local s = tonumber(cleanText:match("(%d+)s")) or 0
+        
+        return cleanText, (h * 3600) + (m * 60) + s
+    end)
+    
+    return (success and text) or "Inactive", (success and seconds) or 0
+end
+
 -- 📨 FUNGSI LAPOR GABUNGAN (Premium Embed)
 local function SendMasterReport()
-    local description = "**Host:** " .. LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)\n\n"
+    local luckText, _ = GetLuckDuration()
+    local description = "**Host:** " .. LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)\n"
+    description = description .. "**Server Luck:** " .. luckText .. "\n\n"
     description = description .. "```\n"
     description = description .. string.format("%-20s | %-12s | %-15s\n", "PLAYER", "FM (/min)", "TOTAL CAUGHT")
     description = description .. string.rep("-", 54) .. "\n"
