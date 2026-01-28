@@ -6,7 +6,7 @@
 
 -- ⚙️ SETTING WEBHOOK
 
-getgenv().WebhookURL = "https://discord.com/api/webhooks/1463022024577519719/rZyVFL5-F2p5YZLgYeGevW7YVHuaToPAHfs76bvrcUf_Y-lFVslNtohcPH95DXqlAxHE"
+getgenv().WebhookURL = "https://discord.com/api/webhooks/1466009680785707252/qnk1X9psg-APYBNQznH57QjvOKQN6iiPA5s6GldDeZuCXUS-HJf4GrPjBkN2RfAUEBHf"
 
 -- [FIX] ID Global disimpan biar gak kirim pesan baru kalau re-execute
 
