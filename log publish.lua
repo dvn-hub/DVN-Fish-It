@@ -213,37 +213,44 @@ ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+-- 1. MAIN FRAME STRUCTURE
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 550, 0, 350)
-MainFrame.AnchorPoint = Vector2.new(0.5, 0) -- Top Center Pivot (Fixes Minimize Animation)
-MainFrame.Position = UDim2.new(0.5, 0, 0.5, -175) -- Centered
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-MainFrame.BackgroundTransparency = 0.1 -- Glassy Look
+MainFrame.Size = UDim2.new(0, 500, 0, 350)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, -175)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0) -- Top Center Pivot for Roll-Up
+MainFrame.BackgroundColor3 = THEME.Background
 MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
+MainFrame.ClipsDescendants = true -- CRITICAL: Hides content when minimized
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
-
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = THEME.Accent
-UIStroke.Transparency = 0.6
-UIStroke.Thickness = 1
-UIStroke.Parent = MainFrame
 
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundTransparency = 1
+Header.Size = UDim2.new(1, 0, 0, 35)
+Header.BackgroundColor3 = THEME.Element
+Header.BorderSizePixel = 0
 Header.Parent = MainFrame
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 10)
+HeaderCorner.Parent = Header
+
+-- Patch to cover bottom rounded corners of Header when expanded
+local HeaderPatch = Instance.new("Frame")
+HeaderPatch.Size = UDim2.new(1, 0, 0, 10)
+HeaderPatch.Position = UDim2.new(0, 0, 1, -10)
+HeaderPatch.BackgroundColor3 = THEME.Element
+HeaderPatch.BorderSizePixel = 0
+HeaderPatch.Parent = Header
 
 local HeaderTitle = Instance.new("TextLabel")
 HeaderTitle.Text = "DVN LOGGER"
-HeaderTitle.Size = UDim2.new(1, -100, 1, 0)
+HeaderTitle.Size = UDim2.new(1, -50, 1, 0)
 HeaderTitle.Position = UDim2.new(0, 15, 0, 0)
 HeaderTitle.BackgroundTransparency = 1
 HeaderTitle.TextColor3 = THEME.Accent
@@ -255,62 +262,22 @@ HeaderTitle.Parent = Header
 local MinBtn = Instance.new("TextButton")
 MinBtn.Name = "MinBtn"
 MinBtn.Text = "-"
-MinBtn.Size = UDim2.new(0, 40, 1, 0)
-MinBtn.Position = UDim2.new(1, -40, 0, 0)
+MinBtn.Size = UDim2.new(0, 35, 1, 0)
+MinBtn.Position = UDim2.new(1, -35, 0, 0)
 MinBtn.BackgroundTransparency = 1
 MinBtn.TextColor3 = THEME.TextDim
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextSize = 24
 MinBtn.Parent = Header
 
-local isMinimized = false
-local fullSize = UDim2.new(0, 550, 0, 350)
-local minSize = UDim2.new(0, 550, 0, 40)
-
-MinBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        Body.Visible = false
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
-        MinBtn.Text = "+"
-    else
-        Body.Visible = true
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
-        MinBtn.Text = "-"
-    end
-end)
-
--- Separator
-local Separator = Instance.new("Frame")
-Separator.Size = UDim2.new(1, 0, 0, 1)
-Separator.Position = UDim2.new(0, 0, 0, 40)
-Separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-Separator.BackgroundTransparency = 0.9
-Separator.BorderSizePixel = 0
-Separator.Parent = MainFrame
-
--- Body (Container for Content)
-local Body = Instance.new("Frame")
-Body.Name = "Body"
-Body.Size = UDim2.new(1, 0, 1, -41)
-Body.Position = UDim2.new(0, 0, 0, 41)
-Body.BackgroundTransparency = 1
-Body.Parent = MainFrame
-
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 140, 1, 0)
-Sidebar.BackgroundTransparency = 1
-Sidebar.Parent = Body
-
-local SidebarBorder = Instance.new("Frame")
-SidebarBorder.Size = UDim2.new(0, 1, 1, 0)
-SidebarBorder.Position = UDim2.new(1, -1, 0, 0)
-SidebarBorder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SidebarBorder.BackgroundTransparency = 0.9
-SidebarBorder.BorderSizePixel = 0
-SidebarBorder.Parent = Sidebar
+Sidebar.Size = UDim2.new(0, 120, 1, -35)
+Sidebar.Position = UDim2.new(0, 0, 0, 35)
+Sidebar.BackgroundColor3 = THEME.Element
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
 
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Padding = UDim.new(0, 5)
@@ -322,22 +289,22 @@ local SidebarPadding = Instance.new("UIPadding")
 SidebarPadding.PaddingTop = UDim.new(0, 10)
 SidebarPadding.Parent = Sidebar
 
--- PageContainer
-local PageContainer = Instance.new("Frame")
-PageContainer.Name = "PageContainer"
-PageContainer.Size = UDim2.new(1, -140, 1, 0)
-PageContainer.Position = UDim2.new(0, 140, 0, 0)
-PageContainer.BackgroundTransparency = 1
-PageContainer.Parent = Body
+-- ContentContainer
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Name = "ContentContainer"
+ContentContainer.Size = UDim2.new(1, -120, 1, -35)
+ContentContainer.Position = UDim2.new(0, 120, 0, 35)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Parent = MainFrame
 
--- Pages
+-- 2. FIX BLANK PAGES
 local InfoPage = Instance.new("Frame")
 InfoPage.Name = "InfoPage"
-InfoPage.Size = UDim2.new(1, -30, 1, -30)
-InfoPage.Position = UDim2.new(0, 15, 0, 15)
+InfoPage.Size = UDim2.new(1, -20, 1, -20)
+InfoPage.Position = UDim2.new(0, 10, 0, 10)
 InfoPage.BackgroundTransparency = 1
 InfoPage.Visible = true
-InfoPage.Parent = PageContainer
+InfoPage.Parent = ContentContainer
 
 local InfoLayout = Instance.new("UIListLayout")
 InfoLayout.Padding = UDim.new(0, 10)
@@ -346,22 +313,38 @@ InfoLayout.Parent = InfoPage
 
 local LoggerPage = Instance.new("Frame")
 LoggerPage.Name = "LoggerPage"
-LoggerPage.Size = UDim2.new(1, -30, 1, -30)
-LoggerPage.Position = UDim2.new(0, 15, 0, 15)
+LoggerPage.Size = UDim2.new(1, -20, 1, -20)
+LoggerPage.Position = UDim2.new(0, 10, 0, 10)
 LoggerPage.BackgroundTransparency = 1
 LoggerPage.Visible = false
-LoggerPage.Parent = PageContainer
+LoggerPage.Parent = ContentContainer
 
 local LoggerLayout = Instance.new("UIListLayout")
 LoggerLayout.Padding = UDim.new(0, 10)
 LoggerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 LoggerLayout.Parent = LoggerPage
 
--- Helper Functions for UI Elements
+-- 3. MINIMIZE LOGIC (ROLL-UP)
+local isMinimized = false
+local fullSize = UDim2.new(0, 500, 0, 350)
+local minSize = UDim2.new(0, 500, 0, 35)
+
+MinBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
+        MinBtn.Text = "+"
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
+        MinBtn.Text = "-"
+    end
+end)
+
+-- 4. SIDEBAR NAVIGATION
 local function CreateTabBtn(name, icon, targetPage)
     local Btn = Instance.new("TextButton")
     Btn.Name = name .. "Btn"
-    Btn.Size = UDim2.new(1, -20, 0, 40)
+    Btn.Size = UDim2.new(1, -10, 0, 40)
     Btn.BackgroundTransparency = 1
     Btn.Text = "   " .. icon .. "  " .. name
     Btn.TextColor3 = THEME.TextDim
@@ -398,14 +381,8 @@ local function CreateInput(parent, placeholder)
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, 0, 0, 40)
     Container.BackgroundColor3 = THEME.Element
-    Container.BackgroundTransparency = 0.5
     Container.Parent = parent
     Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
-    
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(60, 60, 60)
-    Stroke.Thickness = 1
-    Stroke.Parent = Container
     
     local Box = Instance.new("TextBox")
     Box.Size = UDim2.new(1, -20, 1, 0)
@@ -426,7 +403,6 @@ local function CreateButton(parent, text, color, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, 0, 0, 35)
     Btn.BackgroundColor3 = color
-    Btn.BackgroundTransparency = 0.2
     Btn.Text = text
     Btn.TextColor3 = Color3.white
     Btn.Font = Enum.Font.GothamBold
@@ -457,7 +433,6 @@ local function CreateToggle(parent, text, callback)
     Btn.Size = UDim2.new(0, 40, 0, 20)
     Btn.Position = UDim2.new(1, -40, 0.5, -10)
     Btn.BackgroundColor3 = THEME.Element
-    Btn.BackgroundTransparency = 0.5
     Btn.Text = ""
     Btn.Parent = Frame
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(1, 0)
@@ -541,7 +516,6 @@ local function CreateRarityCheck(name, color)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0.23, 0, 1, 0)
     Btn.BackgroundColor3 = THEME.Element
-    Btn.BackgroundTransparency = 0.5
     Btn.Text = name
     Btn.TextColor3 = THEME.TextDim
     Btn.Font = Enum.Font.GothamBold
