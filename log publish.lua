@@ -217,7 +217,8 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 550, 0, 350)
 MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
-MainFrame.BackgroundColor3 = THEME.Background
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BackgroundTransparency = 0.1 -- Glassy Look
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
@@ -226,12 +227,17 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = THEME.Accent
+UIStroke.Transparency = 0.6
+UIStroke.Thickness = 1
+UIStroke.Parent = MainFrame
+
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = THEME.Element
-Header.BorderSizePixel = 0
+Header.BackgroundTransparency = 1
 Header.Parent = MainFrame
 
 local HeaderTitle = Instance.new("TextLabel")
@@ -245,60 +251,42 @@ HeaderTitle.TextSize = 16
 HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
 HeaderTitle.Parent = Header
 
--- Window Controls
-local ControlContainer = Instance.new("Frame")
-ControlContainer.Size = UDim2.new(0, 80, 1, 0)
-ControlContainer.Position = UDim2.new(1, -80, 0, 0)
-ControlContainer.BackgroundTransparency = 1
-ControlContainer.Parent = Header
-
-local MinBtn = Instance.new("TextButton")
-MinBtn.Name = "MinBtn"
-MinBtn.Text = "-"
-MinBtn.Size = UDim2.new(0, 40, 1, 0)
-MinBtn.BackgroundTransparency = 1
-MinBtn.TextColor3 = THEME.TextDim
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 20
-MinBtn.Parent = ControlContainer
-
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Text = "×"
 CloseBtn.Size = UDim2.new(0, 40, 1, 0)
-CloseBtn.Position = UDim2.new(0, 40, 0, 0)
+CloseBtn.Position = UDim2.new(1, -40, 0, 0)
 CloseBtn.BackgroundTransparency = 1
 CloseBtn.TextColor3 = THEME.TextDim
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 24
-CloseBtn.Parent = ControlContainer
+CloseBtn.Parent = Header
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
--- Body (Container for Sidebar & PageContainer)
-local Body = Instance.new("Frame")
-Body.Name = "Body"
-Body.Size = UDim2.new(1, 0, 1, -40)
-Body.Position = UDim2.new(0, 0, 0, 40)
-Body.BackgroundTransparency = 1
-Body.Parent = MainFrame
+-- Separator
+local Separator = Instance.new("Frame")
+Separator.Size = UDim2.new(1, 0, 0, 1)
+Separator.Position = UDim2.new(0, 0, 0, 40)
+Separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Separator.BackgroundTransparency = 0.9
+Separator.BorderSizePixel = 0
+Separator.Parent = MainFrame
 
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 140, 1, 0)
-Sidebar.BackgroundColor3 = THEME.Element
-Sidebar.BorderSizePixel = 0
-Sidebar.Parent = Body
+Sidebar.Size = UDim2.new(0, 140, 1, -41)
+Sidebar.Position = UDim2.new(0, 0, 0, 41)
+Sidebar.BackgroundTransparency = 1
+Sidebar.Parent = MainFrame
 
-local SidebarCorner = Instance.new("UICorner")
-SidebarCorner.CornerRadius = UDim.new(0, 12)
-SidebarCorner.Parent = Sidebar
-
-local SidebarFix = Instance.new("Frame") -- Covers the right rounded corners of sidebar
-SidebarFix.Size = UDim2.new(0, 10, 1, 0)
-SidebarFix.Position = UDim2.new(1, -10, 0, 0)
-SidebarFix.BackgroundColor3 = THEME.Element
-SidebarFix.BorderSizePixel = 0
-SidebarFix.Parent = Sidebar
+local SidebarBorder = Instance.new("Frame")
+SidebarBorder.Size = UDim2.new(0, 1, 1, 0)
+SidebarBorder.Position = UDim2.new(1, -1, 0, 0)
+SidebarBorder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SidebarBorder.BackgroundTransparency = 0.9
+SidebarBorder.BorderSizePixel = 0
+SidebarBorder.Parent = Sidebar
 
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Padding = UDim.new(0, 5)
@@ -313,10 +301,10 @@ SidebarPadding.Parent = Sidebar
 -- PageContainer
 local PageContainer = Instance.new("Frame")
 PageContainer.Name = "PageContainer"
-PageContainer.Size = UDim2.new(1, -140, 1, 0)
-PageContainer.Position = UDim2.new(0, 140, 0, 0)
+PageContainer.Size = UDim2.new(1, -140, 1, -41)
+PageContainer.Position = UDim2.new(0, 140, 0, 41)
 PageContainer.BackgroundTransparency = 1
-PageContainer.Parent = Body
+PageContainer.Parent = MainFrame
 
 -- Pages
 local InfoPage = Instance.new("Frame")
@@ -350,7 +338,7 @@ local function CreateTabBtn(name, icon, targetPage)
     local Btn = Instance.new("TextButton")
     Btn.Name = name .. "Btn"
     Btn.Size = UDim2.new(1, -20, 0, 40)
-    Btn.BackgroundColor3 = THEME.Background
+    Btn.BackgroundTransparency = 1
     Btn.Text = "   " .. icon .. "  " .. name
     Btn.TextColor3 = THEME.TextDim
     Btn.Font = Enum.Font.GothamBold
@@ -366,11 +354,11 @@ local function CreateTabBtn(name, icon, targetPage)
         -- Reset all buttons
         for _, child in pairs(Sidebar:GetChildren()) do
             if child:IsA("TextButton") then
-                TweenService:Create(child, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Background, TextColor3 = THEME.TextDim}):Play()
+                TweenService:Create(child, TweenInfo.new(0.2), {BackgroundTransparency = 1, TextColor3 = THEME.TextDim}):Play()
             end
         end
         -- Highlight this button
-        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Accent, TextColor3 = Color3.white}):Play()
+        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.9, BackgroundColor3 = THEME.Accent, TextColor3 = Color3.white}):Play()
         
         -- Switch Page
         InfoPage.Visible = false
@@ -386,8 +374,14 @@ local function CreateInput(parent, placeholder)
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, 0, 0, 40)
     Container.BackgroundColor3 = THEME.Element
+    Container.BackgroundTransparency = 0.5
     Container.Parent = parent
     Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(60, 60, 60)
+    Stroke.Thickness = 1
+    Stroke.Parent = Container
     
     local Box = Instance.new("TextBox")
     Box.Size = UDim2.new(1, -20, 1, 0)
@@ -408,6 +402,7 @@ local function CreateButton(parent, text, color, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, 0, 0, 35)
     Btn.BackgroundColor3 = color
+    Btn.BackgroundTransparency = 0.2
     Btn.Text = text
     Btn.TextColor3 = Color3.white
     Btn.Font = Enum.Font.GothamBold
@@ -438,6 +433,7 @@ local function CreateToggle(parent, text, callback)
     Btn.Size = UDim2.new(0, 40, 0, 20)
     Btn.Position = UDim2.new(1, -40, 0.5, -10)
     Btn.BackgroundColor3 = THEME.Element
+    Btn.BackgroundTransparency = 0.5
     Btn.Text = ""
     Btn.Parent = Frame
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(1, 0)
@@ -521,6 +517,7 @@ local function CreateRarityCheck(name, color)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0.23, 0, 1, 0)
     Btn.BackgroundColor3 = THEME.Element
+    Btn.BackgroundTransparency = 0.5
     Btn.Text = name
     Btn.TextColor3 = THEME.TextDim
     Btn.Font = Enum.Font.GothamBold
@@ -548,28 +545,9 @@ local InfoBtn = CreateTabBtn("Info", "🏠", InfoPage)
 local LoggerBtn = CreateTabBtn("Logger", "⚙️", LoggerPage)
 
 -- Set Default Tab (Info)
+InfoBtn.BackgroundTransparency = 0.9
 InfoBtn.BackgroundColor3 = THEME.Accent
 InfoBtn.TextColor3 = Color3.white
-
--- Minimize Logic
-local isMinimized = false
-local fullSize = UDim2.new(0, 550, 0, 350)
-local minSize = UDim2.new(0, 550, 0, 40)
-
-MinBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
-        MinBtn.Text = "+"
-    else
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
-        MinBtn.Text = "-"
-    end
-end)
-
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
 
 -- Dragging Logic
 local dragging, dragInput, dragStart, startPos
@@ -577,7 +555,7 @@ local function update(input)
     local delta = input.Position - dragStart
     MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-Header.InputBegan:Connect(function(input)
+MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
