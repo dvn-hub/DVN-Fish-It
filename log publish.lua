@@ -3,7 +3,7 @@
     Created by Divine Tools
     
     Features:
-    - Premium Glassy UI (Black Elegant)
+    - Premium Modern UI (Sidebar Layout)
     - Universal Executor Support (Fluxus/Delta/Hydrogen/etc)
     - Legacy Domain Support (Fixes 429 Errors)
     - Fully Configurable
@@ -23,11 +23,21 @@ local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or CoreGui or Loc
 -- Request Handler
 local req = http_request or request or (fluxus and fluxus.request) or (getgenv and getgenv().request) or (syn and syn.request)
 
+-- Theme Colors
+local THEME = {
+    Background = Color3.fromHex("1a1a1a"),
+    Element    = Color3.fromHex("252525"),
+    Accent     = Color3.fromHex("3b82f6"),
+    Text       = Color3.fromRGB(240, 240, 240),
+    TextDim    = Color3.fromRGB(160, 160, 160)
+}
+
 -- Configuration
 local SETTINGS = {
     WebhookURL = "",
     LogFish = false,
-    LogJoinLeave = false,
+    TrackRuby = false,
+    TrackSacred = false,
     Rarities = {
         Epic = false,
         Legendary = false,
@@ -101,6 +111,10 @@ local function send(payload)
     end)
 end
 
+local function GetFooter()
+    return { text = "Divine Tools • discord.gg/dvn • Today at " .. os.date("%I:%M %p") }
+end
+
 local function TestWebhook()
     if SETTINGS.WebhookURL == "" then return end
     send({
@@ -109,14 +123,47 @@ local function TestWebhook()
         embeds = {{
             title = "💎 DIVINE TOOLS CONNECTED",
             description = "Webhook is working perfectly!",
-            color = 0xFFFFFF,
-            footer = { text = "Divine Tools • Public Edition" },
+            color = 0x3b82f6,
+            footer = GetFooter(),
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     })
 end
 
 local function SendFishLog(data)
+    -- Priority Check: Special Fish
+    local isSpecial = false
+    local specialColor = 0xFFFFFF
+
+    if SETTINGS.TrackSacred and data.Fish == "Sacred Guardian Squid" then
+        isSpecial = true
+        specialColor = 0x00FBFF
+    elseif SETTINGS.TrackRuby and (data.Fish:find("Ruby") and data.Fish:find("Gemstone")) then
+        isSpecial = true
+        specialColor = 0xFF0040
+    end
+
+    if isSpecial then
+        send({
+            username = "Divine Logger",
+            avatar_url = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png",
+            embeds = {{
+                title = "🚨 SPECIAL TARGET CAUGHT!",
+                description = "**" .. data.Fish .. "**",
+                color = specialColor,
+                fields = {
+                    { name = "👤 Player", value = data.Player, inline = true },
+                    { name = "⚖️ Weight", value = data.Weight, inline = true },
+                    { name = "🎲 Chance", value = "1 in " .. data.Chance, inline = true }
+                },
+                footer = GetFooter(),
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }}
+        })
+        return
+    end
+
+    -- Normal Rarity Check
     local cfg = RARITY_DATA[data.Rarity]
     if not cfg then return end -- Only log configured rarities
     if not SETTINGS.Rarities[data.Rarity] then return end -- Check if enabled
@@ -133,22 +180,7 @@ local function SendFishLog(data)
                 { name = "👤 Player", value = data.Player, inline = true },
                 { name = "🎲 Chance", value = "1 in " .. data.Chance, inline = true }
             },
-            footer = { text = "Divine Tools • Fish Logger" },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-        }}
-    })
-end
-
-local function SendJoinLeave(player, joined)
-    if not SETTINGS.LogJoinLeave then return end
-    send({
-        username = "Divine Logger",
-        avatar_url = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png",
-        embeds = {{
-            title = joined and "👋 Player Joined" or "🚪 Player Left",
-            description = "**" .. player.DisplayName .. "** (@" .. player.Name .. ")",
-            color = joined and 0x2ECC71 or 0xE74C3C,
-            footer = { text = "Divine Tools • Server Activity" },
+            footer = GetFooter(),
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     })
@@ -172,9 +204,6 @@ TextChatService.OnIncomingMessage = function(msg)
     })
 end
 
-Players.PlayerAdded:Connect(function(p) SendJoinLeave(p, true) end)
-Players.PlayerRemoving:Connect(function(p) SendJoinLeave(p, false) end)
-
 -- UI Construction
 if GUI_PARENT:FindFirstChild("DivineLoggerUI") then GUI_PARENT.DivineLoggerUI:Destroy() end
 
@@ -185,10 +214,9 @@ ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
-MainFrame.BackgroundTransparency = 0.1
+MainFrame.Size = UDim2.new(0, 550, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
+MainFrame.BackgroundColor3 = THEME.Background
 MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
@@ -197,60 +225,110 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 255, 255)
-UIStroke.Transparency = 0.9
-UIStroke.Thickness = 1
-UIStroke.Parent = MainFrame
+-- Sidebar
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 140, 1, 0)
+Sidebar.BackgroundColor3 = THEME.Element
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
 
--- Header
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundTransparency = 1
-Header.Parent = MainFrame
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 12)
+SidebarCorner.Parent = Sidebar
 
-local Title = Instance.new("TextLabel")
-Title.Text = "DIVINE LOGGER"
-Title.Size = UDim2.new(1, -40, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.BackgroundTransparency = 1
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = Header
+local SidebarFix = Instance.new("Frame") -- Covers the right rounded corners of sidebar
+SidebarFix.Size = UDim2.new(0, 10, 1, 0)
+SidebarFix.Position = UDim2.new(1, -10, 0, 0)
+SidebarFix.BackgroundColor3 = THEME.Element
+SidebarFix.BorderSizePixel = 0
+SidebarFix.Parent = Sidebar
 
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Text = "×"
-CloseBtn.Size = UDim2.new(0, 40, 1, 0)
-CloseBtn.Position = UDim2.new(1, -40, 0, 0)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-CloseBtn.Font = Enum.Font.Gotham
-CloseBtn.TextSize = 24
-CloseBtn.Parent = Header
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+local SidebarTitle = Instance.new("TextLabel")
+SidebarTitle.Text = "DVN LOGGER"
+SidebarTitle.Size = UDim2.new(1, 0, 0, 50)
+SidebarTitle.BackgroundTransparency = 1
+SidebarTitle.TextColor3 = THEME.Accent
+SidebarTitle.Font = Enum.Font.GothamBlack
+SidebarTitle.TextSize = 18
+SidebarTitle.Parent = Sidebar
 
--- Content
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.Padding = UDim.new(0, 5)
+SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Parent = Sidebar
+
+-- Content Area
 local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -30, 1, -50)
-Content.Position = UDim2.new(0, 15, 0, 45)
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -140, 1, 0)
+Content.Position = UDim2.new(0, 140, 0, 0)
 Content.BackgroundTransparency = 1
 Content.Parent = MainFrame
 
-local UIList = Instance.new("UIListLayout")
-UIList.Padding = UDim.new(0, 10)
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Parent = Content
+local Pages = {}
+
+-- Helper: Create Tab Button
+local currentTab = nil
+local function CreateTabBtn(name, icon, pageFrame)
+    local Btn = Instance.new("TextButton")
+    Btn.Size = UDim2.new(0.85, 0, 0, 35)
+    Btn.BackgroundColor3 = THEME.Background
+    Btn.Text = "   " .. icon .. "  " .. name
+    Btn.TextColor3 = THEME.TextDim
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 14
+    Btn.TextXAlignment = Enum.TextXAlignment.Left
+    Btn.Parent = Sidebar
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 6)
+    Corner.Parent = Btn
+
+    Btn.MouseButton1Click:Connect(function()
+        -- Reset all tabs
+        for _, p in pairs(Pages) do p.Visible = false end
+        for _, b in pairs(Sidebar:GetChildren()) do
+            if b:IsA("TextButton") then
+                TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Background, TextColor3 = THEME.TextDim}):Play()
+            end
+        end
+        
+        -- Activate selected
+        pageFrame.Visible = true
+        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Accent, TextColor3 = Color3.white}):Play()
+    end)
+    
+    return Btn
+end
+
+-- Helper: Create Page
+local function CreatePage(name)
+    local Page = Instance.new("Frame")
+    Page.Name = name
+    Page.Size = UDim2.new(1, -30, 1, -30)
+    Page.Position = UDim2.new(0, 15, 0, 15)
+    Page.BackgroundTransparency = 1
+    Page.Visible = false
+    Page.Parent = Content
+    
+    local Layout = Instance.new("UIListLayout")
+    Layout.Padding = UDim.new(0, 10)
+    Layout.SortOrder = Enum.SortOrder.LayoutOrder
+    Layout.Parent = Page
+    
+    table.insert(Pages, Page)
+    return Page
+end
 
 -- Helper for UI Elements
-local function CreateInput(placeholder)
+local function CreateInput(parent, placeholder)
     local Container = Instance.new("Frame")
     Container.Size = UDim2.new(1, 0, 0, 40)
-    Container.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    Container.Parent = Content
+    Container.BackgroundColor3 = THEME.Element
+    Container.Parent = parent
     Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
-    Instance.new("UIStroke", Container).Color = Color3.fromRGB(40, 40, 45)
     
     local Box = Instance.new("TextBox")
     Box.Size = UDim2.new(1, -20, 1, 0)
@@ -258,8 +336,8 @@ local function CreateInput(placeholder)
     Box.BackgroundTransparency = 1
     Box.PlaceholderText = placeholder
     Box.Text = ""
-    Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Box.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+    Box.TextColor3 = THEME.Text
+    Box.PlaceholderColor3 = THEME.TextDim
     Box.Font = Enum.Font.Gotham
     Box.TextSize = 14
     Box.TextXAlignment = Enum.TextXAlignment.Left
@@ -267,31 +345,31 @@ local function CreateInput(placeholder)
     return Box
 end
 
-local function CreateButton(text, color, callback)
+local function CreateButton(parent, text, color, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, 0, 0, 35)
     Btn.BackgroundColor3 = color
     Btn.Text = text
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.TextColor3 = Color3.white
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
-    Btn.Parent = Content
+    Btn.Parent = parent
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
     Btn.MouseButton1Click:Connect(callback)
     return Btn
 end
 
-local function CreateToggle(text, callback)
+local function CreateToggle(parent, text, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, 0, 0, 30)
     Frame.BackgroundTransparency = 1
-    Frame.Parent = Content
+    Frame.Parent = parent
     
     local Label = Instance.new("TextLabel")
     Label.Text = text
     Label.Size = UDim2.new(0.8, 0, 1, 0)
     Label.BackgroundTransparency = 1
-    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Label.TextColor3 = THEME.Text
     Label.Font = Enum.Font.Gotham
     Label.TextSize = 14
     Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -300,7 +378,7 @@ local function CreateToggle(text, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0, 40, 0, 20)
     Btn.Position = UDim2.new(1, -40, 0.5, -10)
-    Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    Btn.BackgroundColor3 = THEME.Element
     Btn.Text = ""
     Btn.Parent = Frame
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(1, 0)
@@ -308,7 +386,7 @@ local function CreateToggle(text, callback)
     local Dot = Instance.new("Frame")
     Dot.Size = UDim2.new(0, 16, 0, 16)
     Dot.Position = UDim2.new(0, 2, 0.5, -8)
-    Dot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+    Dot.BackgroundColor3 = THEME.TextDim
     Dot.Parent = Btn
     Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
     
@@ -316,37 +394,69 @@ local function CreateToggle(text, callback)
     Btn.MouseButton1Click:Connect(function()
         on = not on
         callback(on)
-        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = on and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(40, 40, 45)}):Play()
-        TweenService:Create(Dot, TweenInfo.new(0.2), {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = on and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)}):Play()
+        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = on and THEME.Accent or THEME.Element}):Play()
+        TweenService:Create(Dot, TweenInfo.new(0.2), {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = on and Color3.white or THEME.TextDim}):Play()
     end)
 end
 
--- Build UI Elements
-local WebhookBox = CreateInput("Paste Webhook URL Here...")
+-- === TAB 1: INFO ===
+local InfoPage = CreatePage("Info")
+
+local WelcomeHeader = Instance.new("TextLabel")
+WelcomeHeader.Text = "Welcome to Divine Tools"
+WelcomeHeader.Size = UDim2.new(1, 0, 0, 30)
+WelcomeHeader.BackgroundTransparency = 1
+WelcomeHeader.TextColor3 = THEME.Text
+WelcomeHeader.Font = Enum.Font.GothamBold
+WelcomeHeader.TextSize = 20
+WelcomeHeader.TextXAlignment = Enum.TextXAlignment.Left
+WelcomeHeader.Parent = InfoPage
+
+local DescText = Instance.new("TextLabel")
+DescText.Text = "Empower your fishing journey with the ultimate utility tool. Tracking your rarest catches has never been easier."
+DescText.Size = UDim2.new(1, 0, 0, 60)
+DescText.BackgroundTransparency = 1
+DescText.TextColor3 = THEME.TextDim
+DescText.Font = Enum.Font.Gotham
+DescText.TextSize = 14
+DescText.TextXAlignment = Enum.TextXAlignment.Left
+DescText.TextWrapped = true
+DescText.Parent = InfoPage
+
+CreateButton(InfoPage, "Join Divine Discord", Color3.fromRGB(88, 101, 242), function()
+    setclipboard("https://discord.gg/dvn")
+    -- Simple notification logic could go here
+end)
+
+-- === TAB 2: LOGGER ===
+local LoggerPage = CreatePage("Logger")
+
+local WebhookBox = CreateInput(LoggerPage, "Paste Webhook URL Here...")
 WebhookBox.FocusLost:Connect(function()
     SETTINGS.WebhookURL = WebhookBox.Text
 end)
 
-CreateButton("TEST WEBHOOK", Color3.fromRGB(40, 40, 50), TestWebhook)
+CreateButton(LoggerPage, "Test Webhook", THEME.Element, TestWebhook)
 
-CreateToggle("Enable Fish Logger", function(v) SETTINGS.LogFish = v end)
-CreateToggle("Enable Join/Leave Logs", function(v) SETTINGS.LogJoinLeave = v end)
+CreateToggle(LoggerPage, "Enable Fish Logger", function(v) SETTINGS.LogFish = v end)
+CreateToggle(LoggerPage, "Track Ruby Gemstone", function(v) SETTINGS.TrackRuby = v end)
+CreateToggle(LoggerPage, "Track Sacred Guardian Squid", function(v) SETTINGS.TrackSacred = v end)
 
 -- Rarity Section
 local RarityLabel = Instance.new("TextLabel")
 RarityLabel.Text = "RARITY FILTER"
 RarityLabel.Size = UDim2.new(1, 0, 0, 20)
 RarityLabel.BackgroundTransparency = 1
-RarityLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+RarityLabel.TextColor3 = THEME.TextDim
 RarityLabel.Font = Enum.Font.GothamBold
 RarityLabel.TextSize = 12
 RarityLabel.TextXAlignment = Enum.TextXAlignment.Left
-RarityLabel.Parent = Content
+RarityLabel.Parent = LoggerPage
 
 local RarityContainer = Instance.new("Frame")
 RarityContainer.Size = UDim2.new(1, 0, 0, 30)
 RarityContainer.BackgroundTransparency = 1
-RarityContainer.Parent = Content
+RarityContainer.Parent = LoggerPage
 
 local RLayout = Instance.new("UIListLayout")
 RLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -356,9 +466,9 @@ RLayout.Parent = RarityContainer
 local function CreateRarityCheck(name, color)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0.23, 0, 1, 0)
-    Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    Btn.BackgroundColor3 = THEME.Element
     Btn.Text = name
-    Btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Btn.TextColor3 = THEME.TextDim
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 11
     Btn.Parent = RarityContainer
@@ -370,7 +480,7 @@ local function CreateRarityCheck(name, color)
     Btn.MouseButton1Click:Connect(function()
         on = not on
         SETTINGS.Rarities[name] = on
-        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = on and Color3.fromRGB(color) or Color3.fromRGB(30, 30, 35), TextColor3 = on and Color3.fromRGB(20, 20, 20) or Color3.fromRGB(150, 150, 150)}):Play()
+        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = on and Color3.fromRGB(color) or THEME.Element, TextColor3 = on and Color3.black or THEME.TextDim}):Play()
     end)
 end
 
@@ -379,21 +489,14 @@ CreateRarityCheck("Legendary", 0xFFB92B)
 CreateRarityCheck("Mythic", 0xFF1919)
 CreateRarityCheck("Secret", 0x18FF98)
 
--- Discord Button
-local DiscordBtn = CreateButton("JOIN DIVINE DISCORD", Color3.fromRGB(88, 101, 242), function()
-    setclipboard("https://discord.gg/dvn")
-    local notif = Instance.new("TextLabel")
-    notif.Text = "COPIED TO CLIPBOARD!"
-    notif.Size = UDim2.new(1, 0, 1, 0)
-    notif.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-    notif.TextColor3 = Color3.white
-    notif.Font = Enum.Font.GothamBold
-    notif.TextSize = 14
-    notif.Parent = DiscordBtn
-    Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 8)
-    task.wait(1)
-    notif:Destroy()
-end)
+-- Initialize Tabs
+local InfoBtn = CreateTabBtn("Info", "🏠", InfoPage)
+local LoggerBtn = CreateTabBtn("Logger", "⚙️", LoggerPage)
+
+-- Default to Info
+InfoPage.Visible = true
+InfoBtn.BackgroundColor3 = THEME.Accent
+InfoBtn.TextColor3 = Color3.white
 
 -- Dragging Logic
 local dragging, dragInput, dragStart, startPos
