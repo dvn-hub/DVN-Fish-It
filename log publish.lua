@@ -211,6 +211,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DivineLoggerUI"
 ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
@@ -272,7 +273,7 @@ CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 24
 CloseBtn.Parent = ControlContainer
 
--- Body (Container for Sidebar & Content)
+-- Body (Container for Sidebar & PageContainer)
 local Body = Instance.new("Frame")
 Body.Name = "Body"
 Body.Size = UDim2.new(1, 0, 1, -40)
@@ -309,20 +310,46 @@ local SidebarPadding = Instance.new("UIPadding")
 SidebarPadding.PaddingTop = UDim.new(0, 10)
 SidebarPadding.Parent = Sidebar
 
--- Content Area
-local Content = Instance.new("Frame")
-Content.Name = "Content"
-Content.Size = UDim2.new(1, -140, 1, 0)
-Content.Position = UDim2.new(0, 140, 0, 0)
-Content.BackgroundTransparency = 1
-Content.Parent = Body
+-- PageContainer
+local PageContainer = Instance.new("Frame")
+PageContainer.Name = "PageContainer"
+PageContainer.Size = UDim2.new(1, -140, 1, 0)
+PageContainer.Position = UDim2.new(0, 140, 0, 0)
+PageContainer.BackgroundTransparency = 1
+PageContainer.Parent = Body
 
-local Pages = {}
+-- Pages
+local InfoPage = Instance.new("Frame")
+InfoPage.Name = "InfoPage"
+InfoPage.Size = UDim2.new(1, -30, 1, -30)
+InfoPage.Position = UDim2.new(0, 15, 0, 15)
+InfoPage.BackgroundTransparency = 1
+InfoPage.Visible = true
+InfoPage.Parent = PageContainer
 
--- Helper: Create Tab Button
-local function CreateTabBtn(name, icon, pageFrame)
+local InfoLayout = Instance.new("UIListLayout")
+InfoLayout.Padding = UDim.new(0, 10)
+InfoLayout.SortOrder = Enum.SortOrder.LayoutOrder
+InfoLayout.Parent = InfoPage
+
+local LoggerPage = Instance.new("Frame")
+LoggerPage.Name = "LoggerPage"
+LoggerPage.Size = UDim2.new(1, -30, 1, -30)
+LoggerPage.Position = UDim2.new(0, 15, 0, 15)
+LoggerPage.BackgroundTransparency = 1
+LoggerPage.Visible = false
+LoggerPage.Parent = PageContainer
+
+local LoggerLayout = Instance.new("UIListLayout")
+LoggerLayout.Padding = UDim.new(0, 10)
+LoggerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+LoggerLayout.Parent = LoggerPage
+
+-- Helper Functions for UI Elements
+local function CreateTabBtn(name, icon, targetPage)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(0.85, 0, 0, 35)
+    Btn.Name = name .. "Btn"
+    Btn.Size = UDim2.new(1, -20, 0, 40)
     Btn.BackgroundColor3 = THEME.Background
     Btn.Text = "   " .. icon .. "  " .. name
     Btn.TextColor3 = THEME.TextDim
@@ -336,39 +363,22 @@ local function CreateTabBtn(name, icon, pageFrame)
     Corner.Parent = Btn
 
     Btn.MouseButton1Click:Connect(function()
-        -- Reset all tabs
-        for _, p in pairs(Pages) do p.Visible = false end
-        for _, b in pairs(Sidebar:GetChildren()) do
-            if b:IsA("TextButton") then
-                TweenService:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Background, TextColor3 = THEME.TextDim}):Play()
+        -- Reset all buttons
+        for _, child in pairs(Sidebar:GetChildren()) do
+            if child:IsA("TextButton") then
+                TweenService:Create(child, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Background, TextColor3 = THEME.TextDim}):Play()
             end
         end
-        
-        -- Activate selected
-        pageFrame.Visible = true
+        -- Highlight this button
         TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Accent, TextColor3 = Color3.white}):Play()
+        
+        -- Switch Page
+        InfoPage.Visible = false
+        LoggerPage.Visible = false
+        targetPage.Visible = true
     end)
     
     return Btn
-end
-
--- Helper: Create Page
-local function CreatePage(name)
-    local Page = Instance.new("Frame")
-    Page.Name = name
-    Page.Size = UDim2.new(1, -30, 1, -30)
-    Page.Position = UDim2.new(0, 15, 0, 15)
-    Page.BackgroundTransparency = 1
-    Page.Visible = false
-    Page.Parent = Content
-    
-    local Layout = Instance.new("UIListLayout")
-    Layout.Padding = UDim.new(0, 10)
-    Layout.SortOrder = Enum.SortOrder.LayoutOrder
-    Layout.Parent = Page
-    
-    table.insert(Pages, Page)
-    return Page
 end
 
 -- Helper for UI Elements
@@ -448,9 +458,7 @@ local function CreateToggle(parent, text, callback)
     end)
 end
 
--- === TAB 1: INFO ===
-local InfoPage = CreatePage("Info")
-
+-- === POPULATE INFO PAGE ===
 local WelcomeHeader = Instance.new("TextLabel")
 WelcomeHeader.Text = "Welcome to Divine Tools"
 WelcomeHeader.Size = UDim2.new(1, 0, 0, 30)
@@ -474,12 +482,9 @@ DescText.Parent = InfoPage
 
 CreateButton(InfoPage, "Join Divine Discord", Color3.fromRGB(88, 101, 242), function()
     setclipboard("https://discord.gg/dvn")
-    -- Simple notification logic could go here
 end)
 
--- === TAB 2: LOGGER ===
-local LoggerPage = CreatePage("Logger")
-
+-- === POPULATE LOGGER PAGE ===
 local WebhookBox = CreateInput(LoggerPage, "Paste Webhook URL Here...")
 WebhookBox.FocusLost:Connect(function()
     SETTINGS.WebhookURL = WebhookBox.Text
@@ -538,12 +543,11 @@ CreateRarityCheck("Legendary", 0xFFB92B)
 CreateRarityCheck("Mythic", 0xFF1919)
 CreateRarityCheck("Secret", 0x18FF98)
 
--- Initialize Tabs
+-- Create Sidebar Buttons
 local InfoBtn = CreateTabBtn("Info", "🏠", InfoPage)
 local LoggerBtn = CreateTabBtn("Logger", "⚙️", LoggerPage)
 
--- Default to Info
-InfoPage.Visible = true
+-- Set Default Tab (Info)
 InfoBtn.BackgroundColor3 = THEME.Accent
 InfoBtn.TextColor3 = Color3.white
 
