@@ -225,13 +225,68 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
 UICorner.Parent = MainFrame
 
+-- Header
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = THEME.Element
+Header.BorderSizePixel = 0
+Header.Parent = MainFrame
+
+local HeaderTitle = Instance.new("TextLabel")
+HeaderTitle.Text = "DVN LOGGER"
+HeaderTitle.Size = UDim2.new(1, -100, 1, 0)
+HeaderTitle.Position = UDim2.new(0, 15, 0, 0)
+HeaderTitle.BackgroundTransparency = 1
+HeaderTitle.TextColor3 = THEME.Accent
+HeaderTitle.Font = Enum.Font.GothamBlack
+HeaderTitle.TextSize = 16
+HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+HeaderTitle.Parent = Header
+
+-- Window Controls
+local ControlContainer = Instance.new("Frame")
+ControlContainer.Size = UDim2.new(0, 80, 1, 0)
+ControlContainer.Position = UDim2.new(1, -80, 0, 0)
+ControlContainer.BackgroundTransparency = 1
+ControlContainer.Parent = Header
+
+local MinBtn = Instance.new("TextButton")
+MinBtn.Name = "MinBtn"
+MinBtn.Text = "-"
+MinBtn.Size = UDim2.new(0, 40, 1, 0)
+MinBtn.BackgroundTransparency = 1
+MinBtn.TextColor3 = THEME.TextDim
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 20
+MinBtn.Parent = ControlContainer
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Text = "×"
+CloseBtn.Size = UDim2.new(0, 40, 1, 0)
+CloseBtn.Position = UDim2.new(0, 40, 0, 0)
+CloseBtn.BackgroundTransparency = 1
+CloseBtn.TextColor3 = THEME.TextDim
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 24
+CloseBtn.Parent = ControlContainer
+
+-- Body (Container for Sidebar & Content)
+local Body = Instance.new("Frame")
+Body.Name = "Body"
+Body.Size = UDim2.new(1, 0, 1, -40)
+Body.Position = UDim2.new(0, 0, 0, 40)
+Body.BackgroundTransparency = 1
+Body.Parent = MainFrame
+
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 140, 1, 0)
 Sidebar.BackgroundColor3 = THEME.Element
 Sidebar.BorderSizePixel = 0
-Sidebar.Parent = MainFrame
+Sidebar.Parent = Body
 
 local SidebarCorner = Instance.new("UICorner")
 SidebarCorner.CornerRadius = UDim.new(0, 12)
@@ -244,20 +299,15 @@ SidebarFix.BackgroundColor3 = THEME.Element
 SidebarFix.BorderSizePixel = 0
 SidebarFix.Parent = Sidebar
 
-local SidebarTitle = Instance.new("TextLabel")
-SidebarTitle.Text = "DVN LOGGER"
-SidebarTitle.Size = UDim2.new(1, 0, 0, 50)
-SidebarTitle.BackgroundTransparency = 1
-SidebarTitle.TextColor3 = THEME.Accent
-SidebarTitle.Font = Enum.Font.GothamBlack
-SidebarTitle.TextSize = 18
-SidebarTitle.Parent = Sidebar
-
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Padding = UDim.new(0, 5)
 SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
 SidebarLayout.Parent = Sidebar
+
+local SidebarPadding = Instance.new("UIPadding")
+SidebarPadding.PaddingTop = UDim.new(0, 10)
+SidebarPadding.Parent = Sidebar
 
 -- Content Area
 local Content = Instance.new("Frame")
@@ -265,12 +315,11 @@ Content.Name = "Content"
 Content.Size = UDim2.new(1, -140, 1, 0)
 Content.Position = UDim2.new(0, 140, 0, 0)
 Content.BackgroundTransparency = 1
-Content.Parent = MainFrame
+Content.Parent = Body
 
 local Pages = {}
 
 -- Helper: Create Tab Button
-local currentTab = nil
 local function CreateTabBtn(name, icon, pageFrame)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0.85, 0, 0, 35)
@@ -498,13 +547,33 @@ InfoPage.Visible = true
 InfoBtn.BackgroundColor3 = THEME.Accent
 InfoBtn.TextColor3 = Color3.white
 
+-- Minimize Logic
+local isMinimized = false
+local fullSize = UDim2.new(0, 550, 0, 350)
+local minSize = UDim2.new(0, 550, 0, 40)
+
+MinBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
+        MinBtn.Text = "+"
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
+        MinBtn.Text = "-"
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
 -- Dragging Logic
 local dragging, dragInput, dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
     MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-MainFrame.InputBegan:Connect(function(input)
+Header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
