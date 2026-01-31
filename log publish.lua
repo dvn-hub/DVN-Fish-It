@@ -213,10 +213,13 @@ ScreenGui.Parent = GUI_PARENT
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- 1. MAIN FRAME STRUCTURE
+-- UI CONFIG
+local DEFAULT_SIZE = UDim2.new(0, 500, 0, 350)
+local MINIMIZED_SIZE = UDim2.new(0, 500, 0, 32)
+
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 500, 0, 350)
+MainFrame.Size = DEFAULT_SIZE
 MainFrame.Position = UDim2.new(0.5, 0, 0.5, -175)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0) -- Top Center Pivot for Roll-Up
 MainFrame.BackgroundColor3 = THEME.Background
@@ -224,34 +227,21 @@ MainFrame.BorderSizePixel = 0
 MainFrame.ClipsDescendants = true -- CRITICAL: Hides content when minimized
 MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 6)
+MainCorner.Parent = MainFrame
 
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, 35)
-Header.BackgroundColor3 = THEME.Element
-Header.BorderSizePixel = 0
+Header.Size = UDim2.new(1, 0, 0, 32)
+Header.BackgroundTransparency = 1
 Header.Parent = MainFrame
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 10)
-HeaderCorner.Parent = Header
-
--- Patch to cover bottom rounded corners of Header when expanded
-local HeaderPatch = Instance.new("Frame")
-HeaderPatch.Size = UDim2.new(1, 0, 0, 10)
-HeaderPatch.Position = UDim2.new(0, 0, 1, -10)
-HeaderPatch.BackgroundColor3 = THEME.Element
-HeaderPatch.BorderSizePixel = 0
-HeaderPatch.Parent = Header
 
 local HeaderTitle = Instance.new("TextLabel")
 HeaderTitle.Text = "DVN LOGGER"
-HeaderTitle.Size = UDim2.new(1, -50, 1, 0)
-HeaderTitle.Position = UDim2.new(0, 15, 0, 0)
+HeaderTitle.Size = UDim2.new(0, 200, 1, 0)
+HeaderTitle.Position = UDim2.new(0, 12, 0, 0)
 HeaderTitle.BackgroundTransparency = 1
 HeaderTitle.TextColor3 = THEME.Accent
 HeaderTitle.Font = Enum.Font.GothamBlack
@@ -261,200 +251,168 @@ HeaderTitle.Parent = Header
 
 local MinBtn = Instance.new("TextButton")
 MinBtn.Name = "MinBtn"
-MinBtn.Text = "-"
-MinBtn.Size = UDim2.new(0, 35, 1, 0)
-MinBtn.Position = UDim2.new(1, -35, 0, 0)
+MinBtn.Size = UDim2.new(0, 32, 1, 0)
+MinBtn.Position = UDim2.new(1, -32, 0, 0)
 MinBtn.BackgroundTransparency = 1
+MinBtn.Text = "-"
 MinBtn.TextColor3 = THEME.TextDim
 MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 24
+MinBtn.TextSize = 20
 MinBtn.Parent = Header
 
--- SidebarFrame
-local SidebarFrame = Instance.new("Frame")
-SidebarFrame.Name = "SidebarFrame"
-SidebarFrame.Size = UDim2.new(0, 130, 1, -35)
-SidebarFrame.Position = UDim2.new(0, 0, 0, 35)
-SidebarFrame.BackgroundColor3 = Color3.fromHex("252525")
-SidebarFrame.BorderSizePixel = 0
-SidebarFrame.ZIndex = 2
-SidebarFrame.Parent = MainFrame
+local HeaderLine = Instance.new("Frame")
+HeaderLine.Size = UDim2.new(1, 0, 0, 1)
+HeaderLine.Position = UDim2.new(0, 0, 1, -1)
+HeaderLine.BackgroundColor3 = THEME.Accent
+HeaderLine.BackgroundTransparency = 0.8
+HeaderLine.BorderSizePixel = 0
+HeaderLine.Parent = Header
 
-local SidebarCorner = Instance.new("UICorner")
-SidebarCorner.CornerRadius = UDim.new(0, 10)
-SidebarCorner.Parent = SidebarFrame
+-- BODY
+local Body = Instance.new("Frame")
+Body.Name = "Body"
+Body.Size = UDim2.new(1, 0, 1, -32)
+Body.Position = UDim2.new(0, 0, 0, 32)
+Body.BackgroundTransparency = 1
+Body.ClipsDescendants = true
+Body.Parent = MainFrame
 
--- Sidebar Patches to look seamless
-local SidebarPatchTop = Instance.new("Frame")
-SidebarPatchTop.Size = UDim2.new(1, 0, 0, 10)
-SidebarPatchTop.Position = UDim2.new(0, 0, 0, 0)
-SidebarPatchTop.BackgroundColor3 = Color3.fromHex("252525")
-SidebarPatchTop.BorderSizePixel = 0
-SidebarPatchTop.Parent = SidebarFrame
+local Sidebar = Instance.new("Frame")
+Sidebar.Size = UDim2.new(0, 130, 1, 0)
+Sidebar.BackgroundColor3 = THEME.Element
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Body
 
-local SidebarPatchRight = Instance.new("Frame")
-SidebarPatchRight.Size = UDim2.new(0, 10, 1, 0)
-SidebarPatchRight.Position = UDim2.new(1, -10, 0, 0)
-SidebarPatchRight.BackgroundColor3 = Color3.fromHex("252525")
-SidebarPatchRight.BorderSizePixel = 0
-SidebarPatchRight.Parent = SidebarFrame
+local SideLayout = Instance.new("UIListLayout")
+SideLayout.Padding = UDim.new(0, 2)
+SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SideLayout.Parent = Sidebar
 
-local SidebarLayout = Instance.new("UIListLayout")
-SidebarLayout.Padding = UDim.new(0, 5)
-SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SidebarLayout.Parent = SidebarFrame
+local SidePad = Instance.new("UIPadding")
+SidePad.PaddingTop = UDim.new(0, 8)
+SidePad.Parent = Sidebar
 
-local SidebarPadding = Instance.new("UIPadding")
-SidebarPadding.PaddingTop = UDim.new(0, 10)
-SidebarPadding.Parent = SidebarFrame
+local Content = Instance.new("Frame")
+Content.Size = UDim2.new(1, -130, 1, 0)
+Content.Position = UDim2.new(0, 130, 0, 0)
+Content.BackgroundTransparency = 1
+Content.ClipsDescendants = true
+Content.Parent = Body
 
--- ContentFrame
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -130, 1, -35)
-ContentFrame.Position = UDim2.new(0, 130, 0, 35)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.ZIndex = 1
-ContentFrame.Parent = MainFrame
+-- TABS SYSTEM
+local TabFrames = {}
+local TabButtons = {}
 
--- 2. PAGES
-local InfoPage = Instance.new("Frame")
-InfoPage.Name = "InfoPage"
-InfoPage.Size = UDim2.new(1, 0, 1, 0)
-InfoPage.BackgroundTransparency = 1
-InfoPage.Visible = true
-InfoPage.Parent = ContentFrame
-
-local InfoPadding = Instance.new("UIPadding")
-InfoPadding.PaddingTop = UDim.new(0, 10)
-InfoPadding.PaddingLeft = UDim.new(0, 10)
-InfoPadding.PaddingRight = UDim.new(0, 10)
-InfoPadding.PaddingBottom = UDim.new(0, 10)
-InfoPadding.Parent = InfoPage
-
-local InfoLayout = Instance.new("UIListLayout")
-InfoLayout.Padding = UDim.new(0, 10)
-InfoLayout.SortOrder = Enum.SortOrder.LayoutOrder
-InfoLayout.Parent = InfoPage
-
-local LoggerPage = Instance.new("Frame")
-LoggerPage.Name = "LoggerPage"
-LoggerPage.Size = UDim2.new(1, 0, 1, 0)
-LoggerPage.BackgroundTransparency = 1
-LoggerPage.Visible = false
-LoggerPage.Parent = ContentFrame
-
-local LoggerPadding = Instance.new("UIPadding")
-LoggerPadding.PaddingTop = UDim.new(0, 10)
-LoggerPadding.PaddingLeft = UDim.new(0, 10)
-LoggerPadding.PaddingRight = UDim.new(0, 10)
-LoggerPadding.PaddingBottom = UDim.new(0, 10)
-LoggerPadding.Parent = LoggerPage
-
-local LoggerLayout = Instance.new("UIListLayout")
-LoggerLayout.Padding = UDim.new(0, 10)
-LoggerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-LoggerLayout.Parent = LoggerPage
-
--- 3. MINIMIZE LOGIC (ROLL-UP)
-local isMinimized = false
-local fullSize = UDim2.new(0, 500, 0, 350)
-local minSize = UDim2.new(0, 500, 0, 35)
-
-MinBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    if isMinimized then
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
-        MinBtn.Text = "+"
-    else
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
-        MinBtn.Text = "-"
+local function SwitchTab(activeName)
+    for name, frame in pairs(TabFrames) do
+        frame.Visible = (name == activeName)
     end
-end)
-
--- 4. SIDEBAR NAVIGATION
-local function CreateTabBtn(name, icon, targetPage)
-    local Btn = Instance.new("TextButton")
-    Btn.Name = name .. "Btn"
-    Btn.Size = UDim2.new(1, -10, 0, 40)
-    Btn.BackgroundTransparency = 1
-    Btn.Text = "   " .. icon .. "  " .. name
-    Btn.TextColor3 = THEME.TextDim
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 14
-    Btn.TextXAlignment = Enum.TextXAlignment.Left
-    Btn.Parent = SidebarFrame
-    
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = Btn
-
-    Btn.MouseButton1Click:Connect(function()
-        -- Reset all buttons
-        for _, child in pairs(SidebarFrame:GetChildren()) do
-            if child:IsA("TextButton") then
-                TweenService:Create(child, TweenInfo.new(0.2), {BackgroundTransparency = 1, TextColor3 = THEME.TextDim}):Play()
-            end
+    for name, btn in pairs(TabButtons) do
+        if name == activeName then
+            btn.TextColor3 = THEME.Text
+            btn.BackgroundTransparency = 0.9
+        else
+            btn.TextColor3 = THEME.TextDim
+            btn.BackgroundTransparency = 1
         end
-        -- Highlight this button
-        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.9, BackgroundColor3 = THEME.Accent, TextColor3 = Color3.white}):Play()
-        
-        -- Switch Page
-        InfoPage.Visible = false
-        LoggerPage.Visible = false
-        targetPage.Visible = true
-    end)
-    
-    return Btn
+    end
 end
 
--- Helper for UI Elements
-local function CreateInput(parent, placeholder)
-    local Container = Instance.new("Frame")
-    Container.Size = UDim2.new(1, 0, 0, 40)
-    Container.BackgroundColor3 = THEME.Element
-    Container.Parent = parent
-    Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 8)
+local function CreateTab(name)
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = name
+    Page.Size = UDim2.new(1, -10, 1, -10)
+    Page.Position = UDim2.new(0, 5, 0, 5)
+    Page.BackgroundTransparency = 1
+    Page.Visible = false
+    Page.ScrollBarThickness = 2
+    Page.ScrollBarImageColor3 = THEME.Accent
+    Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Page.CanvasSize = UDim2.new(0,0,0,0)
+    Page.Parent = Content
     
-    local Box = Instance.new("TextBox")
-    Box.Size = UDim2.new(1, -20, 1, 0)
-    Box.Position = UDim2.new(0, 10, 0, 0)
-    Box.BackgroundTransparency = 1
-    Box.PlaceholderText = placeholder
-    Box.Text = ""
-    Box.TextColor3 = THEME.Text
-    Box.PlaceholderColor3 = THEME.TextDim
-    Box.Font = Enum.Font.Gotham
-    Box.TextSize = 14
-    Box.TextXAlignment = Enum.TextXAlignment.Left
-    Box.Parent = Container
-    return Box
+    local PLayout = Instance.new("UIListLayout")
+    PLayout.Padding = UDim.new(0, 5)
+    PLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PLayout.Parent = Page
+    
+    local PPad = Instance.new("UIPadding")
+    PPad.PaddingTop = UDim.new(0, 5)
+    PPad.PaddingLeft = UDim.new(0, 5)
+    PPad.PaddingRight = UDim.new(0, 5)
+    PPad.Parent = Page
+    
+    TabFrames[name] = Page
+    
+    local Btn = Instance.new("TextButton")
+    Btn.Name = name
+    Btn.Size = UDim2.new(1, -16, 0, 28)
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundTransparency = 1
+    Btn.Text = name
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 14
+    Btn.TextColor3 = THEME.TextDim
+    Btn.Parent = Sidebar
+    
+    local BCorner = Instance.new("UICorner")
+    BCorner.CornerRadius = UDim.new(0, 4)
+    BCorner.Parent = Btn
+    
+    Btn.MouseButton1Click:Connect(function() SwitchTab(name) end)
+    TabButtons[name] = Btn
+    
+    return Page
+end
+
+-- HELPER FUNCTIONS
+local function GetOrder(parent) return #parent:GetChildren() end
+
+local function CreateSection(parent, text)
+    local Lab = Instance.new("TextLabel")
+    Lab.LayoutOrder = GetOrder(parent)
+    Lab.Text = text:upper()
+    Lab.Size = UDim2.new(1, 0, 0, 24)
+    Lab.BackgroundTransparency = 1
+    Lab.TextColor3 = THEME.Accent
+    Lab.TextTransparency = 0.2
+    Lab.Font = Enum.Font.GothamBold
+    Lab.TextSize = 12
+    Lab.TextXAlignment = Enum.TextXAlignment.Left
+    Lab.Parent = parent
 end
 
 local function CreateButton(parent, text, color, callback)
     local Btn = Instance.new("TextButton")
+    Btn.LayoutOrder = GetOrder(parent)
     Btn.Size = UDim2.new(1, 0, 0, 35)
-    Btn.BackgroundColor3 = color
+    Btn.BackgroundColor3 = THEME.Element
     Btn.Text = text
-    Btn.TextColor3 = Color3.white
+    Btn.TextColor3 = THEME.Text
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
     Btn.Parent = parent
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
-    Btn.MouseButton1Click:Connect(callback)
-    return Btn
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 4)
+    Corner.Parent = Btn
+    Btn.MouseButton1Click:Connect(function() pcall(callback) end)
 end
 
-local function CreateToggle(parent, text, callback)
+local function CreateToggle(parent, text, defaultVal, callback)
     local Frame = Instance.new("Frame")
+    Frame.LayoutOrder = GetOrder(parent)
     Frame.Size = UDim2.new(1, 0, 0, 30)
-    Frame.BackgroundTransparency = 1
+    Frame.BackgroundColor3 = THEME.Element
     Frame.Parent = parent
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 4)
+    Corner.Parent = Frame
     
     local Label = Instance.new("TextLabel")
     Label.Text = text
     Label.Size = UDim2.new(0.8, 0, 1, 0)
+    Lab.Position = UDim2.new(0, 10, 0, 0)
     Label.BackgroundTransparency = 1
     Label.TextColor3 = THEME.Text
     Label.Font = Enum.Font.Gotham
@@ -465,29 +423,70 @@ local function CreateToggle(parent, text, callback)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(0, 40, 0, 20)
     Btn.Position = UDim2.new(1, -40, 0.5, -10)
-    Btn.BackgroundColor3 = THEME.Element
+    Btn.BackgroundColor3 = defaultVal and THEME.Accent or Color3.fromRGB(50, 50, 50)
     Btn.Text = ""
     Btn.Parent = Frame
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(1, 0)
+    local TCorner = Instance.new("UICorner")
+    TCorner.CornerRadius = UDim.new(1, 0)
+    TCorner.Parent = Btn
     
     local Dot = Instance.new("Frame")
     Dot.Size = UDim2.new(0, 16, 0, 16)
-    Dot.Position = UDim2.new(0, 2, 0.5, -8)
-    Dot.BackgroundColor3 = THEME.TextDim
+    Dot.Position = defaultVal and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+    Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Dot.Parent = Btn
-    Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
+    local DCorner = Instance.new("UICorner")
+    DCorner.CornerRadius = UDim.new(1, 0)
+    DCorner.Parent = Dot
     
-    local on = false
+    local on = defaultVal
     Btn.MouseButton1Click:Connect(function()
         on = not on
-        callback(on)
-        TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = on and THEME.Accent or THEME.Element}):Play()
-        TweenService:Create(Dot, TweenInfo.new(0.2), {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = on and Color3.white or THEME.TextDim}):Play()
+        if on then
+            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = THEME.Accent}):Play()
+            TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(1, -16, 0.5, -7)}):Play()
+        else
+            TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 50)}):Play()
+            TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -7)}):Play()
+        end
+        pcall(callback, on)
     end)
 end
 
--- === POPULATE INFO PAGE ===
+local function CreateInput(parent, placeholder, defaultText, callback)
+    local Frame = Instance.new("Frame")
+    Frame.LayoutOrder = GetOrder(parent)
+    Frame.Size = UDim2.new(1, 0, 0, 36)
+    Frame.BackgroundColor3 = THEME.Element
+    Frame.Parent = parent
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 4)
+    Corner.Parent = Frame
+    
+    local Box = Instance.new("TextBox")
+    Box.Size = UDim2.new(1, -20, 1, 0)
+    Box.Position = UDim2.new(0, 10, 0, 0)
+    Box.BackgroundTransparency = 1
+    Box.Text = defaultText or ""
+    Box.PlaceholderText = placeholder
+    Box.TextColor3 = THEME.Text
+    Box.PlaceholderColor3 = THEME.TextDim
+    Box.Font = Enum.Font.GothamBold
+    Box.TextSize = 14
+    Box.TextXAlignment = Enum.TextXAlignment.Left
+    Box.ClearTextOnFocus = false
+    Box.Parent = Frame
+    
+    Box.FocusLost:Connect(function() pcall(callback, Box.Text) end)
+end
+
+-- BUILD TABS
+local InfoPage = CreateTab("Info")
+local LoggerPage = CreateTab("Logger")
+
+-- [INFO TAB]
 local WelcomeHeader = Instance.new("TextLabel")
+WelcomeHeader.LayoutOrder = GetOrder(InfoPage)
 WelcomeHeader.Text = "Welcome to Divine Tools"
 WelcomeHeader.Size = UDim2.new(1, 0, 0, 30)
 WelcomeHeader.BackgroundTransparency = 1
@@ -498,6 +497,7 @@ WelcomeHeader.TextXAlignment = Enum.TextXAlignment.Left
 WelcomeHeader.Parent = InfoPage
 
 local DescText = Instance.new("TextLabel")
+DescText.LayoutOrder = GetOrder(InfoPage)
 DescText.Text = "Empower your fishing journey with the ultimate utility tool. Tracking your rarest catches has never been easier."
 DescText.Size = UDim2.new(1, 0, 0, 60)
 DescText.BackgroundTransparency = 1
