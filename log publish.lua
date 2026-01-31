@@ -18,7 +18,7 @@ local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local CoreGui = game:GetService("CoreGui")
 
 -- Safe GUI Parent
-local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
+local GUI_PARENT = LocalPlayer:WaitForChild("PlayerGui")
 
 -- Request Handler
 local req = http_request or request or (fluxus and fluxus.request) or (getgenv and getgenv().request) or (syn and syn.request)
@@ -216,7 +216,8 @@ ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 550, 0, 350)
-MainFrame.Position = UDim2.new(0.5, -275, 0.5, -175)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0) -- Top Center Pivot (Fixes Minimize Animation)
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, -175) -- Centered
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 MainFrame.BackgroundTransparency = 0.1 -- Glassy Look
 MainFrame.BorderSizePixel = 0
@@ -269,10 +270,12 @@ local minSize = UDim2.new(0, 550, 0, 40)
 MinBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
-        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
+        Body.Visible = false
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
         MinBtn.Text = "+"
     else
-        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
+        Body.Visible = true
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
         MinBtn.Text = "-"
     end
 end)
@@ -286,13 +289,20 @@ Separator.BackgroundTransparency = 0.9
 Separator.BorderSizePixel = 0
 Separator.Parent = MainFrame
 
+-- Body (Container for Content)
+local Body = Instance.new("Frame")
+Body.Name = "Body"
+Body.Size = UDim2.new(1, 0, 1, -41)
+Body.Position = UDim2.new(0, 0, 0, 41)
+Body.BackgroundTransparency = 1
+Body.Parent = MainFrame
+
 -- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 140, 1, -41)
-Sidebar.Position = UDim2.new(0, 0, 0, 41)
+Sidebar.Size = UDim2.new(0, 140, 1, 0)
 Sidebar.BackgroundTransparency = 1
-Sidebar.Parent = MainFrame
+Sidebar.Parent = Body
 
 local SidebarBorder = Instance.new("Frame")
 SidebarBorder.Size = UDim2.new(0, 1, 1, 0)
@@ -315,10 +325,10 @@ SidebarPadding.Parent = Sidebar
 -- PageContainer
 local PageContainer = Instance.new("Frame")
 PageContainer.Name = "PageContainer"
-PageContainer.Size = UDim2.new(1, -140, 1, -41)
-PageContainer.Position = UDim2.new(0, 140, 0, 41)
+PageContainer.Size = UDim2.new(1, -140, 1, 0)
+PageContainer.Position = UDim2.new(0, 140, 0, 0)
 PageContainer.BackgroundTransparency = 1
-PageContainer.Parent = MainFrame
+PageContainer.Parent = Body
 
 -- Pages
 local InfoPage = Instance.new("Frame")
