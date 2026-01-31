@@ -270,41 +270,68 @@ MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextSize = 24
 MinBtn.Parent = Header
 
--- Sidebar
-local Sidebar = Instance.new("Frame")
-Sidebar.Name = "Sidebar"
-Sidebar.Size = UDim2.new(0, 120, 1, -35)
-Sidebar.Position = UDim2.new(0, 0, 0, 35)
-Sidebar.BackgroundColor3 = THEME.Element
-Sidebar.BorderSizePixel = 0
-Sidebar.Parent = MainFrame
+-- SidebarFrame
+local SidebarFrame = Instance.new("Frame")
+SidebarFrame.Name = "SidebarFrame"
+SidebarFrame.Size = UDim2.new(0, 130, 1, -35)
+SidebarFrame.Position = UDim2.new(0, 0, 0, 35)
+SidebarFrame.BackgroundColor3 = Color3.fromHex("252525")
+SidebarFrame.BorderSizePixel = 0
+SidebarFrame.ZIndex = 2
+SidebarFrame.Parent = MainFrame
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 10)
+SidebarCorner.Parent = SidebarFrame
+
+-- Sidebar Patches to look seamless
+local SidebarPatchTop = Instance.new("Frame")
+SidebarPatchTop.Size = UDim2.new(1, 0, 0, 10)
+SidebarPatchTop.Position = UDim2.new(0, 0, 0, 0)
+SidebarPatchTop.BackgroundColor3 = Color3.fromHex("252525")
+SidebarPatchTop.BorderSizePixel = 0
+SidebarPatchTop.Parent = SidebarFrame
+
+local SidebarPatchRight = Instance.new("Frame")
+SidebarPatchRight.Size = UDim2.new(0, 10, 1, 0)
+SidebarPatchRight.Position = UDim2.new(1, -10, 0, 0)
+SidebarPatchRight.BackgroundColor3 = Color3.fromHex("252525")
+SidebarPatchRight.BorderSizePixel = 0
+SidebarPatchRight.Parent = SidebarFrame
 
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Padding = UDim.new(0, 5)
 SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-SidebarLayout.Parent = Sidebar
+SidebarLayout.Parent = SidebarFrame
 
 local SidebarPadding = Instance.new("UIPadding")
 SidebarPadding.PaddingTop = UDim.new(0, 10)
-SidebarPadding.Parent = Sidebar
+SidebarPadding.Parent = SidebarFrame
 
--- ContentContainer
-local ContentContainer = Instance.new("Frame")
-ContentContainer.Name = "ContentContainer"
-ContentContainer.Size = UDim2.new(1, -120, 1, -35)
-ContentContainer.Position = UDim2.new(0, 120, 0, 35)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.Parent = MainFrame
+-- ContentFrame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, -130, 1, -35)
+ContentFrame.Position = UDim2.new(0, 130, 0, 35)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ZIndex = 1
+ContentFrame.Parent = MainFrame
 
--- 2. FIX BLANK PAGES
+-- 2. PAGES
 local InfoPage = Instance.new("Frame")
 InfoPage.Name = "InfoPage"
-InfoPage.Size = UDim2.new(1, -20, 1, -20)
-InfoPage.Position = UDim2.new(0, 10, 0, 10)
+InfoPage.Size = UDim2.new(1, 0, 1, 0)
 InfoPage.BackgroundTransparency = 1
 InfoPage.Visible = true
-InfoPage.Parent = ContentContainer
+InfoPage.Parent = ContentFrame
+
+local InfoPadding = Instance.new("UIPadding")
+InfoPadding.PaddingTop = UDim.new(0, 10)
+InfoPadding.PaddingLeft = UDim.new(0, 10)
+InfoPadding.PaddingRight = UDim.new(0, 10)
+InfoPadding.PaddingBottom = UDim.new(0, 10)
+InfoPadding.Parent = InfoPage
 
 local InfoLayout = Instance.new("UIListLayout")
 InfoLayout.Padding = UDim.new(0, 10)
@@ -313,11 +340,17 @@ InfoLayout.Parent = InfoPage
 
 local LoggerPage = Instance.new("Frame")
 LoggerPage.Name = "LoggerPage"
-LoggerPage.Size = UDim2.new(1, -20, 1, -20)
-LoggerPage.Position = UDim2.new(0, 10, 0, 10)
+LoggerPage.Size = UDim2.new(1, 0, 1, 0)
 LoggerPage.BackgroundTransparency = 1
 LoggerPage.Visible = false
-LoggerPage.Parent = ContentContainer
+LoggerPage.Parent = ContentFrame
+
+local LoggerPadding = Instance.new("UIPadding")
+LoggerPadding.PaddingTop = UDim.new(0, 10)
+LoggerPadding.PaddingLeft = UDim.new(0, 10)
+LoggerPadding.PaddingRight = UDim.new(0, 10)
+LoggerPadding.PaddingBottom = UDim.new(0, 10)
+LoggerPadding.Parent = LoggerPage
 
 local LoggerLayout = Instance.new("UIListLayout")
 LoggerLayout.Padding = UDim.new(0, 10)
@@ -351,7 +384,7 @@ local function CreateTabBtn(name, icon, targetPage)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 14
     Btn.TextXAlignment = Enum.TextXAlignment.Left
-    Btn.Parent = Sidebar
+    Btn.Parent = SidebarFrame
     
     local Corner = Instance.new("UICorner")
     Corner.CornerRadius = UDim.new(0, 6)
@@ -359,7 +392,7 @@ local function CreateTabBtn(name, icon, targetPage)
 
     Btn.MouseButton1Click:Connect(function()
         -- Reset all buttons
-        for _, child in pairs(Sidebar:GetChildren()) do
+        for _, child in pairs(SidebarFrame:GetChildren()) do
             if child:IsA("TextButton") then
                 TweenService:Create(child, TweenInfo.new(0.2), {BackgroundTransparency = 1, TextColor3 = THEME.TextDim}):Play()
             end
