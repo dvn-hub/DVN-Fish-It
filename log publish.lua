@@ -251,17 +251,31 @@ HeaderTitle.TextSize = 16
 HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
 HeaderTitle.Parent = Header
 
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Name = "CloseBtn"
-CloseBtn.Text = "×"
-CloseBtn.Size = UDim2.new(0, 40, 1, 0)
-CloseBtn.Position = UDim2.new(1, -40, 0, 0)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.TextColor3 = THEME.TextDim
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 24
-CloseBtn.Parent = Header
-CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+local MinBtn = Instance.new("TextButton")
+MinBtn.Name = "MinBtn"
+MinBtn.Text = "-"
+MinBtn.Size = UDim2.new(0, 40, 1, 0)
+MinBtn.Position = UDim2.new(1, -40, 0, 0)
+MinBtn.BackgroundTransparency = 1
+MinBtn.TextColor3 = THEME.TextDim
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 24
+MinBtn.Parent = Header
+
+local isMinimized = false
+local fullSize = UDim2.new(0, 550, 0, 350)
+local minSize = UDim2.new(0, 550, 0, 40)
+
+MinBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    if isMinimized then
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = minSize}):Play()
+        MinBtn.Text = "+"
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = fullSize}):Play()
+        MinBtn.Text = "-"
+    end
+end)
 
 -- Separator
 local Separator = Instance.new("Frame")
@@ -555,7 +569,7 @@ local function update(input)
     local delta = input.Position - dragStart
     MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-MainFrame.InputBegan:Connect(function(input)
+Header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
