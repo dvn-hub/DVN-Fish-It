@@ -50,7 +50,7 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
-        ["Auto Element Rod"] = true,
+        ["Auto Element Rod"] = false,
         ["Auto Diamond Rod"] = false,
         ["Unlock Ancient Ruin"] = true,
         ["Allowed Sacrifice"] = {
@@ -68,7 +68,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Gladiator Shark",
             "Viridis Lurker",
         },
-        ["FARM_LOC_SECRET_SACRIFICE"] = "Ocean",
+        ["FARM_LOC_SECRET_SACRIFICE"] = "Ancient Ruin",
 
         ["Minimum Rod"] = "Astral Rod",
     },
