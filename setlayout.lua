@@ -74,8 +74,18 @@ end
 local COUNT = #SELECTED
 
 -- ================= SCREEN & GRID =================
-local size = exec("wm size"):match("(%d+x%d+)")
+local wm = exec("wm size")
+
+local size = wm:match("Physical size:%s*(%d+x%d+)")
+          or wm:match("Override size:%s*(%d+x%d+)")
+          or wm:match("(%d+x%d+)")
+
+if not size then
+  error("Gagal membaca resolusi layar (wm size)")
+end
+
 local W, H = size:match("(%d+)x(%d+)")
+W, H = tonumber(W), tonumber(H)
 W, H = tonumber(W), tonumber(H)
 
 local COLS, ROWS
