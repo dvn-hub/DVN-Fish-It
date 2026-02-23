@@ -54,7 +54,14 @@ end
 print("---------------------------------------------------")
 io.write(C.CYAN .. "Pilih nomor (1,3,5) atau 'all': " .. C.NC)
 
-local input = io.read():lower()
+local input = io.read()
+
+if not input or input == "" then
+  input = "all"
+else
+  input = input:lower()
+end
+
 local SELECTED = {}
 
 if input == "all" then
