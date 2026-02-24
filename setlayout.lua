@@ -1,6 +1,6 @@
 -- =============================================================================
 -- UNIVERSAL ROBLOX CLONE GRID MANAGER (LUA)
--- VERSION 4.1 - Dynamic Portrait 1 Column
+-- VERSION 4.2 - dumpsys display fallback (NO wm)
 -- =============================================================================
 
 -- ================= CONFIG =================
@@ -24,7 +24,8 @@ end
 -- ================= UTIL =================
 local function exec(cmd)
   local f = io.popen(cmd)
-  local out = f:read("*a")
+  if not f then return "" end
+  local out = f:read("*a") or ""
   f:close()
   return out:gsub("%s+$", "")
 end
@@ -55,12 +56,8 @@ print("---------------------------------------------------")
 io.write(C.CYAN .. "Pilih nomor (1,3,5) atau 'all': " .. C.NC)
 
 local input = io.read()
-
-if not input or input == "" then
-  input = "all"
-else
-  input = input:lower()
-end
+if not input or input == "" then input = "all" end
+input = input:lower()
 
 local SELECTED = {}
 
@@ -80,35 +77,39 @@ end
 
 local COUNT = #SELECTED
 
--- ================= SCREEN & GRID =================
-local wm = exec("wm size")
+-- ================= SCREEN DETECTION (NO WM) =================
+log("＊", C.CYAN, "Mendeteksi resolusi layar (dumpsys display)")
 
-local size = wm:match("Physical size:%s*(%d+x%d+)")
-          or wm:match("Override size:%s*(%d+x%d+)")
-          or wm:match("(%d+x%d+)")
+local out = exec("su -c 'dumpsys display'")
 
-if not size then
-  error("Gagal membaca resolusi layar (wm size)")
+local W, H =
+      out:match("real (%d+) x (%d+)")
+   or out:match("PhysicalDisplayInfo.-(%d+) x (%d+)")
+   or out:match("DisplayDeviceInfo.-(%d+) x (%d+)")
+
+if not W or not H then
+  error("Gagal membaca resolusi layar via dumpsys display")
 end
 
-local W, H = size:match("(%d+)x(%d+)")
 W, H = tonumber(W), tonumber(H)
-W, H = tonumber(W), tonumber(H)
+log("＊", C.CYAN, string.format("Resolusi terdeteksi: %dx%d", W, H))
 
+-- ================= GRID CALC =================
 local COLS, ROWS
+
 if W < H then
-  log("＊", C.CYAN, "Mode Terdeteksi: PORTRAIT")
+  log("＊", C.CYAN, "Mode: PORTRAIT")
   if COUNT <= 5 then
     COLS, ROWS = 1, COUNT
   elseif COUNT <= 10 then
     COLS = 2
     ROWS = math.ceil(COUNT / COLS)
   else
-    log("!", C.RED, "Mode Portrait maksimal 10 akun.")
+    log("!", C.RED, "Portrait maksimal 10 akun.")
     os.exit(1)
   end
 else
-  log("＊", C.CYAN, "Mode Terdeteksi: LANDSCAPE")
+  log("＊", C.CYAN, "Mode: LANDSCAPE")
   if COUNT <= 4 then COLS = 2
   elseif COUNT <= 9 then COLS = 3
   else COLS = 4 end
@@ -118,7 +119,10 @@ end
 local GW = math.floor(W / COLS)
 local GH = math.floor((H - OFFSET_TOP) / ROWS)
 
-log("＊", C.CYAN, string.format("Grid: %dx%d | Stabilizer: %ds", COLS, ROWS, STABILIZE_DELAY))
+log("＊", C.CYAN, string.format(
+  "Grid: %dx%d | Window: %dx%d | Delay: %ds",
+  COLS, ROWS, GW, GH, STABILIZE_DELAY
+))
 
 -- ================= EXECUTION =================
 for idx, PKG in ipairs(SELECTED) do
@@ -132,8 +136,10 @@ for idx, PKG in ipairs(SELECTED) do
 
   local PREF = "/data/data/" .. PKG .. "/shared_prefs/" .. PKG .. "_preferences.xml"
 
-  print(string.format("%s[%d/%d]%s Setup Layout -> %s",
-    C.GREEN, idx, COUNT, C.NC, PKG))
+  print(string.format(
+    "%s[%d/%d]%s Layout -> %s",
+    C.GREEN, idx, COUNT, C.NC, PKG
+  ))
 
   exec("su -c 'am force-stop " .. PKG .. "'")
   exec("su -c 'chmod 666 " .. PREF .. "'")
@@ -160,8 +166,8 @@ for idx, PKG in ipairs(SELECTED) do
   os.execute("sleep " .. STABILIZE_DELAY)
   exec("su -c 'am force-stop " .. PKG .. "'")
 
-  log("＊", C.CYAN, "Posisi terkunci. Menutup " .. PKG)
+  log("＊", C.CYAN, "Posisi terkunci: " .. PKG)
 end
 
 print("---------------------------------------------------")
-log("+", C.GREEN, "PROSES SELESAI! Grid telah dikunci.")
+log("+", C.GREEN, "PROSES SELESAI! Grid berhasil dikunci.")
