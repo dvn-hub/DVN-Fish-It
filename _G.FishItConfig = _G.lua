@@ -25,7 +25,7 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Enabled"] = true,
         ["Whitelist Username"] = {"dvn_store"},
         ["Category Fish"] = {
-            "Secret", 
+            "Secret", "Mythic", 
             -- {Tier = "Mythic", Variant = "Stone"}, -- Tier + Variant
         },
         ["Fish Name"] = {
@@ -50,9 +50,9 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Doing Quest"] = {
         ["Auto Ghostfinn Rod"] = true,
-        ["Auto Element Rod"] = true,
+        ["Auto Element Rod"] = false,
         ["Auto Diamond Rod"] = false,
-        ["Unlock Ancient Ruin"] = true,
+        ["Unlock Ancient Ruin"] = false,
         ["Allowed Sacrifice"] = {
             "Ghost Shark",
             "Cryoshade Glider",
@@ -68,7 +68,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Gladiator Shark",
             "Viridis Lurker",
         },
-        ["FARM_LOC_SECRET_SACRIFICE"] = "Ocean",
+        ["FARM_LOC_SECRET_SACRIFICE"] = "Ancient Ruin",
 
         ["Minimum Rod"] = "Astral Rod",
     },
@@ -93,7 +93,7 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Minimum Rod"] = "Astral Rod",
     },
     ["Totems"] = {
-        ["Auto Use"] = true,
+        ["Auto Use"] = false,
         ["Minimum Rod"] = "Element Rod",
         ["Buy List"] = {
             ["Mutation Totem"] = 5,
@@ -131,9 +131,6 @@ _G.FishItConfig = _G.FishItConfig or {
     ["Bait List"] = {
         ["Auto Buying"] = true,
         ["Buy List"] = {
-            "Midnight Bait",
-            "Chroma Bait",
-            "Corrupt Bait",
             "Aether Bait",
             "Floral Bait",
             "Singularity Bait",
@@ -153,15 +150,15 @@ _G.FishItConfig = _G.FishItConfig or {
             ["Fisherman Island"] = {"Starter Rod"},
             ["Kohana Volcano"] = {"Grass Rod", "Midnight Rod"},
             ["Tropical Grove"] = {"Astral Rod"},
-            ["Ancient Ruin"] = {"Element Rod", "Ghostfinn Rod"},
+            ["Treasure Room"] = {"Element Rod", "Ghostfinn Rod"},
             ["Crystal Depths"] = {"Diamond Rod"},
         },
         ["Endgame"] = "",
     },
 
-    ["ExtremeFpsBoost"] = true,
+    ["ExtremeFpsBoost"] = false,
     ["UltimatePerformance"] = true,
-    ["Disable3DRender"] = true,
+    ["Disable3DRender"] = false,
     ["AutoRemovePlayer"] = true,
 
     ["AutoReconnect"] = false,
