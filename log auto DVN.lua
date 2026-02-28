@@ -1,6 +1,6 @@
 --[[ 
     💎 DVN LOGGER v11 — LEGACY DOMAIN EDITION
-    Status: WORK ON FLUXUS (Fix 429 Error)
+    Status: ACTIVE
     System: Menggunakan jalur 'discordapp.com' (Old API)
 ]]
 
@@ -113,7 +113,7 @@ local function testWebhook()
         avatar_url = WEBHOOK_AVATAR, 
         embeds = {{ 
             title = "💎 DVN HUB • SYSTEM ONLINE",
-            description = "```ini\n[ STATUS: CONNECTED ]\nUsing Legacy Domain (discordapp.com)\nFluxus Fix Applied!```",
+            description = "```ini\n[ STATUS: CONNECTED ]\nUsing Legacy Domain (discordapp.com)```",
             color = 0x2B2D31,
             thumbnail = { url = WEBHOOK_AVATAR }, 
             fields = {
@@ -231,7 +231,7 @@ local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0
 local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 8)
 local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(60,60,60); Stroke.Thickness = 1
 local StatusDot = Instance.new("Frame", MainFrame); StatusDot.Size = UDim2.new(0, 10, 0, 10); StatusDot.Position = UDim2.new(0, 15, 0.5, -5); StatusDot.BackgroundColor3 = Color3.fromRGB(0, 255, 128); Instance.new("UICorner", StatusDot).CornerRadius = UDim.new(1,0)
-local Title = Instance.new("TextLabel", MainFrame); Title.Text = "DVN LOGGER : FLUXUS FIX"; Title.Size = UDim2.new(1, -40, 1, 0); Title.Position = UDim2.new(0, 35, 0, 0); Title.TextColor3 = Color3.fromRGB(240,240,240); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
+local Title = Instance.new("TextLabel", MainFrame); Title.Text = "DVN LOGGER : ACTIVE"; Title.Size = UDim2.new(1, -40, 1, 0); Title.Position = UDim2.new(0, 35, 0, 0); Title.TextColor3 = Color3.fromRGB(240,240,240); Title.BackgroundTransparency = 1; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
 
 print("✅ DVN LOGGER v11 LOADED (LEGACY MODE)")
 testWebhook()
