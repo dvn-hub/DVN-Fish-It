@@ -1,10 +1,10 @@
 --[[ 
-    💎 CIA LOGGER v9.2 — SPECIAL TARGET EDITION
+    💎 CIA LOGGER v9.5 — SECURITY UPDATE
     Features:
-    - FOCUS: Added "Sacred Guardian Squid" & "GEMSTONE Ruby" detection by NAME.
-    - CLEAN: Removed Common, Uncommon, Rare filters.
-    - DEFAULT: All toggles start OFF (Silent Start).
-    - UI: Integrated Focus Menu into Settings.
+    - SECURITY: Webhook Queue System (Anti-429).
+    - BYPASS: User-Agent Spoofing.
+    - UI: Updated Changelog.
+    - STABILITY: Fixed crashes on high load.
 ]]
 
 -- SERVICES
@@ -90,11 +90,37 @@ local function detectFishNameAndWeight(text)
 end
 
 -- WEBHOOK FUNCTIONS
+local Queue = {}
+local IsProcessing = false
+
+local function ProcessQueue()
+    if IsProcessing then return end
+    IsProcessing = true
+    
+    task.spawn(function()
+        while #Queue > 0 do
+            local payload = table.remove(Queue, 1)
+            
+            -- [[ SECURITY: ANTI-SPAM DELAY ]]
+            task.wait(math.random(8, 15) / 10) -- 0.8s - 1.5s delay
+            
+            pcall(function()
+                req({ 
+                    Url = SETTINGS.WebhookURL, 
+                    Method = "POST", 
+                    Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" }, 
+                    Body = HttpService:JSONEncode(payload) 
+                })
+            end)
+        end
+        IsProcessing = false
+    end)
+end
+
 local function send(payload)
     if SETTINGS.WebhookURL == "" or not req then return end
-    pcall(function()
-        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
-    end)
+    table.insert(Queue, payload)
+    ProcessQueue()
 end
 
 local function testWebhook()
@@ -300,7 +326,7 @@ end
 
 -- [INFO TAB]
 CreateSection(TabFrames["Info"], "About")
-local InfoTxt = Instance.new("TextLabel", TabFrames["Info"]); InfoTxt.LayoutOrder = GetOrder(TabFrames["Info"]); InfoTxt.Text = "CIA LOGGER v9.2\n\nFocus Tracking enabled for:\n- Sacred Guardian Squid\n- GEMSTONE Ruby\n\nCommon-Rare filters removed."; InfoTxt.Size = UDim2.new(1, 0, 0, 100); InfoTxt.BackgroundTransparency = 1; InfoTxt.TextColor3 = TEXT_DIM; InfoTxt.Font = Enum.Font.GothamBold; InfoTxt.TextSize = 13; InfoTxt.TextXAlignment = Enum.TextXAlignment.Left; InfoTxt.TextWrapped = true
+local InfoTxt = Instance.new("TextLabel", TabFrames["Info"]); InfoTxt.LayoutOrder = GetOrder(TabFrames["Info"]); InfoTxt.Text = "CIA LOGGER v9.5 [SECURITY]\n\n- Added Webhook Queue (Anti-429)\n- User-Agent Spoofing (Bypass)\n- Optimized for New Roblox Security\n- Fixed Crash Issues"; InfoTxt.Size = UDim2.new(1, 0, 0, 100); InfoTxt.BackgroundTransparency = 1; InfoTxt.TextColor3 = TEXT_DIM; InfoTxt.Font = Enum.Font.GothamBold; InfoTxt.TextSize = 13; InfoTxt.TextXAlignment = Enum.TextXAlignment.Left; InfoTxt.TextWrapped = true
 CreateButton(TabFrames["Info"], "Copy Discord Link", function() setclipboard("https://discord.gg/YOUR_DISCORD_LINK") end)
 
 -- [DASHBOARD TAB]
@@ -371,4 +397,4 @@ UserInputService.InputEnded:Connect(function(input) if input.UserInputType == En
 SwitchTab("Info")
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 TweenService:Create(MainFrame, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = DEFAULT_SIZE}):Play()
-print("CIA LOGGER UI LOADED")
+print("CIA LOGGER v9.5 LOADED")
