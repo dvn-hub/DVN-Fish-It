@@ -36,7 +36,7 @@ _G.FishItConfig = _G.FishItConfig or {
         },
     },
     ["Farm Coin Only"] = {
-        ["Enabled"] = false, -- Farm coins only [ cant buy rod, bait, enchant, weather ]
+        ["Enabled"] = false,
         ["Target"] = 190000,
     },
     ["Selling"] = {
