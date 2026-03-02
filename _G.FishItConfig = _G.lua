@@ -24,14 +24,12 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Whitelist Username"] = {"wokrkerdivine01","wokrkerdivine02","wokrkerdivine03","wokrkerdivine04","wokrkerdivine05","pekerjadvn01","pekerjadvn02","pekerjadvn03","pekerjadvn04","pekerjadvn05"},
         ["Category Fish"] = {
             "Secret", "Mythic", 
-            -- {Tier = "Mythic", Variant = "Stone"}, -- Tier + Variant
         },
         ["Fish Name"] = {
             "Sacred Guardian Squid",
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage"},
-            {Variant = "Leviathan Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
-            -- {Variant = "Leviathan's Rage"}, -- Variant Only
+            {Variant = "Leviathan Rage"},
         },
         ["Item Name"] = {
             "Evolved Enchant Stone",
