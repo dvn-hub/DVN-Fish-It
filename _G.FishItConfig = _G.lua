@@ -23,10 +23,14 @@ _G.FishItConfig = _G.FishItConfig or {
         ["Enabled"] = true,
         ["Whitelist Username"] = {"workerdivine01","workerdivine02","workerdivine03","workerdivine04","workerdivine05","pekerjadvn01","pekerjadvn02","pekerjadvn03","pekerjadvn04","pekerjadvn05"},
         ["Category Fish"] = {
-            "Secret", "Mythic", 
+            "Secret",
         },
         ["Fish Name"] = {
             "Sacred Guardian Squid",
+            "Flatheaded Whale Shark", 
+            "Primordial Octopus", 
+            "Runic Squid", 
+            "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage"},
             {Variant = "Leviathan Rage"},
