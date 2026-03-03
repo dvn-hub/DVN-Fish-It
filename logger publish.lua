@@ -105,7 +105,7 @@ local function ProcessQueue()
                     Body = FinalBody 
                 })
             end)
-            task.wait(3)
+            task.wait(math.random(4, 6))
         end
         IsSending = false
     end)

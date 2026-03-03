@@ -120,7 +120,7 @@ local function ProcessWebhookQueue()
                 end
             end
             
-            task.wait(3) -- [FIX] Increased delay for stability
+            task.wait(math.random(4, 6)) -- [FIX] Increased delay (BAC-3226)
         end
         IsSendingWebhook = false
     end)
