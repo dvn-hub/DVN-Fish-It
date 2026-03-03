@@ -85,7 +85,7 @@ local function ProcessWebhookQueue()
             
             local success, Response = pcall(function()
                 return Request({
-                    Url = requestData.Url,
+                    Url = requestData.Url:gsub("discord.com", "discordapp.com"), -- [FIX] Force Legacy Domain
                     Method = requestData.Method,
                     Headers = {["Content-Type"] = "application/json"},
                     Body = HttpService:JSONEncode(requestData.Payload)
@@ -146,6 +146,8 @@ local function SendMasterReport()
         end
     end
 
+    -- [SAFETY] Truncate description to prevent 400 Bad Request (Limit 4096)
+    if #description > 4000 then description = description:sub(1, 4000) .. "\n... (Truncated)" end
     description = description .. "```"
 
 
@@ -178,6 +180,9 @@ local function SendMasterReport()
     if getgenv().MasterMessageID then
         TargetURL = getgenv().WebhookURL .. "/messages/" .. getgenv().MasterMessageID
         Method = "PATCH"
+        -- [FIX BAC-6223] Jangan kirim username/avatar saat PATCH (Edit Mode)
+        Payload.username = nil
+        Payload.avatar_url = nil
     else
         TargetURL = getgenv().WebhookURL .. "?wait=true"
     end
