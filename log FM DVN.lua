@@ -83,12 +83,17 @@ local function ProcessWebhookQueue()
         while #WebhookQueue > 0 do
             local requestData = table.remove(WebhookQueue, 1)
             
+            -- [FIX BAC-2224] Pre-process variables to prevent executor marshalling errors
+            local FinalURL = requestData.Url:gsub("%s+", "")
+            local FinalBody = HttpService:JSONEncode(requestData.Payload)
+            local FinalHeaders = { ["Content-Type"] = "application/json" }
+
             local success, Response = pcall(function()
                 return Request({
-                    Url = requestData.Url:gsub("%s+", ""), -- [FIX] Clean URL & Remove UA (BAC-1229)
+                    Url = FinalURL,
                     Method = requestData.Method,
-                    Headers = { ["Content-Type"] = "application/json" },
-                    Body = HttpService:JSONEncode(requestData.Payload)
+                    Headers = FinalHeaders,
+                    Body = FinalBody
                 })
             end)
 
@@ -115,7 +120,7 @@ local function ProcessWebhookQueue()
                 end
             end
             
-            task.wait(2) -- Jeda aman untuk mencegah rate limit
+            task.wait(3) -- [FIX] Increased delay for stability
         end
         IsSendingWebhook = false
     end)

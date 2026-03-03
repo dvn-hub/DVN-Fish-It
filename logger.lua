@@ -99,15 +99,19 @@ local function ProcessQueue()
     task.spawn(function()
         while #Queue > 0 do
             local data = table.remove(Queue, 1)
+            
+            -- [FIX BAC-2224] Pre-encode body
+            local FinalBody = HttpService:JSONEncode(data.Payload)
+
             pcall(function()
                 req({ 
                     Url = data.Url, 
                     Method = "POST", 
                     Headers = { ["Content-Type"] = "application/json" }, 
-                    Body = HttpService:JSONEncode(data.Payload) 
+                    Body = FinalBody 
                 })
             end)
-            task.wait(2)
+            task.wait(3)
         end
         IsSending = false
     end)

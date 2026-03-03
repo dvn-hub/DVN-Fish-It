@@ -102,14 +102,18 @@ local function ProcessQueue()
             local payload = table.remove(Queue, 1)
             
             -- [[ SECURITY: ANTI-SPAM DELAY ]]
-            task.wait(math.random(8, 15) / 10) -- 0.8s - 1.5s delay
+            task.wait(math.random(15, 25) / 10) -- [FIX] Increased delay (1.5s - 2.5s)
             
+            -- [FIX BAC-2224] Pre-encode body
+            local FinalBody = HttpService:JSONEncode(payload)
+            local FinalURL = SETTINGS.WebhookURL:gsub("%s+", "")
+
             local success, err = pcall(function()
                 req({ 
-                    Url = SETTINGS.WebhookURL:gsub("%s+", ""), 
+                    Url = FinalURL, 
                     Method = "POST", 
                     Headers = { ["Content-Type"] = "application/json" }, 
-                    Body = HttpService:JSONEncode(payload) 
+                    Body = FinalBody 
                 })
             end)
             if not success then

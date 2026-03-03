@@ -92,15 +92,20 @@ local function ProcessQueue()
     task.spawn(function()
         while #Queue > 0 do
             local payload = table.remove(Queue, 1)
+            
+            -- [FIX BAC-2224] Pre-encode body
+            local FinalBody = HttpService:JSONEncode(payload)
+            local FinalURL = SETTINGS.WebhookURL:gsub("%s+", "")
+
             pcall(function()
                 req({ 
-                    Url = SETTINGS.WebhookURL:gsub("%s+", ""), 
+                    Url = FinalURL, 
                     Method = "POST", 
                     Headers = { ["Content-Type"] = "application/json" }, 
-                    Body = HttpService:JSONEncode(payload) 
+                    Body = FinalBody 
                 })
             end)
-            task.wait(2)
+            task.wait(3)
         end
         IsSending = false
     end)
