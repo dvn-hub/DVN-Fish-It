@@ -100,8 +100,13 @@ local function send(payload)
     -- [[ MAGIC FIX: LEGACY DOMAIN ]]
     local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
 
-    pcall(function()
-        req({ Url = finalURL, Method = "POST", Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/Linux" }, Body = HttpService:JSONEncode(payload) })
+    task.spawn(function()
+        local success, err = pcall(function()
+            req({ Url = finalURL, Method = "POST", Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/Linux" }, Body = HttpService:JSONEncode(payload) })
+        end)
+        if not success then
+            warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
+        end
     end)
 end
 

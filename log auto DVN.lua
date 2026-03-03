@@ -91,7 +91,7 @@ local function send(payload)
     local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
     
     task.spawn(function()
-        pcall(function()
+        local success, err = pcall(function()
             req({
                 Url = finalURL,
                 Method = "POST",
@@ -103,6 +103,9 @@ local function send(payload)
                 Body = HttpService:JSONEncode(payload)
             })
         end)
+        if not success then
+            warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
+        end
     end)
 end
 

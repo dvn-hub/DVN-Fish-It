@@ -18,7 +18,7 @@ local C = {
 }
 
 local function log(tag, color, msg)
-  print(string.format("%s[%s]%s %s", color, tag, C.NC, msg))
+  print(string.format("%s[%s] [%s]%s %s", color, os.date("%H:%M:%S"), tag, C.NC, msg))
 end
 
 -- ================= UTIL =================

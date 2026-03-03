@@ -134,18 +134,22 @@ local function SendMasterReport()
         TargetURL = getgenv().WebhookURL .. "?wait=true"
     end
 
-    local Response = Request({ Url = TargetURL, Method = Method, Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
+    local success, Response = pcall(function()
+        return Request({ Url = TargetURL, Method = Method, Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
+    end)
 
-    if Response and Response.Body then
+    if success and Response and Response.Body then
         local Success, Body = pcall(function() return HttpService:JSONDecode(Response.Body) end)
         if Success and Body then
             if Body.id and Method == "POST" then
                 getgenv().MasterMessageID = Body.id
             end
-            if Response.StatusCode == 404 then
-                getgenv().MasterMessageID = nil
-            end
         end
+        if Response.StatusCode == 404 then
+            getgenv().MasterMessageID = nil
+        end
+    elseif not success then
+        warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(Response))
     end
 end
 
@@ -173,7 +177,9 @@ local function SendWarning(name, fm, total)
     }
     
     local TargetURL = getgenv().WebhookURL
-    Request({ Url = TargetURL, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
+    pcall(function()
+        Request({ Url = TargetURL, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
+    end)
 end
 
 

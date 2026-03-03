@@ -104,7 +104,7 @@ local function ProcessQueue()
             -- [[ SECURITY: ANTI-SPAM DELAY ]]
             task.wait(math.random(8, 15) / 10) -- 0.8s - 1.5s delay
             
-            pcall(function()
+            local success, err = pcall(function()
                 req({ 
                     Url = SETTINGS.WebhookURL, 
                     Method = "POST", 
@@ -112,6 +112,9 @@ local function ProcessQueue()
                     Body = HttpService:JSONEncode(payload) 
                 })
             end)
+            if not success then
+                warn("[CIA LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
+            end
         end
         IsProcessing = false
     end)

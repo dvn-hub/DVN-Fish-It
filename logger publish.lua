@@ -85,8 +85,13 @@ end
 -- WEBHOOK FUNCTIONS
 local function send(payload)
     if SETTINGS.WebhookURL == "" or not req then return end
-    pcall(function()
-        req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+    task.spawn(function()
+        local success, err = pcall(function()
+            req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+        end)
+        if not success then
+            warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
+        end
     end)
 end
 
