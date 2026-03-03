@@ -85,12 +85,9 @@ local function ProcessWebhookQueue()
             
             local success, Response = pcall(function()
                 return Request({
-                    Url = requestData.Url, -- [FIX] Revert to original URL (BAC-10227 Fix)
+                    Url = requestData.Url:gsub("%s+", ""), -- [FIX] Clean URL & Remove UA (BAC-1229)
                     Method = requestData.Method,
-                    Headers = {
-                        ["Content-Type"] = "application/json",
-                        ["User-Agent"] = "Roblox/1.0.0" -- Standard UA to prevent block
-                    },
+                    Headers = { ["Content-Type"] = "application/json" },
                     Body = HttpService:JSONEncode(requestData.Payload)
                 })
             end)

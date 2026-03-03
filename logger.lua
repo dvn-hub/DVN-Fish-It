@@ -103,7 +103,7 @@ local function ProcessQueue()
                 req({ 
                     Url = data.Url, 
                     Method = "POST", 
-                    Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/1.0.0" }, 
+                    Headers = { ["Content-Type"] = "application/json" }, 
                     Body = HttpService:JSONEncode(data.Payload) 
                 })
             end)
