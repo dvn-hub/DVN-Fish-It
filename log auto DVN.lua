@@ -82,6 +82,29 @@ end
 -- ====================================================================
 -- 4. SYSTEM PENGIRIM (JALUR TIKUS DISCORDAPP.COM)
 -- ====================================================================
+local Queue = {}
+local IsSending = false
+
+local function ProcessQueue()
+    if IsSending then return end
+    IsSending = true
+    task.spawn(function()
+        while #Queue > 0 do
+            local data = table.remove(Queue, 1)
+            pcall(function()
+                req({
+                    Url = data.Url,
+                    Method = "POST",
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = HttpService:JSONEncode(data.Payload)
+                })
+            end)
+            task.wait(2) -- Delay aman untuk mencegah BAC-9226
+        end
+        IsSending = false
+    end)
+end
+
 local function send(payload)
     if SETTINGS.WebhookURL == "" then return end
     if not req then return end
@@ -90,23 +113,8 @@ local function send(payload)
     -- Kita paksa ubah 'discord.com' jadi 'discordapp.com' di sini
     local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
     
-    task.spawn(function()
-        local success, err = pcall(function()
-            req({
-                Url = finalURL,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json",
-                    -- User-Agent "Roblox/Linux" biasanya lebih dipercaya di jalur lama
-                    ["User-Agent"] = "Roblox/Linux" 
-                },
-                Body = HttpService:JSONEncode(payload)
-            })
-        end)
-        if not success then
-            warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
-        end
-    end)
+    table.insert(Queue, {Url = finalURL, Payload = payload})
+    ProcessQueue()
 end
 
 local function testWebhook()

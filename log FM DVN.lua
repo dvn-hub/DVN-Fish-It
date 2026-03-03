@@ -37,7 +37,9 @@ local HttpService = game:GetService("HttpService")
 
 local Request = (syn and syn.request) or (http and http.request) or http_request or request
 
-
+-- Konstanta Webhook
+local WEBHOOK_NAME = "Babu DVN"
+local WEBHOOK_AVATAR = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
 
 -- 📨 FUNGSI LAPOR KE DISCORD
 
@@ -67,6 +69,51 @@ local function GetLuckDuration()
     end)
     
     return (success and text) or "Inactive", (success and seconds) or 0
+end
+
+-- [REVISI] Sistem Antrian untuk Webhook (Anti BAC-9226)
+local WebhookQueue = {}
+local IsSendingWebhook = false
+
+local function ProcessWebhookQueue()
+    if IsSendingWebhook then return end
+    IsSendingWebhook = true
+    
+    task.spawn(function()
+        while #WebhookQueue > 0 do
+            local requestData = table.remove(WebhookQueue, 1)
+            
+            local success, Response = pcall(function()
+                return Request({
+                    Url = requestData.Url,
+                    Method = requestData.Method,
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = HttpService:JSONEncode(requestData.Payload)
+                })
+            end)
+
+            if success and Response then
+                if Response.Body then
+                    local decodeSuccess, Body = pcall(function() return HttpService:JSONDecode(Response.Body) end)
+                    if decodeSuccess and Body and Body.id and requestData.Method == "POST" and requestData.IsMaster then
+                        -- Hanya set MasterMessageID jika itu adalah laporan utama
+                        getgenv().MasterMessageID = Body.id
+                    end
+                end
+                -- Jika PATCH gagal dengan 404, artinya pesan di Discord sudah dihapus. Reset ID.
+                if Response.StatusCode == 404 and requestData.Method == "PATCH" then
+                    getgenv().MasterMessageID = nil
+                    -- Kirim ulang sebagai pesan baru
+                    table.insert(WebhookQueue, 1, { Url = getgenv().WebhookURL .. "?wait=true", Method = "POST", Payload = requestData.Payload, IsMaster = true })
+                end
+            elseif not success then
+                warn("[DVN CCTV] Webhook request failed (BAC-SAFE): " .. tostring(Response))
+            end
+            
+            task.wait(2) -- Jeda aman untuk mencegah rate limit
+        end
+        IsSendingWebhook = false
+    end)
 end
 
 -- 📨 FUNGSI LAPOR GABUNGAN (Premium Embed)
@@ -105,9 +152,9 @@ local function SendMasterReport()
 
     local Payload = {
 
-        ["username"] = "Babu DVN",
+        ["username"] = WEBHOOK_NAME,
 
-        ["avatar_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&",
+        ["avatar_url"] = WEBHOOK_AVATAR,
 
         ["embeds"] = {{
             ["title"] = "📈 Divine Tools | Server Performance Monitor",
@@ -115,7 +162,7 @@ local function SendMasterReport()
             ["color"] = 0x2B2D31,
             ["footer"] = { 
                 ["text"] = "Divine Tools • discord.gg/dvn",
-                ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
+                ["icon_url"] = WEBHOOK_AVATAR
             },
 
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -126,6 +173,7 @@ local function SendMasterReport()
 
     local TargetURL = getgenv().WebhookURL
     local Method = "POST"
+    local IsMasterReport = true
 
     if getgenv().MasterMessageID then
         TargetURL = getgenv().WebhookURL .. "/messages/" .. getgenv().MasterMessageID
@@ -133,24 +181,9 @@ local function SendMasterReport()
     else
         TargetURL = getgenv().WebhookURL .. "?wait=true"
     end
-
-    local success, Response = pcall(function()
-        return Request({ Url = TargetURL, Method = Method, Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
-    end)
-
-    if success and Response and Response.Body then
-        local Success, Body = pcall(function() return HttpService:JSONDecode(Response.Body) end)
-        if Success and Body then
-            if Body.id and Method == "POST" then
-                getgenv().MasterMessageID = Body.id
-            end
-        end
-        if Response.StatusCode == 404 then
-            getgenv().MasterMessageID = nil
-        end
-    elseif not success then
-        warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(Response))
-    end
+    
+    table.insert(WebhookQueue, { Url = TargetURL, Method = Method, Payload = Payload, IsMaster = IsMasterReport })
+    ProcessWebhookQueue()
 end
 
 -- ⚠️ FUNGSI WARNING (JIKA FM > 13)
@@ -162,24 +195,22 @@ local function SendWarning(name, fm, total)
     description = description .. "\n*This player has exceeded the safety threshold ("..getgenv().WarningThreshold..").*"
 
     local Payload = {
-        ["username"] = "Babu DVN",
-        ["avatar_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&",
+        ["username"] = WEBHOOK_NAME,
+        ["avatar_url"] = WEBHOOK_AVATAR,
         ["embeds"] = {{
             ["title"] = "🚨 HIGH FM WARNING",
             ["description"] = description,
             ["color"] = 0xFF0000, -- Red Warning Color
             ["footer"] = { 
                 ["text"] = "Divine Tools • discord.gg/dvn",
-                ["icon_url"] = "https://cdn.discordapp.com/attachments/1451798194928353437/1463570214829555878/profil_bot.png?ex=697ae13b&is=69798fbb&hm=d517522cd951f1992b4268d1291fe2b4be0d624109090934772ac5e33a456d8b&"
+                ["icon_url"] = WEBHOOK_AVATAR
             },
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     }
     
-    local TargetURL = getgenv().WebhookURL
-    pcall(function()
-        Request({ Url = TargetURL, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = HttpService:JSONEncode(Payload) })
-    end)
+    table.insert(WebhookQueue, { Url = getgenv().WebhookURL, Method = "POST", Payload = Payload, IsMaster = false })
+    ProcessWebhookQueue()
 end
 
 

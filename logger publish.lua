@@ -83,16 +83,28 @@ local function detectFishNameAndWeight(text)
 end
 
 -- WEBHOOK FUNCTIONS
+local Queue = {}
+local IsSending = false
+
+local function ProcessQueue()
+    if IsSending then return end
+    IsSending = true
+    task.spawn(function()
+        while #Queue > 0 do
+            local payload = table.remove(Queue, 1)
+            pcall(function()
+                req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+            end)
+            task.wait(2)
+        end
+        IsSending = false
+    end)
+end
+
 local function send(payload)
     if SETTINGS.WebhookURL == "" or not req then return end
-    task.spawn(function()
-        local success, err = pcall(function()
-            req({ Url = SETTINGS.WebhookURL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
-        end)
-        if not success then
-            warn("[DVN LOG] Webhook Failed (BAC-SAFE): " .. tostring(err))
-        end
-    end)
+    table.insert(Queue, payload)
+    ProcessQueue()
 end
 
 local function testWebhook()
