@@ -102,7 +102,7 @@ local function ProcessQueue()
             local payload = table.remove(Queue, 1)
             
             -- [[ SECURITY: ANTI-SPAM DELAY ]]
-            task.wait(math.random(40, 60) / 10) -- [FIX] Increased delay (4s - 6s)
+            task.wait(math.random(60, 100) / 10) -- [FIX] Ultra Safe Delay (6s - 10s)
             
             -- [FIX BAC-2224] Pre-encode body
             local FinalBody = HttpService:JSONEncode(payload)
@@ -112,7 +112,7 @@ local function ProcessQueue()
                 req({ 
                     Url = FinalURL, 
                     Method = "POST", 
-                    Headers = { ["Content-Type"] = "application/json" }, 
+                    Headers = { ["Content-Type"] = "application/json", ["Accept"] = "application/json" }, 
                     Body = FinalBody 
                 })
             end)

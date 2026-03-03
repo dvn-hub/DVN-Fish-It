@@ -86,12 +86,15 @@ local function ProcessWebhookQueue()
             -- [FIX BAC-2224] Pre-process variables to prevent executor marshalling errors
             local FinalURL = requestData.Url:gsub("%s+", "")
             local FinalBody = HttpService:JSONEncode(requestData.Payload)
-            local FinalHeaders = { ["Content-Type"] = "application/json" }
+            local FinalHeaders = { 
+                ["Content-Type"] = "application/json",
+                ["Accept"] = "application/json" -- [FIX BAC-4224] Explicit Accept Header
+            }
 
             local success, Response = pcall(function()
                 return Request({
                     Url = FinalURL,
-                    Method = requestData.Method,
+                    Method = tostring(requestData.Method), -- [FIX] Force string type
                     Headers = FinalHeaders,
                     Body = FinalBody
                 })
@@ -120,7 +123,7 @@ local function ProcessWebhookQueue()
                 end
             end
             
-            task.wait(math.random(4, 6)) -- [FIX] Increased delay (BAC-3226)
+            task.wait(math.random(6, 10)) -- [FIX] Ultra Safe Delay (BAC-4224)
         end
         IsSendingWebhook = false
     end)

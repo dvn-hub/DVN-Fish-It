@@ -101,11 +101,11 @@ local function ProcessQueue()
                 req({ 
                     Url = FinalURL, 
                     Method = "POST", 
-                    Headers = { ["Content-Type"] = "application/json" }, 
+                    Headers = { ["Content-Type"] = "application/json", ["Accept"] = "application/json" }, 
                     Body = FinalBody 
                 })
             end)
-            task.wait(math.random(4, 6))
+            task.wait(math.random(6, 10)) -- [FIX] Ultra Safe Delay
         end
         IsSending = false
     end)
