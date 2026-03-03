@@ -1,7 +1,7 @@
 --[[ 
-    💎 DVN LOGGER v11 — LEGACY DOMAIN EDITION
+    💎 DVN LOGGER v11 — STANDARD EDITION
     Status: ACTIVE
-    System: Menggunakan jalur 'discordapp.com' (Old API)
+    System: Menggunakan URL Asli (Clean Headers)
 ]]
 
 -- ====================================================================
@@ -110,7 +110,7 @@ local function send(payload)
     if not req then return end
 
     -- [FIX] Gunakan URL asli
-    local finalURL = SETTINGS.WebhookURL
+    local finalURL = SETTINGS.WebhookURL:gsub("%s+", "")
     
     table.insert(Queue, {Url = finalURL, Payload = payload})
     ProcessQueue()

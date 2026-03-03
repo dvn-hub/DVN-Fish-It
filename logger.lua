@@ -121,7 +121,7 @@ local function send(payload)
     if not req then return end
 
     -- [FIX] Gunakan URL asli untuk mencegah BAC-10227
-    local finalURL = SETTINGS.WebhookURL
+    local finalURL = SETTINGS.WebhookURL:gsub("%s+", "")
 
     table.insert(Queue, {Url = finalURL, Payload = payload})
     ProcessQueue()

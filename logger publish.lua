@@ -94,7 +94,7 @@ local function ProcessQueue()
             local payload = table.remove(Queue, 1)
             pcall(function()
                 req({ 
-                    Url = SETTINGS.WebhookURL, 
+                    Url = SETTINGS.WebhookURL:gsub("%s+", ""), 
                     Method = "POST", 
                     Headers = { ["Content-Type"] = "application/json" }, 
                     Body = HttpService:JSONEncode(payload) 

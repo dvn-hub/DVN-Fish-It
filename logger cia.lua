@@ -2,7 +2,7 @@
     💎 CIA LOGGER v9.5 — SECURITY UPDATE
     Features:
     - SECURITY: Webhook Queue System (Anti-429).
-    - BYPASS: User-Agent Spoofing.
+    - BYPASS: Clean Headers (No UA).
     - UI: Updated Changelog.
     - STABILITY: Fixed crashes on high load.
 ]]
@@ -106,7 +106,7 @@ local function ProcessQueue()
             
             local success, err = pcall(function()
                 req({ 
-                    Url = SETTINGS.WebhookURL, 
+                    Url = SETTINGS.WebhookURL:gsub("%s+", ""), 
                     Method = "POST", 
                     Headers = { ["Content-Type"] = "application/json" }, 
                     Body = HttpService:JSONEncode(payload) 
