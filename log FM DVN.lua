@@ -85,9 +85,12 @@ local function ProcessWebhookQueue()
             
             local success, Response = pcall(function()
                 return Request({
-                    Url = requestData.Url:gsub("discord.com", "discordapp.com"), -- [FIX] Force Legacy Domain
+                    Url = requestData.Url, -- [FIX] Revert to original URL (BAC-10227 Fix)
                     Method = requestData.Method,
-                    Headers = {["Content-Type"] = "application/json"},
+                    Headers = {
+                        ["Content-Type"] = "application/json",
+                        ["User-Agent"] = "Roblox/1.0.0" -- Standard UA to prevent block
+                    },
                     Body = HttpService:JSONEncode(requestData.Payload)
                 })
             end)
@@ -100,14 +103,19 @@ local function ProcessWebhookQueue()
                         getgenv().MasterMessageID = Body.id
                     end
                 end
-                -- Jika PATCH gagal dengan 404, artinya pesan di Discord sudah dihapus. Reset ID.
-                if Response.StatusCode == 404 and requestData.Method == "PATCH" then
+                -- [FIX] Jika PATCH gagal (404 atau error lain), reset ID dan kirim baru
+                if requestData.Method == "PATCH" and Response.StatusCode >= 400 then
                     getgenv().MasterMessageID = nil
                     -- Kirim ulang sebagai pesan baru
                     table.insert(WebhookQueue, 1, { Url = getgenv().WebhookURL .. "?wait=true", Method = "POST", Payload = requestData.Payload, IsMaster = true })
                 end
             elseif not success then
                 warn("[DVN CCTV] Webhook request failed (BAC-SAFE): " .. tostring(Response))
+                -- Jika gagal total saat PATCH (misal koneksi putus), coba kirim ulang sebagai POST di antrian berikutnya
+                if requestData.Method == "PATCH" then
+                    getgenv().MasterMessageID = nil
+                    table.insert(WebhookQueue, 1, { Url = getgenv().WebhookURL .. "?wait=true", Method = "POST", Payload = requestData.Payload, IsMaster = true })
+                end
             end
             
             task.wait(2) -- Jeda aman untuk mencegah rate limit

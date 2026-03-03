@@ -100,7 +100,12 @@ local function ProcessQueue()
         while #Queue > 0 do
             local data = table.remove(Queue, 1)
             pcall(function()
-                req({ Url = data.Url, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(data.Payload) })
+                req({ 
+                    Url = data.Url, 
+                    Method = "POST", 
+                    Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/1.0.0" }, 
+                    Body = HttpService:JSONEncode(data.Payload) 
+                })
             end)
             task.wait(2)
         end
@@ -115,8 +120,8 @@ local function send(payload)
     end
     if not req then return end
 
-    -- [[ MAGIC FIX: LEGACY DOMAIN ]]
-    local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
+    -- [FIX] Gunakan URL asli untuk mencegah BAC-10227
+    local finalURL = SETTINGS.WebhookURL
 
     table.insert(Queue, {Url = finalURL, Payload = payload})
     ProcessQueue()

@@ -108,7 +108,7 @@ local function ProcessQueue()
                 req({ 
                     Url = SETTINGS.WebhookURL, 
                     Method = "POST", 
-                    Headers = { ["Content-Type"] = "application/json" }, 
+                    Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/1.0.0" }, 
                     Body = HttpService:JSONEncode(payload) 
                 })
             end)

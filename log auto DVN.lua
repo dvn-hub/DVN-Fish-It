@@ -95,7 +95,10 @@ local function ProcessQueue()
                 req({
                     Url = data.Url,
                     Method = "POST",
-                    Headers = {["Content-Type"] = "application/json"},
+                    Headers = {
+                        ["Content-Type"] = "application/json",
+                        ["User-Agent"] = "Roblox/1.0.0"
+                    },
                     Body = HttpService:JSONEncode(data.Payload)
                 })
             end)
@@ -109,9 +112,8 @@ local function send(payload)
     if SETTINGS.WebhookURL == "" then return end
     if not req then return end
 
-    -- [[ MAGIC FIX: LEGACY DOMAIN ]]
-    -- Kita paksa ubah 'discord.com' jadi 'discordapp.com' di sini
-    local finalURL = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com")
+    -- [FIX] Gunakan URL asli
+    local finalURL = SETTINGS.WebhookURL
     
     table.insert(Queue, {Url = finalURL, Payload = payload})
     ProcessQueue()

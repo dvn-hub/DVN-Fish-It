@@ -93,7 +93,12 @@ local function ProcessQueue()
         while #Queue > 0 do
             local payload = table.remove(Queue, 1)
             pcall(function()
-                req({ Url = SETTINGS.WebhookURL:gsub("discord.com", "discordapp.com"), Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = HttpService:JSONEncode(payload) })
+                req({ 
+                    Url = SETTINGS.WebhookURL, 
+                    Method = "POST", 
+                    Headers = { ["Content-Type"] = "application/json", ["User-Agent"] = "Roblox/1.0.0" }, 
+                    Body = HttpService:JSONEncode(payload) 
+                })
             end)
             task.wait(2)
         end
