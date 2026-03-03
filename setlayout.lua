@@ -81,7 +81,7 @@ end
 local COUNT = #SELECTED
 
 -- ================= SCREEN & GRID =================
-local wm = exec("wm size")
+local wm = exec("su -c '/system/bin/wm size'")
 
 local size = wm:match("Physical size:%s*(%d+x%d+)")
           or wm:match("Override size:%s*(%d+x%d+)")
