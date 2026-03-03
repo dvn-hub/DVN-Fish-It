@@ -13,9 +13,7 @@ _G.FishItConfig = _G.FishItConfig or {
             "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage"},
-            {Variant = "Leviathan Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
-            -- {Variant = "Leviathan's Rage"}, -- Variant Only
-            -- {Tier = "Secret", Variant = "Leviathan's Rage"},  -- Tier + Variant
+            {Variant = "Leviathan Rage"},
         },
 
         ["Auto Accept Trade"] = true,
@@ -23,24 +21,26 @@ _G.FishItConfig = _G.FishItConfig or {
     },
     ["Auto Trade"] = {
         ["Enabled"] = true,
-        ["Whitelist Username"] = {"dvn_store"},
+        ["Whitelist Username"] = {"workerdivine01","workerdivine02","workerdivine03","workerdivine04","workerdivine05","pekerjadvn01","pekerjadvn02","pekerjadvn03","pekerjadvn04","pekerjadvn05"},
         ["Category Fish"] = {
-            "Secret", "Mythic", 
-            -- {Tier = "Mythic", Variant = "Stone"}, -- Tier + Variant
+            "Secret",
         },
         ["Fish Name"] = {
             "Sacred Guardian Squid",
+            "Flatheaded Whale Shark", 
+            "Primordial Octopus", 
+            "Runic Squid", 
+            "Ancient Squid",
             {Name = "Ruby", Variant = "Gemstone"},
             {Variant = "Leviathan's Rage"},
-            {Variant = "Leviathan Rage"}, -- SUDAH DIPERBAIKI: Format dirapikan
-            -- {Variant = "Leviathan's Rage"}, -- Variant Only
+            {Variant = "Leviathan Rage"},
         },
         ["Item Name"] = {
             "Evolved Enchant Stone",
         },
     },
     ["Farm Coin Only"] = {
-        ["Enabled"] = false, -- Farm coins only [ cant buy rod, bait, enchant, weather ]
+        ["Enabled"] = false,
         ["Target"] = 190000,
     },
     ["Selling"] = {
@@ -157,11 +157,11 @@ _G.FishItConfig = _G.FishItConfig or {
     },
 
     ["ExtremeFpsBoost"] = false,
-    ["UltimatePerformance"] = true,
+    ["UltimatePerformance"] = false,
     ["Disable3DRender"] = false,
     ["AutoRemovePlayer"] = true,
 
     ["AutoReconnect"] = false,
     ["HideGUI"] = false,
-    ["EXIT_MAP_IF_DISCONNECT"] = true,
+    ["EXIT_MAP_IF_DISCONNECT"] = false,
 }
