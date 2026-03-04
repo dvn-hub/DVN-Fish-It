@@ -8,6 +8,6 @@ getgenv().autoGiftConfig = {
     EXIT_MAP = true      -- Exit to lobby after gift complete (true/false)
 }
 
-script_key="E5ECC296CE60E2EFA78D52F20596D297";
+script_key="";
 
 local s,r repeat s,r=pcall(function()return game:HttpGet("https://api.wintercode.dev/loader/Gift-obfuscated.lua")end)wait(1)until s;loadstring(r)()
