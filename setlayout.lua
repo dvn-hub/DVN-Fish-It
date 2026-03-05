@@ -6,7 +6,7 @@
 -- ================= CONFIG =================
 local ACTIVITY = "com.roblox.client.startup.ActivitySplash"
 local OFFSET_TOP = 80
-local STABILIZE_DELAY = 5
+local STABILIZE_DELAY = 30
 
 -- ================= COLORS =================
 local C = {
