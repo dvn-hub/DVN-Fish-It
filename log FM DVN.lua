@@ -103,19 +103,16 @@ local function ProcessWebhookQueue()
                         getgenv().MasterMessageID = Body.id
                     end
                 end
-                -- [FIX] Jika PATCH gagal (404 atau error lain), reset ID dan kirim baru
-                if requestData.Method == "PATCH" and Response.StatusCode >= 400 then
+                -- [FIX REVISI] Hanya reset ID jika pesan benar-benar hilang (404). Jangan reset jika 429 (Rate Limit) atau error server.
+                if requestData.Method == "PATCH" and Response.StatusCode == 404 then
                     getgenv().MasterMessageID = nil
-                    -- Kirim ulang sebagai pesan baru
                     table.insert(WebhookQueue, 1, { Url = getgenv().WebhookURL .. "?wait=true", Method = "POST", Payload = requestData.Payload, IsMaster = true })
+                elseif requestData.Method == "PATCH" and Response.StatusCode >= 400 then
+                    warn("[DVN CCTV] Patch Gagal (Status: " .. tostring(Response.StatusCode) .. ") - Menunggu loop berikutnya.")
                 end
             elseif not success then
                 warn("[DVN CCTV] Webhook request failed (BAC-SAFE): " .. tostring(Response))
-                -- Jika gagal total saat PATCH (misal koneksi putus), coba kirim ulang sebagai POST di antrian berikutnya
-                if requestData.Method == "PATCH" then
-                    getgenv().MasterMessageID = nil
-                    table.insert(WebhookQueue, 1, { Url = getgenv().WebhookURL .. "?wait=true", Method = "POST", Payload = requestData.Payload, IsMaster = true })
-                end
+                -- [FIX] Jangan reset ID jika gagal koneksi (timeout/network error). Biarkan loop selanjutnya mencoba lagi.
             end
             
             task.wait(2) -- Jeda aman untuk mencegah rate limit
