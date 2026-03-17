@@ -210,8 +210,12 @@ local function sendFish(data)
             footer = { text = "Divine Tools • discord.gg/dvn", icon_url = WEBHOOK_AVATAR },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
         return
@@ -232,8 +236,12 @@ local function sendFish(data)
             footer = { text = "Divine Tools • discord.gg/dvn", icon_url = WEBHOOK_AVATAR },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end

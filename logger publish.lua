@@ -185,8 +185,12 @@ local function sendFish(data)
             },
             footer = { text = "Divine Tools • discord.gg/dvn • Today at " .. timeStr }
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Ganti ke thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
         return
@@ -207,8 +211,12 @@ local function sendFish(data)
             },
             footer = { text = "Divine Tools • discord.gg/dvn • Today at " .. timeStr }
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Ganti ke thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end

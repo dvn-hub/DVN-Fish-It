@@ -217,8 +217,12 @@ local function sendFish(data)
             footer = { text = "Babu DVN • Focus Tracker" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Ganti ke thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
         return -- Stop here, don't double log
@@ -240,8 +244,12 @@ local function sendFish(data)
             footer = { text = "Babu DVN • Fish Logger" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        if imageUrl then embed.image = { url = imageUrl }
-        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+        -- [DEBUG] Ganti ke thumbnail untuk tes
+        if imageUrl then
+            embed.thumbnail = { url = imageUrl }
+        else
+            embed.thumbnail = { url = WEBHOOK_AVATAR }
+        end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end
