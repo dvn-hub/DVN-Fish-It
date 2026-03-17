@@ -67,8 +67,9 @@ local function normalize(str)
 end
 
 local function toURL(assetId)
-    if not assetId or not assetId:match("rbxassetid://") then return nil end
-    local id = assetId:match("%d+")
+    if not assetId then return nil end
+    local id = tostring(assetId):match("%d+") -- Ambil angkanya saja, format apapun bisa
+    if not id then return nil end
     return "https://www.roblox.com/asset-thumbnail/image?assetId=" .. id .. "&width=420&height=420&format=png"
 end
 
@@ -92,15 +93,18 @@ end
 local function loadFishData()
     pcall(function()
         local itemsFolder = ReplicatedStorage:WaitForChild("Items", 60)
+        local count = 0
         if not itemsFolder then return warn("DVN Logger: Items folder not found.") end
         for _, itemModule in ipairs(itemsFolder:GetDescendants()) do
             if itemModule:IsA("ModuleScript") then
                 local s, d = pcall(require, itemModule)
                 if s and type(d) == "table" and d.Data and d.Data.Type and d.Data.Name and d.Data.Icon and d.Data.Type:lower():find("fish") then
                     fishImages[normalize(d.Data.Name)] = d.Data.Icon
+                    count = count + 1
                 end
             end
         end
+        print("🐟 DVN Logger: Loaded " .. count .. " fish images.")
     end)
 end
 
