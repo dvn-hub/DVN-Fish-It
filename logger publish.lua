@@ -58,12 +58,14 @@ local fishImages = {}
 -- UTIL FUNCTIONS
 local function normalize(str)
     if type(str) ~= "string" then return "" end
-    return str:lower():gsub("[_%- ]", "")
+    return str:lower():gsub("%W", "")
 end
 
 local function toURL(assetId)
     if not assetId then return nil end
-    local id = tostring(assetId):match("%d+") -- Fix format ID
+    local asString = tostring(assetId)
+    if asString:match("^https?://") then return asString end
+    local id = asString:match("%d+") -- Fix format ID
     if not id then return nil end
     return "https://www.roblox.com/asset-thumbnail/image?assetId=" .. id .. "&width=420&height=420&format=png"
 end
