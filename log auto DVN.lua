@@ -55,10 +55,69 @@ local RGB_RARITY = {
 -- 3. HELPER FUNCTIONS
 -- ====================================================================
 local fishImages = {}
+local fishImagesTokens = {}
 
 local function normalize(str)
     if type(str) ~= "string" then return "" end
     return str:lower():gsub("%W", "")
+end
+
+local function tokenKey(str)
+    if type(str) ~= "string" then return "" end
+    local tokens = {}
+    for token in str:lower():gmatch("%w+") do
+        table.insert(tokens, token)
+    end
+    table.sort(tokens)
+    return table.concat(tokens, "")
+end
+
+local function lowerString(value)
+    if value == nil then return "" end
+    local t = type(value)
+    if t == "string" then return value:lower() end
+    if t == "table" then
+        if type(value.Name) == "string" then return value.Name:lower() end
+        if type(value.Type) == "string" then return value.Type:lower() end
+    end
+    return tostring(value):lower()
+end
+
+local function resolveIcon(iconValue)
+    if typeof and typeof(iconValue) == "Instance" then
+        if iconValue:IsA("Decal") then return iconValue.Texture end
+        if iconValue:IsA("ImageLabel") or iconValue:IsA("ImageButton") then
+            return iconValue.Image
+        end
+    end
+    return iconValue
+end
+
+local function isFishData(data, moduleRef)
+    if not data then return false end
+    local typeStr = lowerString(data.Type or data.Category or data.ItemType)
+    if typeStr:find("fish") then return true end
+    if data.IsFish == true or data.Fish == true then return true end
+    if data.Rarity or data.Weight or data.CatchChance or data.Chance then return true end
+    if moduleRef and type(moduleRef.Name) == "string" and moduleRef.Name:lower():find("fish") then
+        return true
+    end
+    return false
+end
+
+local function addFishImage(name, icon)
+    if type(name) ~= "string" or name == "" or icon == nil then return end
+    fishImages[normalize(name)] = icon
+    fishImagesTokens[tokenKey(name)] = icon
+
+    local before, inside = name:match("^(.-)%s*%((.-)%)%s*$")
+    if before and inside then
+        local swapped = inside .. " " .. before
+        fishImages[normalize(swapped)] = icon
+        fishImagesTokens[tokenKey(swapped)] = icon
+        fishImages[normalize(before)] = icon
+        fishImagesTokens[tokenKey(before)] = icon
+    end
 end
 
 local function toURL(assetId)
@@ -77,6 +136,24 @@ local function getFishImage(fishName)
     if fishImages[normalizedName] then
         return fishImages[normalizedName]
     end
+
+    local before, inside = tostring(fishName):match("^(.-)%s*%((.-)%)%s*$")
+    if before and inside then
+        local swapped = inside .. " " .. before
+        local swappedKey = normalize(swapped)
+        if fishImages[swappedKey] then
+            return fishImages[swappedKey]
+        end
+        local beforeKey = normalize(before)
+        if fishImages[beforeKey] then
+            return fishImages[beforeKey]
+        end
+    end
+
+    local tokenLookup = fishImagesTokens[tokenKey(fishName)]
+    if tokenLookup then
+        return tokenLookup
+    end
     
     for name, id in pairs(fishImages) do
         if normalizedName:find(name, 1, true) or name:find(normalizedName, 1, true) then
@@ -87,7 +164,7 @@ local function getFishImage(fishName)
     return nil
 end
 
-local function loadFishData()
+local function loadFishDataLegacy()
     pcall(function()
         local itemsFolder = ReplicatedStorage:WaitForChild("Items", 60)
         local count = 0
@@ -103,6 +180,40 @@ local function loadFishData()
         end
         print("🐟 Auto Logger: Loaded " .. count .. " fish images.")
     end)
+end
+
+local function loadFishData()
+    local count = 0
+
+    local function scan(container)
+        for _, itemModule in ipairs(container:GetDescendants()) do
+            if itemModule:IsA("ModuleScript") then
+                local ok, d = pcall(require, itemModule)
+                if ok and type(d) == "table" then
+                    local data = d.Data or d
+                    local name = data and (data.Name or data.ItemName or data.FishName)
+                    local icon = data and resolveIcon(data.Icon or data.Image or data.Thumbnail or data.IconId)
+                    if name and icon and isFishData(data, itemModule) then
+                        addFishImage(name, icon)
+                        count = count + 1
+                    end
+                end
+            end
+        end
+    end
+
+    local itemsFolder = ReplicatedStorage:FindFirstChild("Items")
+    if itemsFolder then
+        scan(itemsFolder)
+    else
+        warn("Auto Logger: Items folder not found, trying full ReplicatedStorage scan.")
+    end
+
+    if count == 0 then
+        scan(ReplicatedStorage)
+    end
+
+    print("ðŸŸ Auto Logger: Loaded " .. count .. " fish images.")
 end
 
 local function stripRichText(t) return t:gsub("<.->", "") end
@@ -215,6 +326,7 @@ local function sendFish(data)
         -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
         if imageUrl then
             embed.thumbnail = { url = imageUrl }
+            embed.image = { url = imageUrl }
         else
             embed.thumbnail = { url = WEBHOOK_AVATAR }
         end
@@ -241,6 +353,7 @@ local function sendFish(data)
         -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
         if imageUrl then
             embed.thumbnail = { url = imageUrl }
+            embed.image = { url = imageUrl }
         else
             embed.thumbnail = { url = WEBHOOK_AVATAR }
         end
