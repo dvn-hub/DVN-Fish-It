@@ -370,10 +370,7 @@ local function sendFish(data)
         }
         -- [DEBUG] Ganti ke thumbnail untuk tes
         if imageUrl then
-            embed.thumbnail = { url = imageUrl }
             embed.image = { url = imageUrl }
-        else
-            embed.thumbnail = { url = WEBHOOK_AVATAR }
         end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
@@ -398,10 +395,7 @@ local function sendFish(data)
         }
         -- [DEBUG] Ganti ke thumbnail untuk tes
         if imageUrl then
-            embed.thumbnail = { url = imageUrl }
             embed.image = { url = imageUrl }
-        else
-            embed.thumbnail = { url = WEBHOOK_AVATAR }
         end
 
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
