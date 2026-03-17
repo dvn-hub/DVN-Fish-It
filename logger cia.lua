@@ -14,6 +14,7 @@ local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local Camera = workspace.CurrentCamera or workspace:WaitForChild("Camera")
@@ -56,7 +57,53 @@ local RGB_RARITY = {
     ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
 }
 
+-- [NEW] FISH IMAGE DATA
+local fishImages = {}
+
 -- UTIL FUNCTIONS
+local function normalize(str)
+    if type(str) ~= "string" then return "" end
+    return str:lower():gsub("[_%- ]", "")
+end
+
+local function toURL(assetId)
+    if not assetId or not assetId:match("rbxassetid://") then return nil end
+    local id = assetId:match("%d+")
+    return "https://www.roblox.com/asset-thumbnail/image?assetId=" .. id .. "&width=420&height=420&format=png"
+end
+
+local function getFishImage(fishName)
+    if not fishName or next(fishImages) == nil then return nil end
+    local normalizedName = normalize(fishName)
+    
+    if fishImages[normalizedName] then
+        return fishImages[normalizedName]
+    end
+    
+    for name, id in pairs(fishImages) do
+        if normalizedName:find(name, 1, true) or name:find(normalizedName, 1, true) then
+            return id
+        end
+    end
+    
+    return nil
+end
+
+local function loadFishData()
+    pcall(function()
+        local itemsFolder = ReplicatedStorage:WaitForChild("Items", 60)
+        if not itemsFolder then return warn("CIA Logger: Items folder not found.") end
+        for _, itemModule in ipairs(itemsFolder:GetDescendants()) do
+            if itemModule:IsA("ModuleScript") then
+                local s, d = pcall(require, itemModule)
+                if s and type(d) == "table" and d.Data and d.Data.Type and d.Data.Name and d.Data.Icon and d.Data.Type:lower():find("fish") then
+                    fishImages[normalize(d.Data.Name)] = d.Data.Icon
+                end
+            end
+        end
+    end)
+end
+
 local function stripRichText(t) return t:gsub("<.->", "") end
 
 local function extractDisplayName(text)
@@ -131,48 +178,50 @@ local function testWebhook()
 end
 
 local function sendFish(data)
+    local imageUrl = toURL(getFishImage(data.Fish))
+
     -- 1. Check Priority: FOCUS FISH (ByName)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, 
-            avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = "🚨 TARGET ACQUIRED! 🚨", 
-                description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
-                color = focusData.Color, 
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
-                footer = { text = "Ciaa • Focus Tracker" }, 
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
-            }} 
-        })
+        local embed = {
+            title = "🚨 TARGET ACQUIRED! 🚨",
+            description = "**👑 CAUGHT: " .. data.Fish .. " 👑**",
+            color = focusData.Color,
+            fields = {
+                { name = "👤 Player", value = "`"..data.Player.."`", inline = true },
+                { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true },
+                { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true }
+            },
+            footer = { text = "Ciaa • Focus Tracker" },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }
+        if imageUrl then embed.image = { url = imageUrl }
+        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+
+        send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
         return -- Stop here, don't double log
     end
 
     -- 2. Check Secondary: RARITY
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, 
-            avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = cfg.Icon.." "..data.Rarity.." Catch!", 
-                description = "A rare fish has been caught!", 
-                color = cfg.Color, 
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
-                footer = { text = "Ciaa • Fish Logger" }, 
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
-            }} 
-        })
+        local embed = {
+            title = cfg.Icon.." "..data.Rarity.." Catch!",
+            description = "A rare fish has been caught!",
+            color = cfg.Color,
+            fields = {
+                { name = "👤 Player", value = "`"..data.Player.."`", inline = true },
+                { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true },
+                { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true },
+                { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true }
+            },
+            footer = { text = "Ciaa • Fish Logger" },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }
+        if imageUrl then embed.image = { url = imageUrl }
+        else embed.thumbnail = { url = WEBHOOK_AVATAR } end
+
+        send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end
 end
 
@@ -200,6 +249,8 @@ end
 
 Players.PlayerAdded:Connect(function(player) sendJoinLeave(player, true) end)
 Players.PlayerRemoving:Connect(function(player) sendJoinLeave(player, false) end)
+
+task.spawn(loadFishData)
 
 -- ====================================================================
 -- 2. UI DVN SETUP (GUI CODE)
