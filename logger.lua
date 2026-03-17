@@ -60,6 +60,7 @@ local RGB_RARITY = {
 -- [NEW] FISH IMAGE DATA
 local fishImages = {}
 local fishImagesTokens = {}
+local thumbnailCache = {}
 
 -- UTIL FUNCTIONS
 local function normalize(str)
@@ -125,10 +126,47 @@ local function addFishImage(name, icon)
     end
 end
 
+local function fetchThumbnailUrl(assetId)
+    local id = tostring(assetId or ""):match("%d+")
+    if not id then return nil end
+    if thumbnailCache[id] ~= nil then
+        return thumbnailCache[id] or nil
+    end
+    if not req then
+        thumbnailCache[id] = false
+        return nil
+    end
+
+    local ok, res = pcall(function()
+        return req({
+            Url = "https://thumbnails.roblox.com/v1/assets?assetIds=" .. id .. "&size=420x420&format=Png&isCircular=false",
+            Method = "GET",
+            Headers = { ["User-Agent"] = "Roblox/1.0.0" }
+        })
+    end)
+
+    local bodyText = ok and res and (res.Body or res.body) or nil
+    if bodyText then
+        local decodeOk, decoded = pcall(function()
+            return HttpService:JSONDecode(bodyText)
+        end)
+        local url = decodeOk and decoded and decoded.data and decoded.data[1] and decoded.data[1].imageUrl or nil
+        if url and url ~= "" then
+            thumbnailCache[id] = url
+            return url
+        end
+    end
+
+    thumbnailCache[id] = false
+    return nil
+end
+
 local function toURL(assetId)
     if not assetId then return nil end
     local asString = tostring(assetId)
     if asString:match("^https?://") then return asString end
+    local thumbUrl = fetchThumbnailUrl(asString)
+    if thumbUrl then return thumbUrl end
     local id = asString:match("%d+") -- Ambil angkanya saja, format apapun bisa
     if not id then return nil end
     return "https://www.roblox.com/asset-thumbnail/image?assetId=" .. id .. "&width=420&height=420&format=png"
