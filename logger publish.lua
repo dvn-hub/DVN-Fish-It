@@ -217,7 +217,7 @@ local function getFishImage(fishName)
     end
 
     for name, id in pairs(fishImages) do
-        if normalizedName:find(name, 1, true) or name:find(normalizedName, 1, true) then
+        if name:find(normalizedName, 1, true) then
             return id
         end
     end
