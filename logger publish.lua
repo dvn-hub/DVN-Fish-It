@@ -167,15 +167,30 @@ local function toURL(assetId)
     return "https://www.roblox.com/asset-thumbnail/image?assetId=" .. id .. "&width=420&height=420&format=png"
 end
 
+local function stripVariants(name)
+    -- Remove Shiny/Big/Shiny Big/Big Shiny prefixes for image lookup
+    local stripped = name
+        :gsub("^[Ss]hiny%s+[Bb]ig%s+", "")
+        :gsub("^[Bb]ig%s+[Ss]hiny%s+", "")
+        :gsub("^[Ss]hiny%s+", "")
+        :gsub("^[Bb]ig%s+", "")
+    return stripped
+end
+
 local function getFishImage(fishName)
     if not fishName or next(fishImages) == nil then return nil end
-    local normalizedName = normalize(fishName)
-    
+    local baseName = stripVariants(fishName)
+    local normalizedName = normalize(baseName)
+    local normalizedOrig = normalize(fishName)
+
     if fishImages[normalizedName] then
         return fishImages[normalizedName]
     end
+    if normalizedOrig ~= normalizedName and fishImages[normalizedOrig] then
+        return fishImages[normalizedOrig]
+    end
 
-    local before, inside = tostring(fishName):match("^(.-)%s*%((.-)%)%s*$")
+    local before, inside = tostring(baseName):match("^(.-)%s*%((.-)%)%s*$")
     if before and inside then
         local swapped = inside .. " " .. before
         local swappedKey = normalize(swapped)
@@ -188,17 +203,23 @@ local function getFishImage(fishName)
         end
     end
 
-    local tokenLookup = fishImagesTokens[tokenKey(fishName)]
+    local tokenLookup = fishImagesTokens[tokenKey(baseName)]
     if tokenLookup then
         return tokenLookup
     end
-    
+    if baseName ~= fishName then
+        local tokenLookupOrig = fishImagesTokens[tokenKey(fishName)]
+        if tokenLookupOrig then
+            return tokenLookupOrig
+        end
+    end
+
     for name, id in pairs(fishImages) do
         if normalizedName:find(name, 1, true) or name:find(normalizedName, 1, true) then
             return id
         end
     end
-    
+
     return nil
 end
 
