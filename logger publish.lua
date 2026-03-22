@@ -38,6 +38,7 @@ local RARITY_CONFIG = {
     Legendary = { Enabled = false, Color = 0xFFB92B, Icon = "🟡" },
     Mythic    = { Enabled = false, Color = 0xFF1919, Icon = "🔴" },
     Secret    = { Enabled = false, Color = 0x18FF98, Icon = "💎" },
+    Forgotten = { Enabled = false, Color = 0x808080, Icon = "⬜" },
 }
 
 local FOCUS_FISH = {
@@ -48,8 +49,9 @@ local FOCUS_FISH = {
 }
 
 local RGB_RARITY = {
-    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary", 
-    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
+    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary",
+    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret",
+    ["255,255,255"] = "Forgotten"
 }
 
 -- [NEW] FISH IMAGE DATA
@@ -590,7 +592,7 @@ end
 CreateSection(TabFrames["Settings"], "Rarity Filter")
 
 -- Loop untuk Rarity (Hanya Epic ke atas)
-local RarityOrder = {"Epic", "Legendary", "Mythic", "Secret"}
+local RarityOrder = {"Epic", "Legendary", "Mythic", "Secret", "Forgotten"}
 
 for _, rarityKey in ipairs(RarityOrder) do
     local config = RARITY_CONFIG[rarityKey]

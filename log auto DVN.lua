@@ -36,7 +36,8 @@ local RARITY_CONFIG = {
     Epic      = { Enabled = false, Color = 0xB373F8, Icon = "🟣" },
     Legendary = { Enabled = false, Color = 0xFFB92B, Icon = "🟡" },
     Mythic    = { Enabled = false, Color = 0xFF1919, Icon = "🔴" },
-    Secret    = { Enabled = true, Color = 0x18FF98, Icon = "💎" },
+    Secret    = { Enabled = true,  Color = 0x18FF98, Icon = "💎" },
+    Forgotten = { Enabled = true,  Color = 0x808080, Icon = "⬜" },
 }
 
 local FOCUS_FISH = {
@@ -47,8 +48,9 @@ local FOCUS_FISH = {
 }
 
 local RGB_RARITY = {
-    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary", 
-    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret"
+    ["179,115,248"] = "Epic", ["255,185,43"] = "Legendary",
+    ["255,25,25"] = "Mythic", ["24,255,152"] = "Secret",
+    ["255,255,255"] = "Forgotten"
 }
 
 -- ====================================================================
