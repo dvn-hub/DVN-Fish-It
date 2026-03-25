@@ -119,25 +119,32 @@ local function testWebhook()
     })
 end
 
+local function buildCatchBlock(data)
+    local C1, C2, C3 = 16, 18, 10
+    local header  = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s", "PLAYER", "CAUGHT", "WEIGHT")
+    local divider = string.rep("─", C1 + C2 + C3 + 4)
+    local row     = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s",
+        data.Player:sub(1, C1), data.Fish:sub(1, C2), data.Weight:sub(1, C3))
+    local chance  = "1 in " .. data.Chance
+    return "```\n" .. header .. "\n" .. divider .. "\n" .. row .. "\n```\n> 🎲 **Chance** › `" .. chance .. "`"
+end
+
 local function sendFish(data)
+    local block = buildCatchBlock(data)
+
     -- 1. FOCUS FISH (Priority)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = "🚨 TARGET ACQUIRED! 🚨", 
-                description = "**👑 CAUGHT: " .. data.Fish .. " 👑**", 
-                color = focusData.Color, 
+        send({
+            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR,
+            embeds = {{
+                title = "🚨 TARGET ACQUIRED",
+                description = block,
+                color = 0x1C1C1F,
                 thumbnail = { url = WEBHOOK_AVATAR },
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
                 footer = { text = "DVN HUB • Focus Tracker" },
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
-            }} 
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }}
         })
         return
     end
@@ -145,20 +152,15 @@ local function sendFish(data)
     -- 2. RARITY CHECK
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
-        send({ 
-            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, 
-            embeds = {{ 
-                title = cfg.Icon.." "..data.Rarity.." Catch!", 
-                color = cfg.Color, 
-                fields = { 
-                    { name = "👤 Player", value = "`"..data.Player.."`", inline = true }, 
-                    { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true }, 
-                    { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true }, 
-                    { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true } 
-                }, 
+        send({
+            username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR,
+            embeds = {{
+                title = cfg.Icon .. " " .. data.Rarity .. " Catch",
+                description = block,
+                color = 0x1C1C1F,
                 footer = { text = "DVN HUB • Rarity Logger" },
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
-            }} 
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }}
         })
     end
 end

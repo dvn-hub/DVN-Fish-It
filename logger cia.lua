@@ -376,21 +376,25 @@ local function testWebhook()
     }} })
 end
 
+local function buildCatchBlock(data)
+    local C1, C2, C3 = 16, 18, 10
+    local header  = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s", "PLAYER", "CAUGHT", "WEIGHT")
+    local divider = string.rep("─", C1 + C2 + C3 + 4)
+    local row     = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s",
+        data.Player:sub(1, C1), data.Fish:sub(1, C2), data.Weight:sub(1, C3))
+    return "```\n" .. header .. "\n" .. divider .. "\n" .. row .. "\n```\n> 🎲 **Chance** › `1 in " .. data.Chance .. "`"
+end
+
 local function sendFish(data)
     local imageUrl = toURL(getFishImage(data.Fish))
+    local block = buildCatchBlock(data)
 
-    -- 1. Check Priority: FOCUS FISH (ByName)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         local embed = {
-            title = "🎯 Target Acquired",
-            description = "**" .. data.Fish .. "**",
-            color = focusData.Color,
-            fields = {
-                { name = "👤 Catcher", value = data.Player,                       inline = true },
-                { name = "⚖️ Weight",  value = "`" .. data.Weight .. "`",          inline = true },
-                { name = "🎲 Chance",  value = "`1 in " .. data.Chance .. "`",     inline = true },
-            },
+            title = "🎀 TARGET ACQUIRED",
+            description = block,
+            color = 0xFF69B4,
             footer = { text = "Ciaa  •  Focus Tracker" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
@@ -399,18 +403,12 @@ local function sendFish(data)
         return
     end
 
-    -- 2. Check Secondary: RARITY
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         local embed = {
             title = cfg.Icon .. " " .. data.Rarity .. " Catch",
-            description = "**" .. data.Fish .. "**",
-            color = cfg.Color,
-            fields = {
-                { name = "👤 Catcher", value = data.Player,                       inline = true },
-                { name = "⚖️ Weight",  value = "`" .. data.Weight .. "`",          inline = true },
-                { name = "🎲 Chance",  value = "`1 in " .. data.Chance .. "`",     inline = true },
-            },
+            description = block,
+            color = 0xFF69B4,
             footer = { text = "Ciaa  •  Fish Logger" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
