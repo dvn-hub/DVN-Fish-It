@@ -367,10 +367,12 @@ local function sendFish(data)
     if focusData and focusData.Enabled then
         local embed = {
             title = "🎯 Target Acquired",
-            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
+            description = "**" .. data.Fish .. "**",
             color = focusData.Color,
             fields = {
-                { name = "👤 Player", value = data.Player, inline = false }
+                { name = "👤 Catcher", value = data.Player,                       inline = true },
+                { name = "⚖️ Weight",  value = "`" .. data.Weight .. "`",          inline = true },
+                { name = "🎲 Chance",  value = "`1 in " .. data.Chance .. "`",     inline = true },
             },
             footer = { text = "Divine Tools  •  Focus Tracker" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -384,10 +386,12 @@ local function sendFish(data)
     if cfg and cfg.Enabled then
         local embed = {
             title = cfg.Icon .. " " .. data.Rarity .. " Catch",
-            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
+            description = "**" .. data.Fish .. "**",
             color = cfg.Color,
             fields = {
-                { name = "👤 Player", value = data.Player, inline = false }
+                { name = "👤 Catcher", value = data.Player,                       inline = true },
+                { name = "⚖️ Weight",  value = "`" .. data.Weight .. "`",          inline = true },
+                { name = "🎲 Chance",  value = "`1 in " .. data.Chance .. "`",     inline = true },
             },
             footer = { text = "Divine Tools  •  Fish Logger" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -399,8 +403,13 @@ end
 
 local function sendJoinLeave(player, joined)
     if not SETTINGS.LogJoinLeave then return end
-    local timeStr = os.date("%I:%M %p")
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Player Joined" or "🚪 Player Left", description = "**"..player.DisplayName.."** (@"..player.Name..")", color = joined and 0x2ECC71 or 0xE74C3C, footer = { text = "Divine Tools • discord.gg/dvn • Today at " .. timeStr } }} })
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{
+        title = joined and "👋 Player Joined" or "🚪 Player Left",
+        description = "**" .. player.DisplayName .. "**  `@" .. player.Name .. "`",
+        color = joined and 0x2ECC71 or 0xE74C3C,
+        footer = { text = "Divine Tools  •  Server Activity" },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+    }} })
 end
 
 -- LISTENERS

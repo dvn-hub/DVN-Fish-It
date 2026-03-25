@@ -124,11 +124,6 @@ end
 -- 📨 FUNGSI LAPOR GABUNGAN (Premium Embed)
 local function SendMasterReport()
     local luckText, _ = GetLuckDuration()
-    local description = "**Host:** " .. LocalPlayer.DisplayName .. " (`" .. LocalPlayer.Name .. "`)\n"
-    description = description .. "**Server Luck:** " .. luckText .. "\n\n"
-    description = description .. "```\n"
-    description = description .. string.format("%-20s | %-12s | %-15s\n", "PLAYER", "FM (/min)", "TOTAL CAUGHT")
-    description = description .. string.rep("-", 54) .. "\n"
 
     local playersToReport = {}
     for name, data in pairs(SessionData) do
@@ -140,22 +135,36 @@ local function SendMasterReport()
             })
         end
     end
-    
+    table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
+
+    local rankEmojis = { "🥇", "🥈", "🥉" }
+    local BLANK = "\226\128\139" -- zero-width space untuk field kosong
+    local fields = {}
+
     if #playersToReport == 0 then
-        description = description .. "Menunggu data pemain...\n"
+        table.insert(fields, { ["name"] = "📡 Status", ["value"] = "Menunggu data pemain...", ["inline"] = false })
     else
-        table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
-        for _, data in ipairs(playersToReport) do
+        for i, data in ipairs(playersToReport) do
             local formattedValue = tostring(data.value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
-            description = description .. string.format("%-20s | %-12.2f | %-15s\n", data.name:sub(1, 20), data.fm, formattedValue)
+            local rank = rankEmojis[i] or ("**#" .. i .. "**")
+            table.insert(fields, {
+                ["name"]   = rank .. "  " .. data.name,
+                ["value"]  = "⚡ **" .. string.format("%.2f", data.fm) .. "** FM/min\n📦 `" .. formattedValue .. "` caught",
+                ["inline"] = true
+            })
+        end
+        -- Pad ke kelipatan 3 agar layout desktop rapi 3 kolom
+        local rem = #fields % 3
+        if rem == 1 then
+            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
+            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
+        elseif rem == 2 then
+            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
         end
     end
 
-    -- [SAFETY] Truncate description to prevent 400 Bad Request (Limit 4096)
-    if #description > 4000 then description = description:sub(1, 4000) .. "\n... (Truncated)" end
-    description = description .. "```"
-
-
+    local description = "**Host** › " .. LocalPlayer.DisplayName .. "  `@" .. LocalPlayer.Name .. "`\n"
+        .. "**Server Luck** › " .. luckText
 
     local Payload = {
         ["username"] = WEBHOOK_NAME,
@@ -163,9 +172,10 @@ local function SendMasterReport()
         ["embeds"] = {{
             ["title"] = "📊 Server FM Monitor",
             ["description"] = description,
-            ["color"] = 0x3A3B40,
+            ["color"] = 0x5865F2,
+            ["fields"] = fields,
             ["footer"] = {
-                ["text"] = "Babu DVN  •  FM Monitor",
+                ["text"] = "Babu DVN  •  Updates every 60s",
                 ["icon_url"] = WEBHOOK_AVATAR
             },
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -193,17 +203,19 @@ end
 -- ⚠️ FUNGSI WARNING (JIKA FM > 13)
 local function SendWarning(name, fm, total)
     local totalFmt = tostring(total):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
-    local description = "**" .. name .. "**\n"
-        .. "⚡ `" .. fm .. " FM/min`  ·  📦 `" .. totalFmt .. " caught`\n\n"
-        .. "*Exceeded safety threshold (" .. getgenv().WarningThreshold .. " FM/min)*"
 
     local Payload = {
         ["username"] = WEBHOOK_NAME,
         ["avatar_url"] = WEBHOOK_AVATAR,
         ["embeds"] = {{
-            ["title"] = "⚠️ High FM Detected",
-            ["description"] = description,
+            ["title"] = "⚠️  High FM Detected",
+            ["description"] = "**" .. name .. "** melampaui batas safety threshold.",
             ["color"] = 0xED4245,
+            ["fields"] = {
+                { ["name"] = "⚡ FM Rate",      ["value"] = "`" .. tostring(fm) .. " FM/min`",                           ["inline"] = true },
+                { ["name"] = "📦 Total Caught", ["value"] = "`" .. totalFmt .. "`",                                      ["inline"] = true },
+                { ["name"] = "🚨 Threshold",    ["value"] = "`" .. tostring(getgenv().WarningThreshold) .. " FM/min`",   ["inline"] = true },
+            },
             ["footer"] = {
                 ["text"] = "Babu DVN  •  FM Monitor",
                 ["icon_url"] = WEBHOOK_AVATAR
