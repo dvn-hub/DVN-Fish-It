@@ -126,9 +126,7 @@ local function buildCatchBlock(data)
     local fmt = "%-6s  › %s"
     local lines = {
         string.format(fmt, "PLAYER", data.Player),
-        string.format(fmt, "CAUGHT", data.Fish),
-        string.format(fmt, "WEIGHT", data.Weight),
-        string.format(fmt, "CHANCE", "1 in " .. data.Chance),
+        string.format(fmt, "WEIGHT", data.Weight .. "  ·  1 in " .. data.Chance),
     }
     return "```\n" .. table.concat(lines, "\n") .. "\n```"
 end
@@ -142,11 +140,11 @@ local function sendFish(data)
         send({
             username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR,
             embeds = {{
-                title = "🚨 TARGET ACQUIRED",
+                title = "🚨 " .. data.Fish,
                 description = block,
                 color = 0x1C1C1F,
                 thumbnail = { url = WEBHOOK_AVATAR },
-                footer = { text = "DVN HUB • Focus Tracker" },
+                footer = { text = "DVN HUB  •  Focus Tracker" },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
             }}
         })
@@ -159,10 +157,10 @@ local function sendFish(data)
         send({
             username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR,
             embeds = {{
-                title = cfg.Icon .. " " .. data.Rarity .. " Catch",
+                title = cfg.Icon .. " " .. data.Fish,
                 description = block,
                 color = 0x1C1C1F,
-                footer = { text = "DVN HUB • Rarity Logger" },
+                footer = { text = "DVN HUB  •  Rarity Logger" },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
             }}
         })

@@ -384,9 +384,7 @@ local function buildCatchBlock(data)
     local fmt = "%-6s  › %s"
     local lines = {
         string.format(fmt, "PLAYER", data.Player),
-        string.format(fmt, "CAUGHT", data.Fish),
-        string.format(fmt, "WEIGHT", data.Weight),
-        string.format(fmt, "CHANCE", "1 in " .. data.Chance),
+        string.format(fmt, "WEIGHT", data.Weight .. "  ·  1 in " .. data.Chance),
     }
     return "```\n" .. table.concat(lines, "\n") .. "\n```"
 end
@@ -398,7 +396,7 @@ local function sendFish(data)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         local embed = {
-            title = "🎀 TARGET ACQUIRED",
+            title = "🎀 " .. data.Fish,
             description = block,
             color = 0xFF69B4,
             footer = { text = "Ciaa  •  Focus Tracker" },
@@ -412,7 +410,7 @@ local function sendFish(data)
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         local embed = {
-            title = cfg.Icon .. " " .. data.Rarity .. " Catch",
+            title = cfg.Icon .. " " .. data.Fish,
             description = block,
             color = 0xFF69B4,
             footer = { text = "Ciaa  •  Fish Logger" },
