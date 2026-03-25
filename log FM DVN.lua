@@ -138,23 +138,28 @@ local function SendMasterReport()
     table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
 
     local rankEmojis = { "🥇", "🥈", "🥉" }
-    local lines = {}
+    local C1, C2, C3 = 16, 9, 8
+    local tableLines = {}
+    table.insert(tableLines, string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s", "PLAYER", "FM", "CAUGHT"))
+    table.insert(tableLines, string.rep("─", C1 + C2 + C3 + 4))
+
     if #playersToReport == 0 then
-        table.insert(lines, "*(no data)*")
+        table.insert(tableLines, "(no data)")
     else
         for i, data in ipairs(playersToReport) do
             local formattedValue = tostring(data.value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
-            local rank = rankEmojis[i] or ("**#" .. i .. "**")
+            local rank = { "#1", "#2", "#3" }
             local fmStr = string.format("%.2f/min", data.fm)
-            table.insert(lines, rank .. " **" .. data.name .. "** · `" .. fmStr .. "` · `" .. formattedValue .. "`")
+            local prefix = (rank[i] or ("#"..i)) .. " "
+            local nameCol = (prefix .. data.name):sub(1, C1)
+            table.insert(tableLines, string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s",
+                nameCol, fmStr:sub(1, C2), formattedValue:sub(1, C3)))
         end
     end
 
     local description = "**Host** › " .. LocalPlayer.DisplayName .. "  `@" .. LocalPlayer.Name .. "`\n"
-        .. "**Server Luck** › " .. luckText .. "\n\n"
-        .. "**PLAYER · FM · CAUGHT**\n"
-        .. "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        .. table.concat(lines, "\n")
+        .. "**Luck** › " .. luckText .. "\n"
+        .. "```\n" .. table.concat(tableLines, "\n") .. "\n```"
 
     local Payload = {
         ["username"] = WEBHOOK_NAME,
@@ -162,7 +167,7 @@ local function SendMasterReport()
         ["embeds"] = {{
             ["title"] = "📊 Server FM Monitor",
             ["description"] = description,
-            ["color"] = 0x5865F2,
+            ["color"] = 0x1C1C1F,
             ["footer"] = {
                 ["text"] = "Babu DVN  •  Updates every 60s",
                 ["icon_url"] = WEBHOOK_AVATAR
