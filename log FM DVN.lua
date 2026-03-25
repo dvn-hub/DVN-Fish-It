@@ -138,33 +138,23 @@ local function SendMasterReport()
     table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
 
     local rankEmojis = { "🥇", "🥈", "🥉" }
-    local BLANK = "\226\128\139" -- zero-width space untuk field kosong
-    local fields = {}
-
+    local lines = {}
     if #playersToReport == 0 then
-        table.insert(fields, { ["name"] = "📡 Status", ["value"] = "Menunggu data pemain...", ["inline"] = false })
+        table.insert(lines, "*(no data)*")
     else
         for i, data in ipairs(playersToReport) do
             local formattedValue = tostring(data.value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
             local rank = rankEmojis[i] or ("**#" .. i .. "**")
-            table.insert(fields, {
-                ["name"]   = rank .. "  " .. data.name,
-                ["value"]  = "⚡ **" .. string.format("%.2f", data.fm) .. "** FM/min\n📦 `" .. formattedValue .. "` caught",
-                ["inline"] = true
-            })
-        end
-        -- Pad ke kelipatan 3 agar layout desktop rapi 3 kolom
-        local rem = #fields % 3
-        if rem == 1 then
-            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
-            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
-        elseif rem == 2 then
-            table.insert(fields, { ["name"] = BLANK, ["value"] = BLANK, ["inline"] = true })
+            local fmStr = string.format("%.2f/min", data.fm)
+            table.insert(lines, rank .. " **" .. data.name .. "** · `" .. fmStr .. "` · `" .. formattedValue .. "`")
         end
     end
 
     local description = "**Host** › " .. LocalPlayer.DisplayName .. "  `@" .. LocalPlayer.Name .. "`\n"
-        .. "**Server Luck** › " .. luckText
+        .. "**Server Luck** › " .. luckText .. "\n\n"
+        .. "**PLAYER · FM · CAUGHT**\n"
+        .. "━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        .. table.concat(lines, "\n")
 
     local Payload = {
         ["username"] = WEBHOOK_NAME,
@@ -173,7 +163,6 @@ local function SendMasterReport()
             ["title"] = "📊 Server FM Monitor",
             ["description"] = description,
             ["color"] = 0x5865F2,
-            ["fields"] = fields,
             ["footer"] = {
                 ["text"] = "Babu DVN  •  Updates every 60s",
                 ["icon_url"] = WEBHOOK_AVATAR
