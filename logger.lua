@@ -289,7 +289,7 @@ local function loadFishData()
         scan(ReplicatedStorage)
     end
 
-    print("ðŸŸ DVN Logger: Loaded " .. count .. " fish images.")
+    print("🐟 DVN Logger: Loaded " .. count .. " fish images.")
 end
 
 local function stripRichText(t) return t:gsub("<.->", "") end

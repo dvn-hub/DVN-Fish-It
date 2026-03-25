@@ -253,7 +253,7 @@ local function loadFishData()
         scan(ReplicatedStorage)
     end
 
-    print("ðŸŸ Auto Logger: Loaded " .. count .. " fish images.")
+    print("🐟 Auto Logger: Loaded " .. count .. " fish images.")
 end
 
 local function stripRichText(t) return t:gsub("<.->", "") end
@@ -323,95 +323,63 @@ local function send(payload)
 end
 
 local function testWebhook()
-    local executor = (identifyexecutor and identifyexecutor()) or "Unknown Client"
-    send({ 
-        username = WEBHOOK_NAME, 
-        avatar_url = WEBHOOK_AVATAR, 
-        embeds = {{ 
-            title = "💎 DVN HUB • SYSTEM ONLINE",
-            description = "```ini\n[ STATUS: CONNECTED ]\nUsing Legacy Domain (discordapp.com)```",
-            color = 0x2B2D31,
-            thumbnail = { url = WEBHOOK_AVATAR }, 
-            fields = {
-                { name = "👤 User", value = LocalPlayer.DisplayName, inline = true },
-                { name = "💻 Exec", value = executor, inline = true }
-            },
-            footer = {
-                text = "Divine Tools • discord.gg/dvn",
-                icon_url = WEBHOOK_AVATAR
-            },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") 
-        }} 
-    })
+    local executor = (identifyexecutor and identifyexecutor()) or "Unknown"
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{
+        title = "✅ System Online",
+        description = "Logger is active and monitoring catches.",
+        color = 0x57F287,
+        thumbnail = { url = WEBHOOK_AVATAR },
+        fields = {
+            { name = "👤 Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
+            { name = "💻 Client",  value = executor .. "\n`" .. math.floor(LocalPlayer:GetNetworkPing() * 1000) .. " ms`", inline = true },
+        },
+        footer = { text = "Babu DVN  •  System" },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+    }} })
 end
 
 local function sendFish(data)
     local imageUrl = toURL(getFishImage(data.Fish))
 
+    -- 1. Check Priority: FOCUS FISH (ByName)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         local embed = {
-            title = "🚨 TARGET ACQUIRED! 🚨",
-            description = "**" .. data.Player .. "** has caught a focused target!",
+            title = "🎯 Target Acquired",
+            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
             color = focusData.Color,
             fields = {
-                { name = "👑 Fish", value = "**" .. data.Fish .. "**", inline = false },
-                { name = "👤 Player", value = "`" .. data.Player .. "`", inline = true },
-                { name = "⚖️ Weight", value = "`" .. data.Weight .. "`", inline = true },
-                { name = "🎲 Chance", value = "`1 in " .. data.Chance .. "`", inline = true }
+                { name = "👤 Player", value = data.Player, inline = false }
             },
-            footer = { text = "Divine Tools • discord.gg/dvn", icon_url = WEBHOOK_AVATAR },
+            footer = { text = "Babu DVN  •  Focus Tracker" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
-        if imageUrl then
-            embed.thumbnail = { url = imageUrl }
-        end
-
+        if imageUrl then embed.thumbnail = { url = imageUrl } end
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
         return
     end
 
+    -- 2. Check Secondary: RARITY
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         local embed = {
-            title = cfg.Icon .. " A wild " .. data.Rarity .. " appeared!",
-            description = "A rare fish has been caught on the server.",
+            title = cfg.Icon .. " " .. data.Rarity .. " Catch",
+            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
             color = cfg.Color,
             fields = {
-                { name = "🐟 Fish", value = "**" .. data.Fish .. "**", inline = false },
-                { name = "👤 Player", value = "`" .. data.Player .. "`", inline = true },
-                { name = "⚖️ Weight", value = "`" .. data.Weight .. "`", inline = true },
-                { name = "🎲 Chance", value = "`1 in " .. data.Chance .. "`", inline = true }
+                { name = "👤 Player", value = data.Player, inline = false }
             },
-            footer = { text = "Divine Tools • discord.gg/dvn", icon_url = WEBHOOK_AVATAR },
+            footer = { text = "Babu DVN  •  Fish Logger" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        -- [DEBUG] Paksa gambar muncul di thumbnail untuk tes
-        if imageUrl then
-            embed.thumbnail = { url = imageUrl }
-        end
-
+        if imageUrl then embed.thumbnail = { url = imageUrl } end
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end
 end
 
 local function sendJoinLeave(player, joined)
     if not SETTINGS.LogJoinLeave then return end
-    send({
-        username = WEBHOOK_NAME,
-        avatar_url = WEBHOOK_AVATAR,
-        embeds = {{
-            title = joined and "👋 Player Joined" or "🚪 Player Left",
-            description = "**" .. player.DisplayName .. "** (`@" .. player.Name .. "`) has " .. (joined and "joined" or "left") .. " the server.",
-            color = joined and 0x2ECC71 or 0xE74C3C,
-            footer = {
-                text = "Divine Tools • discord.gg/dvn",
-                icon_url = WEBHOOK_AVATAR
-            },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-        }}
-    })
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = joined and "👋 Player Joined" or "🚪 Player Left", description = "**"..player.DisplayName.."** (@"..player.Name..")", color = joined and 0x2ECC71 or 0xE74C3C, footer = { text = "Babu DVN • Server Activity" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
 end
 
 -- ====================================================================
