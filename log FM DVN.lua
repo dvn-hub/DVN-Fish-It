@@ -137,8 +137,18 @@ local function SendMasterReport()
     end
     table.sort(playersToReport, function(a, b) return a.fm > b.fm end)
 
-    local rankEmojis = { "🥇", "🥈", "🥉" }
-    local C1, C2, C3 = 16, 9, 8
+    local function fmtNum(n)
+        local s = tostring(math.floor(n))
+        local rem = #s % 3
+        local result = rem > 0 and s:sub(1, rem) or ""
+        for i = (rem > 0 and rem + 1 or 1), #s, 3 do
+            if result ~= "" then result = result .. "," end
+            result = result .. s:sub(i, i + 2)
+        end
+        return result
+    end
+
+    local C1, C2, C3 = 16, 6, 10
     local tableLines = {}
     table.insert(tableLines, string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s", "PLAYER", "FM", "CAUGHT"))
     table.insert(tableLines, string.rep("─", C1 + C2 + C3 + 4))
@@ -146,14 +156,14 @@ local function SendMasterReport()
     if #playersToReport == 0 then
         table.insert(tableLines, "(no data)")
     else
+        local rank = { "#1", "#2", "#3" }
         for i, data in ipairs(playersToReport) do
-            local formattedValue = tostring(data.value):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
-            local rank = { "#1", "#2", "#3" }
-            local fmStr = string.format("%.2f/min", data.fm)
+            local formattedValue = fmtNum(data.value)
+            local fmStr = string.format("%.2f", data.fm)
             local prefix = (rank[i] or ("#"..i)) .. " "
             local nameCol = (prefix .. data.name):sub(1, C1)
             table.insert(tableLines, string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s",
-                nameCol, fmStr:sub(1, C2), formattedValue:sub(1, C3)))
+                nameCol, fmStr, formattedValue))
         end
     end
 

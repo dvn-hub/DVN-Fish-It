@@ -364,27 +364,33 @@ end
 
 local function testWebhook()
     local executor = (identifyexecutor and identifyexecutor()) or "Unknown"
+    local ping = math.floor(LocalPlayer:GetNetworkPing() * 1000)
+    local fmt = "%-7s  › %s"
+    local block = "```\n"
+        .. string.format(fmt, "USER",   LocalPlayer.DisplayName .. " (@" .. LocalPlayer.Name .. ")") .. "\n"
+        .. string.format(fmt, "CLIENT", executor) .. "\n"
+        .. string.format(fmt, "PING",   ping .. " ms") .. "\n"
+        .. string.format(fmt, "STATUS", "ONLINE") .. "\n"
+        .. "```"
     send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{
-        title = "✅ System Online",
-        description = "Logger is active and monitoring catches.",
-        color = 0x57F287,
+        title = "▸ LOGGER ONLINE",
+        description = block,
+        color = 0x1C1C1F,
         thumbnail = { url = WEBHOOK_AVATAR },
-        fields = {
-            { name = "👤 Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
-            { name = "💻 Client",  value = executor .. "\n`" .. math.floor(LocalPlayer:GetNetworkPing() * 1000) .. " ms`", inline = true },
-        },
         footer = { text = "Babu DVN  •  System" },
         timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
     }} })
 end
 
 local function buildCatchBlock(data)
-    local C1, C2, C3 = 16, 18, 10
-    local header  = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s", "PLAYER", "CAUGHT", "WEIGHT")
-    local divider = string.rep("─", C1 + C2 + C3 + 4)
-    local row     = string.format("%-"..C1.."s  %-"..C2.."s  %-"..C3.."s",
-        data.Player:sub(1, C1), data.Fish:sub(1, C2), data.Weight:sub(1, C3))
-    return "```\n" .. header .. "\n" .. divider .. "\n" .. row .. "\n```\n> 🎲 **Chance** › `1 in " .. data.Chance .. "`"
+    local fmt = "%-6s  › %s"
+    local lines = {
+        string.format(fmt, "PLAYER", data.Player),
+        string.format(fmt, "CAUGHT", data.Fish),
+        string.format(fmt, "WEIGHT", data.Weight),
+        string.format(fmt, "CHANCE", "1 in " .. data.Chance),
+    }
+    return "```\n" .. table.concat(lines, "\n") .. "\n```"
 end
 
 local function sendFish(data)
