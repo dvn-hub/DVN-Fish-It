@@ -42,7 +42,7 @@ local RARITY_CONFIG = {
     Legendary = { Enabled = false, Color = 0xFFB92B, Icon = "🟡" },
     Mythic    = { Enabled = false, Color = 0xFF1919, Icon = "🔴" },
     Secret    = { Enabled = false, Color = 0x18FF98, Icon = "💎" },
-    Forgotten = { Enabled = false, Color = 0x808080, Icon = "⬜" },
+    Forgotten = { Enabled = true,  Color = 0x808080, Icon = "⬜" },
 }
 
 -- [NEW] FOCUS FISH CONFIG (Default OFF)
@@ -181,6 +181,8 @@ local function stripVariants(name)
         :gsub("^[Bb]ig%s+[Ss]hiny%s+", "")
         :gsub("^[Ss]hiny%s+", "")
         :gsub("^[Bb]ig%s+", "")
+        :gsub("^[A-Z][A-Z]+%s+", "") -- Strip ALL-CAPS mutation prefix (e.g. GHOST, ZOMBIE)
+        :gsub("^[A-Z][A-Z]+%s+", "") -- Strip second mutation prefix if stacked
     return stripped
 end
 
@@ -221,11 +223,18 @@ local function getFishImage(fishName)
         end
     end
 
+    -- Prefer longest matching name (e.g. "skeleton narwhal" beats "narwhal" for "GHOST Skeleton Narwhal")
+    local bestMatch = nil
+    local bestLen = 0
     for name, id in pairs(fishImages) do
         if normalizedName:find(name, 1, true) or name:find(normalizedName, 1, true) then
-            return id
+            if #name > bestLen then
+                bestLen = #name
+                bestMatch = id
+            end
         end
     end
+    if bestMatch then return bestMatch end
 
     return nil
 end
@@ -352,7 +361,19 @@ local function send(payload)
 end
 
 local function testWebhook()
-    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{ title = "✅ Webhook Connected", description = "Ciaa is ready to log!", color = 0x2ECC71, footer = { text = "Ciaa • System" }, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") }} })
+    local executor = (identifyexecutor and identifyexecutor()) or "Unknown"
+    send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {{
+        title = "✅ System Online",
+        description = "Logger is active and monitoring catches.",
+        color = 0x57F287,
+        thumbnail = { url = WEBHOOK_AVATAR },
+        fields = {
+            { name = "👤 Session", value = "**" .. LocalPlayer.DisplayName .. "**\n`@" .. LocalPlayer.Name .. "`", inline = true },
+            { name = "💻 Client",  value = executor .. "\n`" .. math.floor(LocalPlayer:GetNetworkPing() * 1000) .. " ms`", inline = true },
+        },
+        footer = { text = "Ciaa  •  System" },
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+    }} })
 end
 
 local function sendFish(data)
@@ -362,47 +383,34 @@ local function sendFish(data)
     local focusData = FOCUS_FISH[data.Fish]
     if focusData and focusData.Enabled then
         local embed = {
-            title = "🚨 TARGET ACQUIRED! 🚨",
-            description = "**👑 CAUGHT: " .. data.Fish .. " 👑**",
+            title = "🎯 Target Acquired",
+            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
             color = focusData.Color,
             fields = {
-                { name = "👤 Player", value = "`"..data.Player.."`", inline = true },
-                { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true },
-                { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true }
+                { name = "👤 Player", value = data.Player, inline = false }
             },
-            footer = { text = "Ciaa • Focus Tracker" },
+            footer = { text = "Ciaa  •  Focus Tracker" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        -- [DEBUG] Ganti ke thumbnail untuk tes
-        if imageUrl then
-            embed.thumbnail = { url = imageUrl }
-        end
-
+        if imageUrl then embed.thumbnail = { url = imageUrl } end
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
-        return -- Stop here, don't double log
+        return
     end
 
     -- 2. Check Secondary: RARITY
     local cfg = RARITY_CONFIG[data.Rarity]
     if cfg and cfg.Enabled then
         local embed = {
-            title = cfg.Icon.." "..data.Rarity.." Catch!",
-            description = "A rare fish has been caught!",
+            title = cfg.Icon .. " " .. data.Rarity .. " Catch",
+            description = "**" .. data.Fish .. "**\n⚖️ `" .. data.Weight .. "`  ·  🎲 `1 in " .. data.Chance .. "`",
             color = cfg.Color,
             fields = {
-                { name = "👤 Player", value = "`"..data.Player.."`", inline = true },
-                { name = "🐟 Fish", value = "**"..data.Fish.."**", inline = true },
-                { name = "⚖️ Weight", value = "`"..data.Weight.."`", inline = true },
-                { name = "🎲 Chance", value = "`1 in "..data.Chance.."`", inline = true }
+                { name = "👤 Player", value = data.Player, inline = false }
             },
-            footer = { text = "Ciaa • Fish Logger" },
+            footer = { text = "Ciaa  •  Fish Logger" },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }
-        -- [DEBUG] Ganti ke thumbnail untuk tes
-        if imageUrl then
-            embed.thumbnail = { url = imageUrl }
-        end
-
+        if imageUrl then embed.thumbnail = { url = imageUrl } end
         send({ username = WEBHOOK_NAME, avatar_url = WEBHOOK_AVATAR, embeds = {embed} })
     end
 end

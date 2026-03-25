@@ -158,24 +158,18 @@ local function SendMasterReport()
 
 
     local Payload = {
-
         ["username"] = WEBHOOK_NAME,
-
         ["avatar_url"] = WEBHOOK_AVATAR,
-
         ["embeds"] = {{
-            ["title"] = "📈 Divine Tools | Server Performance Monitor",
+            ["title"] = "📊 Server FM Monitor",
             ["description"] = description,
-            ["color"] = 0x2B2D31,
-            ["footer"] = { 
-                ["text"] = "Divine Tools • discord.gg/dvn",
+            ["color"] = 0x3A3B40,
+            ["footer"] = {
+                ["text"] = "Babu DVN  •  FM Monitor",
                 ["icon_url"] = WEBHOOK_AVATAR
             },
-
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
-
         }}
-
     }
 
     local TargetURL = getgenv().WebhookURL
@@ -198,21 +192,20 @@ end
 
 -- ⚠️ FUNGSI WARNING (JIKA FM > 13)
 local function SendWarning(name, fm, total)
-    local description = "**⚠️ ABNORMAL ACTIVITY DETECTED**\n\n"
-    description = description .. "**👤 Player:** `" .. name .. "`\n"
-    description = description .. "**⚡ FM Rate:** `" .. fm .. " / min`\n"
-    description = description .. "**📦 Total Caught:** `" .. tostring(total):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "") .. "`\n"
-    description = description .. "\n*This player has exceeded the safety threshold ("..getgenv().WarningThreshold..").*"
+    local totalFmt = tostring(total):reverse():gsub("%d%d%d", "%1,"):reverse():gsub("^,", "")
+    local description = "**" .. name .. "**\n"
+        .. "⚡ `" .. fm .. " FM/min`  ·  📦 `" .. totalFmt .. " caught`\n\n"
+        .. "*Exceeded safety threshold (" .. getgenv().WarningThreshold .. " FM/min)*"
 
     local Payload = {
         ["username"] = WEBHOOK_NAME,
         ["avatar_url"] = WEBHOOK_AVATAR,
         ["embeds"] = {{
-            ["title"] = "🚨 HIGH FM WARNING",
+            ["title"] = "⚠️ High FM Detected",
             ["description"] = description,
-            ["color"] = 0xFF0000, -- Red Warning Color
-            ["footer"] = { 
-                ["text"] = "Divine Tools • discord.gg/dvn",
+            ["color"] = 0xED4245,
+            ["footer"] = {
+                ["text"] = "Babu DVN  •  FM Monitor",
                 ["icon_url"] = WEBHOOK_AVATAR
             },
             ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -314,52 +307,92 @@ getgenv().DVN_CCTV_Loop = task.spawn(function()
     end
 end)
 
--- 🖥️ GUI CONTROL PANEL (TOGGLE WARNING)
+-- 🖥️ GUI CONTROL PANEL
 local GUI_PARENT = (typeof(gethui) == "function" and gethui()) or LocalPlayer:WaitForChild("PlayerGui")
 if GUI_PARENT:FindFirstChild("DVN_CCTV_UI") then GUI_PARENT.DVN_CCTV_UI:Destroy() end
 
-local ScreenGui = Instance.new("ScreenGui"); ScreenGui.Name = "DVN_CCTV_UI"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DVN_CCTV_UI"; ScreenGui.Parent = GUI_PARENT; ScreenGui.ResetOnSpawn = false
+
+-- Colors
+local C_BG     = Color3.fromRGB(12, 12, 14)
+local C_HEADER = Color3.fromRGB(18, 18, 22)
+local C_TEXT   = Color3.fromRGB(235, 235, 240)
+local C_DIM    = Color3.fromRGB(85, 85, 95)
+local C_ON     = Color3.fromRGB(88, 196, 121)
+local C_OFF    = Color3.fromRGB(40, 40, 52)
+
+local PANEL_W, PANEL_H = 270, 88
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 80)
-MainFrame.Position = UDim2.new(0.5, -120, 0.1, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.Size = UDim2.new(0, PANEL_W, 0, PANEL_H)
+MainFrame.Position = UDim2.new(0.5, -PANEL_W/2, 0.08, 0)
+MainFrame.BackgroundColor3 = C_BG
 MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+local MStroke = Instance.new("UIStroke", MainFrame)
+MStroke.Color = Color3.fromRGB(45, 45, 58); MStroke.Thickness = 1
 
-local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(0, 8)
-local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(60,60,60); Stroke.Thickness = 1
+-- Header (draggable)
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 36); Header.BackgroundColor3 = C_HEADER; Header.BorderSizePixel = 0
+local HFill = Instance.new("Frame", Header) -- Square bottom corners
+HFill.Size = UDim2.new(1, 0, 0, 10); HFill.Position = UDim2.new(0, 0, 1, -10); HFill.BackgroundColor3 = C_HEADER; HFill.BorderSizePixel = 0
+local TitleLbl = Instance.new("TextLabel", Header)
+TitleLbl.Text = "FM MONITOR"; TitleLbl.Size = UDim2.new(1, -50, 1, 0); TitleLbl.Position = UDim2.new(0, 12, 0, 0)
+TitleLbl.BackgroundTransparency = 1; TitleLbl.TextColor3 = C_TEXT; TitleLbl.Font = Enum.Font.GothamBold; TitleLbl.TextSize = 13; TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+local VerLbl = Instance.new("TextLabel", Header)
+VerLbl.Text = "v2.0"; VerLbl.Size = UDim2.new(0, 40, 1, 0); VerLbl.Position = UDim2.new(1, -44, 0, 0)
+VerLbl.BackgroundTransparency = 1; VerLbl.TextColor3 = C_DIM; VerLbl.Font = Enum.Font.Gotham; VerLbl.TextSize = 11; VerLbl.TextXAlignment = Enum.TextXAlignment.Right
+local HeaderBorder = Instance.new("Frame", Header)
+HeaderBorder.Size = UDim2.new(1, 0, 0, 1); HeaderBorder.Position = UDim2.new(0, 0, 1, -1); HeaderBorder.BackgroundColor3 = Color3.fromRGB(35, 35, 48); HeaderBorder.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Text = "DVN CCTV MONITOR"
-Title.Size = UDim2.new(1, -20, 0, 30)
-Title.Position = UDim2.new(0, 10, 0, 5)
-Title.TextColor3 = Color3.fromRGB(240,240,240)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 14
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
-local ToggleBtn = Instance.new("TextButton", MainFrame)
-ToggleBtn.Size = UDim2.new(1, -20, 0, 30)
-ToggleBtn.Position = UDim2.new(0, 10, 0, 40)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-ToggleBtn.Text = "⚠️ Warning Mode: OFF"
-ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-ToggleBtn.Font = Enum.Font.GothamBold
-ToggleBtn.TextSize = 12
-Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+-- Toggle Row
+local RowPad = Instance.new("Frame", MainFrame)
+RowPad.Size = UDim2.new(1, -24, 0, 44); RowPad.Position = UDim2.new(0, 12, 0, 40); RowPad.BackgroundTransparency = 1
+local WarnLabel = Instance.new("TextLabel", RowPad)
+WarnLabel.Text = "⚠️  Warning Mode"; WarnLabel.Size = UDim2.new(1, -58, 1, 0)
+WarnLabel.BackgroundTransparency = 1; WarnLabel.TextColor3 = C_TEXT; WarnLabel.Font = Enum.Font.GothamBold; WarnLabel.TextSize = 13; WarnLabel.TextXAlignment = Enum.TextXAlignment.Left
+local ToggleBtn = Instance.new("TextButton", RowPad)
+ToggleBtn.Size = UDim2.new(0, 38, 0, 20); ToggleBtn.Position = UDim2.new(1, -38, 0.5, -10)
+ToggleBtn.BackgroundColor3 = getgenv().WarningEnabled and C_ON or C_OFF
+ToggleBtn.Text = ""; ToggleBtn.AutoButtonColor = false
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+local Dot = Instance.new("Frame", ToggleBtn)
+Dot.Size = UDim2.new(0, 14, 0, 14)
+Dot.Position = getgenv().WarningEnabled and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
+Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
 
 ToggleBtn.MouseButton1Click:Connect(function()
     getgenv().WarningEnabled = not getgenv().WarningEnabled
     if getgenv().WarningEnabled then
-        ToggleBtn.Text = "⚠️ Warning Mode: ON (>13)"
-        ToggleBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 20, 20)}):Play()
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = C_ON}):Play()
+        TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(1, -17, 0.5, -7)}):Play()
     else
-        ToggleBtn.Text = "⚠️ Warning Mode: OFF"
-        ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 45)}):Play()
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = C_OFF}):Play()
+        TweenService:Create(Dot, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -7)}):Play()
     end
 end)
+
+-- Drag
+local dragging, dragStart, startPos
+Header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = MainFrame.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+
+-- Entrance animation
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, PANEL_W, 0, PANEL_H)}):Play()
