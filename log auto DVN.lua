@@ -44,7 +44,8 @@ local FOCUS_FISH = {
     ["Sacred Guardian Squid"] = { Enabled = true, Color = 0x00FBFF },
     ["GEMSTONE Ruby"]         = { Enabled = true, Color = 0xFF0040 },
     ["GEMSTONE Shiny Ruby"]   = { Enabled = true, Color = 0xFF0040 },
-    ["GEMSTONE Big Ruby"]     = { Enabled = true, Color = 0xFF0040 }
+    ["GEMSTONE Big Ruby"]     = { Enabled = true, Color = 0xFF0040 },
+    ["Eggy Enchant Stone"]    = { Enabled = true, Color = 0xFF1919 }
 }
 
 local RGB_RARITY = {
